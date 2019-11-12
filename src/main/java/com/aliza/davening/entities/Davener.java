@@ -29,13 +29,11 @@ public class Davener {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	
-	@NotNull(message = "Davener must have a country. ")
-	@NotBlank(message = "Davener country cannot be blank. ")
+	@NotBlank(message = "Davener must have a country. ")
 	private String country="Israel";
 	
-	@NotNull(message = "Davener must have an associated email. ")
+	@NotBlank(message = "Davener must have an associated email. ")
 	@NotEmpty
-	@NotBlank
 	@Pattern(regexp="^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message="Davener email seems to be invalid.")
 	private String email;
 	

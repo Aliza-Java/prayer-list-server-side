@@ -43,12 +43,13 @@ public class Davenfor {
 	@NotNull(message = "The name must belong to some category. ")
 	private Category category;
 
-	@NotBlank(message = "Hebrew name is blank. ") // Regex pattern is made to accept blank, so that a blank input will											// give only this specific message
+	@NotBlank(message = "Hebrew name is blank. ") // Regex pattern is made to accept blank, so that a blank input will
+													// // give only this specific message
 	@NotNull(message = "Missing Hebrew name. ") // This field is a must
 	// Allowing only Hebrew characters, no numbers
-	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Hebrew name must contain only Hebrew letters. ") 
+	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Hebrew name must contain only Hebrew letters. ")
 	private String nameHebrew;
-	
+
 	// Regex pattern is made to accept blank, so that a blank input will give only
 	// this specific message
 	@NotBlank(message = "English name is blank. ")
@@ -58,40 +59,28 @@ public class Davenfor {
 	private String nameEnglish;
 
 	// If category is shidduch, need also spouse's name.
-	// Regex pattern is made to accept blank, so that a blank input will give only
-	// this specific message
-	@NotBlank(message = "Spouse's Hebrew name is blank. ")
-	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Spouse's Hebrew name must contain only Hebrew letters. ") // Allowing
-																														// only
-																														// Hebrew
-																														// characters,
-																														// no
-																														// numbers
+
+	// Allowing only Hebrew characters, no numbers
+	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Spouse's Hebrew name must contain only Hebrew letters. ")
 	private String nameHebrewSpouse;
 
 	// If category is shidduch, need also spouse's name.
-	@NotBlank(message = "Spouse's English name is blank. ") // Regex pattern is made to accept blank, so that a blank
-															// input will give only this specific message
-	@Pattern(regexp = "^[a-zA-Z '\\-]*$", message = "Spouse's English name must contain only English letters. ") // Allowing
-																													// only
-																													// English
-																													// characters,
-																													// no
-																													// numbers
+	// Allowing only English characters, no numbers
+	@Pattern(regexp = "^[a-zA-Z '\\-]*$", message = "Spouse's English name must contain only English letters. ")
 	private String nameEnglishSpouse;
 
 	// Will submitter (if is a davener) receive this name on list?
 	private boolean submitterToReceive = true;
 
-	private String lastConfirmedAt = LocalDate.now().toString();
+	private LocalDate lastConfirmedAt = LocalDate.now();
 
-	@NotBlank(message = "The name does not have an expiration date. ") // This will show up in null case as well.
-	private String expireAt;
+	@NotNull(message = "The name does not have an expiration date. ")
+	private LocalDate expireAt;
 
 	// Unix timestamp when the record was created
-	@NotBlank(message = "The name does not have a creation date. ") // This will show up in null case as well.
-	private String createdAt = LocalDate.now().toString();
+	@NotNull(message = "The name does not have a creation date. ")
+	private LocalDate createdAt = LocalDate.now();
 
 	// When this database record was last updated (if at all)
-	private String updatedAt;
+	private LocalDate updatedAt;
 }
