@@ -6,4 +6,6 @@ import com.aliza.davening.entities.Submitter;
 
 public interface SubmitterRepository extends JpaRepository<Submitter, Long>{
 
+	public Submitter findByEmail(String email);
+
 }

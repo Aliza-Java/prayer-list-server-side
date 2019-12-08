@@ -10,12 +10,14 @@ import org.springframework.stereotype.Repository;
 import com.aliza.davening.entities.Category;
 
 @Repository
-public interface CategoryRepository extends JpaRepository<Category, Long>{
+public interface CategoryRepository extends JpaRepository<Category, Long> {
 
 	@Modifying
 	@Transactional
 	@Query("update Category set catOrder=?1 where id=?2")
-	public void updateCategoryOrder(int order, long categoryId);
+	public void updateCategoryOrder(int newOrder, long categoryId);
 
+	@Query("select c from Category c where c.isCurrent=true")
+	public Category getCurrent();
 	
 }

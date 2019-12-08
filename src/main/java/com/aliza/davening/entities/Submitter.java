@@ -56,6 +56,13 @@ public class Submitter {
 	@JsonIgnore
 	private List<Davenfor> davenfors;
 
+	// Constructor with only email, for quick creation.
+	public Submitter(
+			@NotBlank(message = "Submitter's email missing. ") @Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Please provide a valid email for submitter. ") String email) {
+		super();
+		this.email = email;
+	}
+
 	@Override
 	public String toString() {
 		return "Submitter [id=" + id + ", name=" + name + ", email=" + email + ", whatsapp=" + whatsapp + ", phone="

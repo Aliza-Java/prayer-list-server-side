@@ -14,12 +14,14 @@ import com.aliza.davening.entities.Davener;
 @Repository
 public interface DavenerRepository extends JpaRepository<Davener, Long> {
 	
-	 @Query("select d.email from Davener d")
+	 @Query("select d.email from Davener d where d.active=true")
 	   List<String> getAllDavenersEmails();
 	 
 	 @Modifying
 	 @Transactional
 	 @Query("update Davener d set d.active=false where id=?1")
 	 public void disactivateDavener(long id);
+	 
+	 Davener findByEmail(String email);
 
 }

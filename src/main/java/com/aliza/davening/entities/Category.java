@@ -22,6 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,8 +34,10 @@ import lombok.Setter;
 public class Category {
 
 	// A constructor for initializing the database.
-	public Category(String name, boolean current, int catOrder, int updateRate) {
-		this.name = name;
+	public Category(long id, String english, String hebrew, boolean current, int catOrder, int updateRate) {
+		this.id=id;
+		this.english = english;
+		this.hebrew = hebrew;
 		this.isCurrent = current;
 		this.updateRate = updateRate;
 		this.catOrder = catOrder;
@@ -45,15 +48,20 @@ public class Category {
 	private long id;
 
 	@Column(unique=true)
-	@NotNull(message = "Category's name cannot be null. ")
-	@NotBlank(message = "Category's name cannot be blank. ")
-	@Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "Category name must contain only letters and spaces")
-	private String name;
+	@NotNull(message = "Category's English name cannot be null. ")
+	@NotBlank(message = "Category's English name cannot be blank. ")
+	@Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "Category's English name must contain only English letters and spaces. ")
+	private String english;
+	
+	@NotNull(message = "Category's Hebrew name cannot be null. ")
+	@NotBlank(message = "Category's Hebrew name cannot be blank. ")
+	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$",  message = "Category's Hebrew name must contain only Hebrew letters and spaces. ")
+	private String hebrew;
 
 	// Is this the current category being sent out?
 	private boolean isCurrent;
 
-	// By how many days a name of this category adds when extending
+	// How many days a name of this category adds on when extending expiration date
 	@Positive(message = "The update rate of a category must be a positive number. ")
 	private int updateRate;
 
@@ -66,10 +74,12 @@ public class Category {
 	@JsonIgnore
 	private List<Davenfor> davenfors;
 
+	
+	
 	// davenfors omitted as it causes recursive output.
 	@Override
 	public String toString() {
-		return "Category [id=" + id + ", name=" + name + ", isCurrent=" + isCurrent + ", updateRate=" + updateRate
+		return "Category [id=" + id + ", english=" + english + ", hebrew=" + hebrew + ", isCurrent=" + isCurrent + ", updateRate=" + updateRate
 				+ ", catOrder=" + catOrder + "]";
 	}
 
