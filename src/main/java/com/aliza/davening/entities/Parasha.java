@@ -1,6 +1,5 @@
 package com.aliza.davening.entities;
 
-import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -17,7 +16,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 
-@Entity
+//as of now not a Spring entity - not necessary
 public class Parasha {
 
 	@Id
@@ -27,7 +26,5 @@ public class Parasha {
 	String englishName;
 
 	String hebrewName;
-
-	String fileName;
 
 }

@@ -1,30 +1,19 @@
 package com.aliza.davening.services;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.mail.MessagingException;
-import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.aliza.davening.EmailSender;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
-import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
@@ -40,6 +29,7 @@ import exceptions.ObjectNotFoundException;
 import exceptions.ReorderCategoriesException;
 
 @Service("adminService")
+@EnableTransactionManagement
 public class AdminService {
 
 	@Autowired
@@ -62,7 +52,7 @@ public class AdminService {
 
 	// TODO: change to null when have login system in place, so that by default it's
 	// null and changes only if properly logged in.
-	Admin thisAdmin = new Admin(5, "davening.list@gmail.com", "admin1234", false, 7);
+	public static Admin thisAdmin = new Admin(11, "davening.list@gmail.com", "adminPass66", false, 7);
 
 	public Admin login(String email, String password) {
 		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmailAndPassword(email, password);
@@ -73,11 +63,16 @@ public class AdminService {
 		return thisAdmin;
 	}
 
-	// This method is used both on initial start (and id=0, will send a newly
-	// created Admin),
-	// and also to update admin, where id will be current session.adminId.
-	public Admin setAdmin(Admin admin, long id) {
-		admin.setId(id);
+	/*
+	 * This method is used both on initial start (when admin.id=0, will send a newly
+	 * created Admin), and also to update admin with his existing id.
+	 */
+	public Admin setAdmin(Admin admin) throws DatabaseException {
+
+		// ensuring no two admins have the same email
+		if (isThisAdminEmailInUse(admin)) {
+			throw new DatabaseException("This admin email address is already in use.");
+		}
 		adminRepository.save(admin);
 		return admin;
 	}
@@ -91,6 +86,8 @@ public class AdminService {
 		// saving davener's email, as it may be used multiple times in this method.
 		String davenersEmail = davener.getEmail();
 
+		// Lack of email needs to be detected before trying to save to DB, since other
+		// actions are performed.
 		if (davenersEmail == null) {
 			throw new NoRelatedEmailException("Cannot enter this davener into the system.  No email associated. ");
 		}
@@ -99,13 +96,13 @@ public class AdminService {
 		String returnMessage = String.format("We will now send weekly davening lists to %s. ", davenersEmail);
 
 		/*
-		 * If davener already exists on database (but was disactivated from receiving
-		 * weekly emails), will change to active and save him. Otherwise, we will just
-		 * add him to the database.
+		 * If davener already exists on database (but was disactivated at a different
+		 * time from receiving weekly emails), will change to active and save him.
+		 * Otherwise, we will just add him to the database.
 		 */
 		if (davenerRepository.findByEmail(davenersEmail) != null) {
 			davener.setActive(true);
-			returnMessage = returnMessage.concat(" (By the way, this email existed on database already.) ");
+			returnMessage = returnMessage.concat(" (By the way, this email existed on the database already.) ");
 		}
 		davenerRepository.save(davener);
 		return returnMessage;
@@ -123,8 +120,7 @@ public class AdminService {
 		return optionalDavener.get();
 	}
 
-	public Davener updateDavener(long davenerId, Davener davener)
-			throws ObjectNotFoundException, EmptyInformationException {
+	public Davener updateDavener(Davener davener) throws ObjectNotFoundException, EmptyInformationException {
 
 		if (davener == null) {
 			throw new EmptyInformationException("Could not update.  No davener information sent. ");
@@ -132,13 +128,12 @@ public class AdminService {
 
 		// Checking that davener exists so that it won't create a new one through
 		// save().
-		Optional<Davener> optionalDavener = davenerRepository.findById(davenerId);
+		Optional<Davener> optionalDavener = davenerRepository.findById(davener.getId());
 		if (!optionalDavener.isPresent()) {
-			throw new ObjectNotFoundException("Davener with id " + davenerId);
+			throw new ObjectNotFoundException("Davener with id " + davener.getId());
 		}
 		// In case the external davenerId is different than the id sent with the davener
 		// object
-		davener.setId(davenerId);
 		davenerRepository.save(davener);
 		return davener;
 	}
@@ -173,33 +168,28 @@ public class AdminService {
 		return optionalCategory.get();
 	}
 
-	/*
-	 * This entire action must be done completely. If something doesn't work out, it
-	 * must roll back.
-	 * 
-	 * Returning void instead of findAll since the @Transactional causes findAll to
-	 * be of previous version, before reordering. If necessary, retrieve all after
-	 * entire action.
-	 */
-	@Transactional
-	public void changeCategoryOrder(List<Category> sortedCategories)
+	
+	@Transactional(rollbackFor = ReorderCategoriesException.class)
+	public List<Category> changeCategoryOrder(List<Category> sortedCategories)
 			throws ReorderCategoriesException, ObjectNotFoundException {
 
 		/*
 		 * as we update the categories, we will cross them off, and check at the end if
 		 * all have been crossed off.
 		 */
+
 		List<Category> crossOffList = categoryRepository.findAll();
 
 		for (Category newCategory : sortedCategories) {
 
-			// checking if new category order is valid.
+				// checking if new category order is valid.
 			if (newCategory.getCatOrder() < 0) {
 				throw new ReorderCategoriesException("Category order must be a positive number.");
 			}
 
 			Category updatedCategory = getCategory(newCategory.getId());
 			categoryRepository.updateCategoryOrder(newCategory.getCatOrder(), newCategory.getId());
+
 			crossOffList.remove(updatedCategory);
 		}
 
@@ -207,8 +197,10 @@ public class AdminService {
 		// sort.
 		if (!crossOffList.isEmpty()) {
 			throw new ReorderCategoriesException(
-					"Categories reordered only partially.  Could not continue with action. ");
+					"Categories reordered only partially. Could not continue with action. ");
 		}
+
+		return sortedCategories;
 	}
 
 	public Category addCategory(Category category) throws DatabaseException, EmptyInformationException {
@@ -219,17 +211,19 @@ public class AdminService {
 		}
 
 		// Removing any leading and trailing spaces from name.
-		String categoryName = category.getEnglish().trim();
+		String englishCategoryName = category.getEnglish().trim();
+		String hebrewCategoryName = category.getHebrew().trim();
 
-		// Checking if category name is unique.
-		if (isThisCategoryNameInUse(categoryName, getAllCategories())) {
-			throw new DatabaseException("The category name '" + categoryName.toLowerCase() + "' is already in use.");
-		}
+		// Checking if category name is unique, English and Hebrew
+		checkIfThisCategoryNameIsInUse(englishCategoryName, hebrewCategoryName, getAllCategories(),
+				SchemeValues.NON_EXIST);
 
 		// The trimmed name must be also saved in the entity to be persisted.
-		category.setEnglish(categoryName);
+		category.setEnglish(englishCategoryName);
+		category.setHebrew(hebrewCategoryName);
 
 		categoryRepository.save(category);
+
 		return category;
 	}
 
@@ -255,21 +249,29 @@ public class AdminService {
 		 */
 		categoryToUpdate.setId(categoryId);
 
-		/*
-		 * checking if name is being updated, and if so that it is not already in use No
-		 * need to exclude comparing with name itself because sent only if not matching.
-		 */
+		// Trim incoming names before comparing them.
+		String suggestedCategoryNameEnglish = categoryToUpdate.getEnglish().trim();
+		String suggestedCategoryNameHebrew = categoryToUpdate.getHebrew().trim();
 
-		String suggestedCategoryName = categoryToUpdate.getEnglish().trim();
-		if (!optionalCategory.get().getEnglish().equalsIgnoreCase(suggestedCategoryName)) {
-			if (isThisCategoryNameInUse(suggestedCategoryName, getAllCategories())) {
-				throw new DatabaseException(
-						"The category name '" + suggestedCategoryName.toLowerCase() + "' is already in use.");
-			}
+		/*
+		 * checking if name is being updated, and if so that it is not already in use.
+		 * No need to exclude comparing with name itself because sent only if not
+		 * matching.
+		 */
+		boolean englishNameHasBeenChanged = !optionalCategory.get().getEnglish()
+				.equalsIgnoreCase(suggestedCategoryNameEnglish);
+		boolean hebrewNameHasBeenChanged = !optionalCategory.get().getHebrew()
+				.equalsIgnoreCase(suggestedCategoryNameHebrew);
+		if (englishNameHasBeenChanged || hebrewNameHasBeenChanged) {
+			checkIfThisCategoryNameIsInUse(suggestedCategoryNameEnglish, suggestedCategoryNameHebrew,
+					getAllCategories(), categoryId);
+
 		}
 
-		// In case originally name had spaces and was then trimmed.
-		categoryToUpdate.setEnglish(suggestedCategoryName);
+		// Setting names in Category object in any case (even if name is the same,
+		// spaces may have changed).
+		categoryToUpdate.setEnglish(suggestedCategoryNameEnglish);
+		categoryToUpdate.setHebrew(suggestedCategoryNameHebrew);
 
 		categoryRepository.save(categoryToUpdate);
 		return categoryToUpdate;
@@ -284,103 +286,49 @@ public class AdminService {
 		}
 	}
 
-	public void sendOutWeekly(Parasha parasha)
-			throws EmptyInformationException, IOException, MessagingException, EmailException {
-		if (parasha == null) {
-			throw new EmptyInformationException("No Parasha name submitted. ");
+	public void disactivateDavener(String davenerEmail)
+			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
+
+		Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
+		if (davenerToDisactivate.isActive() == false) {
+			throw new DatabaseException(String.format(
+					"The email %s has already been disactivated from receiving the davening lists. ", davenerEmail));
 		}
 
-		emailSender.sendWeeklyEmailToAll(davenerRepository.getAllDavenersEmails(), categoryRepository.getCurrent(),
-				parasha, buildWeeklyEmail(parasha));
-	}
-
-	public void sendOutUrgent(Davenfor davenfor, String davenforNote)
-			throws EmptyInformationException, MessagingException, EmailException {
-		if (davenfor == null) {
-			throw new EmptyInformationException("The name you submitted for davening is incomplete.  ");
-		}
-		emailSender.sendUrgentEmail(davenerRepository.getAllDavenersEmails(), davenfor, davenforNote);
+		davenerRepository.disactivateDavener(davenerEmail);
+		emailSender.notifyDisactivatedDavener(davenerEmail);
 
 	}
 
-	public File buildWeeklyEmail(Parasha parasha) throws IOException {
+	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)
+			throws DatabaseException {
 
-		Category currentCategory = categoryRepository.getCurrent();
+		// names should be compared only after trimming, as spaces do not change the
+		// word inherently
+		english = english.toLowerCase().trim();
+		hebrew = hebrew.trim();
 
-		// The lines making up the file
-		List<String> formattedLines = new ArrayList<String>();
-
-		// Adding headlines
-		formattedLines.add(String.format("%s %s", SchemeValues.inMemoryEnglish, SchemeValues.inMemoryHebrew));
-		formattedLines.add(String.format("%s %s", parasha.getEnglishName(), parasha.getHebrewName()));
-		formattedLines.add(String.format("%s %s", currentCategory.getEnglish(), currentCategory.getHebrew()));
-
-		// Adding all names to the main part of the file
-		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(currentCategory);
-
-		for (Davenfor d : categoryDavenfors) {
-			formattedLines.add(String.format("%s %s", d.getNameEnglish(), d.getNameHebrew()));
-		}
-
-		// Writing final closing lines in file
-		Category nextCategory = getNextCategory(currentCategory);
-
-		formattedLines
-				.add(String.format("Next week %s - שבוע הבא %s", nextCategory.getEnglish(), nextCategory.getHebrew()));
-
-		formattedLines.add(String.format("Please email %s with name and good news!", thisAdmin.getEmail()));
-
-		// writing the lines to the file
-		Path file = Paths.get("builtFiles/" + parasha.getFileName() + "_" + LocalDate.now().toString() + ".txt");
-		Files.write(file, formattedLines, StandardCharsets.UTF_8);
-
-		return file.toFile();
-
-	}
-
-	public void disactivateDavener(Davener davener) {
-		davenerRepository.disactivateDavener(davener.getId());
-
-	}
-
-	public Category getNextCategory(Category current) {
-
-		List<Category> allCategories = categoryRepository.findAll();
-
-		int max = Integer.MAX_VALUE;
-		int currentPosition = current.getCatOrder();
-		Category nextCategory = null;
-
-		/*
-		 * Search for the category containing the very next cat_order - must be bigger
-		 * than current position but lower than all other 'next' categories
-		 */
-		for (Category c : allCategories) {
-			if (c.getCatOrder() > currentPosition && c.getCatOrder() < max) {
-				nextCategory = c;
-				max = c.getCatOrder();
-			}
-		}
-
-		/*
-		 * If didn't find the next in line, because current cat_order is the highest -
-		 * restart rotation and search for lowest value.
-		 */
-		if (nextCategory == null) {
-			int min = Integer.MAX_VALUE;
-			for (Category c : allCategories) {
-				if (c.getCatOrder() < min) {
-					nextCategory = c;
-					min = c.getCatOrder();
-				}
-			}
-		}
-		return nextCategory;
-	}
-
-	private boolean isThisCategoryNameInUse(String name, List<Category> categories) {
 		for (Category c : categories) {
-			if (name.equalsIgnoreCase(c.getEnglish())) {
+			if (c.getId() != id) { // do this check only if checked category is not the one in question
+
+				if (english.equalsIgnoreCase(c.getEnglish()))
+					throw new DatabaseException("The category name '" + english + "' is already in use.");
+				if (hebrew.equalsIgnoreCase(c.getHebrew()))
+					throw new DatabaseException("The category name '" + hebrew + "' is already in use.");
+
+			}
+		}
+
+		return false;
+	}
+
+	// A local method to check if an admin email exists (other than this one, of
+	// course).
+	public boolean isThisAdminEmailInUse(Admin admin) {
+		List<Admin> allAdmins = adminRepository.findAll();
+		String thisAdminsEmail = admin.getEmail();
+		for (Admin a : allAdmins) {
+			if (a.getEmail().equalsIgnoreCase(thisAdminsEmail) && a.getId() != admin.getId()) {
 				return true;
 			}
 		}

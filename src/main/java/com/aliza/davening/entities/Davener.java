@@ -5,7 +5,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Pattern;
 
 import lombok.AllArgsConstructor;
@@ -32,11 +31,13 @@ public class Davener {
 	private String country="Israel";
 	
 	@NotBlank(message = "Davener must have an associated email. ")
-	@NotEmpty
 	@Pattern(regexp="^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message="Davener email seems to be invalid.")
 	private String email;
 	
-	//Does davener want to accept regular davening list?
+	@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
+	private String whatsapp;
+	
+	//Does davener want to accept weekly davening list and alerts?
 	private boolean active=true;
 
 	}

@@ -41,8 +41,6 @@ public class Admin {
 	private boolean	NewNamePrompt=false;
 	
 	//how many days to wait after submitter was warned name is expired default 7 (set in application.properties)	
-	//TODO: is Value the right annotation?  From annotations or lombok? Is it indeed initialized?
-	
 	private int WaitBeforeDeletion=SchemeValues.waitBeforeDeletion;
 	
 	
