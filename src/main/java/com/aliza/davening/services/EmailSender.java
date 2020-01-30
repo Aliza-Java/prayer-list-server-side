@@ -51,6 +51,9 @@ public class EmailSender {
 	@Autowired
 	private CategoryRepository categoryRepository;
 
+	@Autowired
+	private Utilities utilities;
+
 	// A general method allowing Admin to send messages to system users
 	public void sendEmailFromAdmin(String recipient, String message) throws EmailException, EmptyInformationException {
 
@@ -58,21 +61,15 @@ public class EmailSender {
 			throw new EmptyInformationException("Recipient email address missing. ");
 		}
 
-		String[] recipientAsArray = { recipient };
-
 		/*
 		 * simple email where subject is defined in EmailScheme, message is received,
 		 * recipient is only one, and there is no bcc.
 		 */
-		doEmail(EmailScheme.getAdminMessageSubject(), message, recipientAsArray, null, null, null);
+		doEmail(EmailScheme.getAdminMessageSubject(), message, recipient, null, null, null);
 	}
 
-	public void sendOutWeekly(Parasha parasha, String message) throws EmptyInformationException, IOException,
-			MessagingException, EmailException, DocumentException, ObjectNotFoundException, DatabaseException {
-		if (parasha == null) {
-			throw new EmptyInformationException("No Parasha name submitted. ");
-		}
-
+	public void sendOutWeekly(Parasha parasha, String message) throws IOException, MessagingException, EmailException,
+			DocumentException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
 		Category currentCategory = categoryRepository.getCurrent();
 
 		String subject = String.format(EmailScheme.getWeeklyEmailSubject(), currentCategory.getEnglish());
@@ -92,7 +89,14 @@ public class EmailSender {
 
 		String fileName = String.format(EmailScheme.getWeeklyFileName(), parasha.getEnglishName());
 
-		doEmail(subject, message, null, davenersArray, Utilities.buildListImage(parasha), fileName);
+		/*
+		 * 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
+		 * therefore including admin's email. TODO: make sure this works with dynamic
+		 * adminId after login layer in place. TODO: consider saving adminEmail as
+		 * private variable in this class, used a lot, instead of in each method.
+		 */ String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
+
+		doEmail(subject, message, adminEmail, davenersArray, utilities.buildListImage(parasha), fileName);
 	}
 
 	public void sendUrgentEmail(List<String> recipientList, Davenfor davenfor, String davenforNote)
@@ -132,14 +136,20 @@ public class EmailSender {
 			urgentMessage = concatAdminMessage(davenforNote, urgentMessage);
 		}
 
-		doEmail(subject, urgentMessage, null, recipientsArray, null, null);
+		/*
+		 * 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
+		 * therefore including admin's email.
+		 */
+		String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
+
+		doEmail(subject, urgentMessage, adminEmail, recipientsArray, null, null);
 	}
 
 	public void informAdmin(String subject, String message) throws EmailException {
 
-		String[] toAdmin = { adminRepository.FindAdminEmailById(SchemeValues.adminId) };
+		String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
 
-		doEmail(subject, message, toAdmin, null, null, null);
+		doEmail(subject, message, adminEmail, null, null, null);
 
 	}
 
@@ -171,7 +181,7 @@ public class EmailSender {
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
 				confirmedDavenfor.getCategory().getEnglish(), confirmedDavenfor.getId());
 
-		String[] to = { confirmedDavenfor.getSubmitter().getEmail() };
+		String to = confirmedDavenfor.getSubmitter().getEmail();
 
 		try {
 			doEmail(subject, personalizedEmailText, to, null, null, null);
@@ -189,7 +199,7 @@ public class EmailSender {
 		sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
 	}
 
-	private void doEmail(String subject, String message, String[] to, String[] bcc, File attachment,
+	private void doEmail(String subject, String message, String to, String[] bcc, File attachment,
 			String attachmentName) throws EmailException {
 		MimeMessage msg = javaMailSender.createMimeMessage();
 

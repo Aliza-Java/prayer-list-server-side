@@ -97,14 +97,20 @@ public class AdminService {
 
 		/*
 		 * If davener already exists on database (but was disactivated at a different
-		 * time from receiving weekly emails), will change to active and save him.
-		 * Otherwise, we will just add him to the database.
+		 * time from receiving weekly emails), will change to active and save him under
+		 * the same davener (in order not to create new daveners with same email.) Then
+		 * add him to the database. If new - will create new. If old - will receive the
+		 * old id and save in the same row.
 		 */
-		if (davenerRepository.findByEmail(davenersEmail) != null) {
-			davener.setActive(true);
+		Davener existingDavener = davenerRepository.findByEmail(davenersEmail);
+
+		if (existingDavener != null) {
+			davener = existingDavener; // giving davener the existing id
+			davener.setActive(true); //
 			returnMessage = returnMessage.concat(" (By the way, this email existed on the database already.) ");
 		}
 		davenerRepository.save(davener);
+
 		return returnMessage;
 	}
 
@@ -168,7 +174,6 @@ public class AdminService {
 		return optionalCategory.get();
 	}
 
-	
 	@Transactional(rollbackFor = ReorderCategoriesException.class)
 	public List<Category> changeCategoryOrder(List<Category> sortedCategories)
 			throws ReorderCategoriesException, ObjectNotFoundException {
@@ -182,7 +187,7 @@ public class AdminService {
 
 		for (Category newCategory : sortedCategories) {
 
-				// checking if new category order is valid.
+			// checking if new category order is valid.
 			if (newCategory.getCatOrder() < 0) {
 				throw new ReorderCategoriesException("Category order must be a positive number.");
 			}

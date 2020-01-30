@@ -31,12 +31,12 @@ import exceptions.ObjectNotFoundException;
 public class Utilities {
 
 	@Autowired
-	static CategoryRepository categoryRepository;
+	CategoryRepository categoryRepository;
 
 	@Autowired
-	static DavenforRepository davenforRepository;
+	DavenforRepository davenforRepository;
 
-	public static File buildListImage(Parasha parasha)
+	public File buildListImage(Parasha parasha)
 			throws IOException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
 
 		if (parasha == null) {
@@ -81,7 +81,7 @@ public class Utilities {
 
 		// Running through names, adding them in columns - English and Hebrew
 
-		// ZSK category prints nusach first, and includes name and spouse name in one
+		// banim category prints nusach first, and includes name and spouse name in one
 		// box
 		if (currentCategory.getEnglish().equalsIgnoreCase(SchemeValues.banimName)) {
 			stringBuilder.append(String.format(EmailScheme.getHtmlNameRowInList(), EmailScheme.getBanimLineEnglish(),
@@ -138,7 +138,7 @@ public class Utilities {
 		return filePath.toFile();
 	}
 
-	public static Category getNextCategory(Category current) {
+	public Category getNextCategory(Category current) {
 
 		List<Category> allCategories = categoryRepository.findAll();
 
@@ -173,4 +173,8 @@ public class Utilities {
 		return nextCategory;
 	}
 
+	//TODO: make it read from a file/DB and find by id.
+	public static Parasha findParasha(long parashaId) {
+		return new Parasha(9, "Bo", "בא");
+	}
 }
