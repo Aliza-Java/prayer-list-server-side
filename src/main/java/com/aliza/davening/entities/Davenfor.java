@@ -85,6 +85,6 @@ public class Davenfor {
 	// When this database record was last updated (if at all)
 	private LocalDate updatedAt;
 
-	
+	private String note;
 	
 }

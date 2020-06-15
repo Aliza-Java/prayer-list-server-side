@@ -16,22 +16,27 @@ import com.aliza.davening.entities.Davenfor;
 @Repository
 public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 
-	// Extend expiration date by adding to it amount of days according to category
+	// Extend expiration date by adding to it amount of days according to category,
+	// as well as updating the confirmed and updated fields.
 	@Transactional
 	@Modifying
-	@Query("update Davenfor d set d.expireAt=?1 where id=?2")
-	public void extendExpiryDate(LocalDate newExpireAt, long davenforId);
+	@Query("update Davenfor d set d.expireAt=?2, lastConfirmedAt=?3, updatedAt=?3 where id=?1")
+	public void extendExpiryDate(long davenforId, LocalDate extendedDate, LocalDate today);
 
 	// Changing the lastConfirmed to today's date (sent in as parameter)
 	@Transactional
 	@Modifying
 	@Query("update Davenfor d set d.lastConfirmedAt=?1 where id=?2")
 	public void setLastConfirmedAt(LocalDate today, long davenforId);
-	
+
 	public List<Davenfor> findByExpireAtLessThan(LocalDate expireAt);
 	
+	@Transactional
+	@Modifying
+	public void deleteByExpireAtLessThan(LocalDate expireAt);
+
 	public List<Davenfor> findAllDavenforBySubmitterEmail(String email);
-	
+
 	public List<Davenfor> findAllDavenforByCategory(Category category);
 
 }

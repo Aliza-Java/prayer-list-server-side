@@ -20,4 +20,9 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 	@Query("select c from Category c where c.isCurrent=true")
 	public Category getCurrent();
 	
+	@Modifying
+	@Transactional
+	@Query("update Category set isCurrent=?1 where id=?2")
+	public void updateCategoryCurrent(boolean isCurrent, long categoryId);
+	
 }

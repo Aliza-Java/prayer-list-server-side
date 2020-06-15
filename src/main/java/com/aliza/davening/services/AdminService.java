@@ -3,13 +3,19 @@ package com.aliza.davening.services;
 import java.util.List;
 import java.util.Optional;
 
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.aliza.davening.SchemeValues;
+import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
@@ -24,6 +30,7 @@ import com.aliza.davening.repositories.SubmitterRepository;
 import exceptions.DatabaseException;
 import exceptions.EmailException;
 import exceptions.EmptyInformationException;
+import exceptions.LoginException;
 import exceptions.NoRelatedEmailException;
 import exceptions.ObjectNotFoundException;
 import exceptions.ReorderCategoriesException;
@@ -50,31 +57,81 @@ public class AdminService {
 	@Autowired
 	EmailSender emailSender;
 
+	@Autowired
+	Utilities utilities;
+	
+	@Autowired
+	BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+
+	public Admin thisAdmin = null;
+
 	// TODO: change to null when have login system in place, so that by default it's
 	// null and changes only if properly logged in.
-	public static Admin thisAdmin = new Admin(11, "davening.list@gmail.com", "adminPass66", false, 7);
+	//public static Admin thisAdmin = new Admin(11, "davening.list@gmail.com", "adminPass66", false, 7);
 
-	public Admin login(String email, String password) {
-		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmailAndPassword(email, password);
+	//Returning Admin so that session can store the admin with Id and details.
+	public Admin login(String email, String password) throws LoginException {
+		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
+		
+		//Check if the admin was found by email.
 		if (!optionalAdmin.isPresent()) {
+			throw new LoginException("The email you provided is not associated with an admin.");
+		}
+		
+		//At this point save retrieved admin, to check password and (if passes check) to save for future.
+		thisAdmin = optionalAdmin.get();
+		
+		//Check if password is correct
+		if (!BCrypt.checkpw(password, thisAdmin.getPassword())) {
 			return null;
 		}
-		thisAdmin = optionalAdmin.get();
+		
 		return thisAdmin;
 	}
 
 	/*
-	 * This method is used both on initial start (when admin.id=0, will send a newly
-	 * created Admin), and also to update admin with his existing id.
+	 * This method is used on initial start (when admin.id=Non_Exist, will send a
+	 * newly created Admin).
 	 */
-	public Admin setAdmin(Admin admin) throws DatabaseException {
+	public boolean setAdmin(Admin admin) throws DatabaseException {
 
-		// ensuring no two admins have the same email
-		if (isThisAdminEmailInUse(admin)) {
+		/*
+		 * ensuring no two admins have the same email. In this case sending to compare
+		 * with Non_Exist since no need to compare with this id (not in the DB yet)
+		 */
+		if (isThisAdminEmailInUse(SchemeValues.NON_EXIST, admin.getEmail())) {
 			throw new DatabaseException("This admin email address is already in use.");
 		}
+		admin.setId(SchemeValues.NON_EXIST);// Ensuring the DB will enter a new row.
+
+		// Setting default value for waitBeforeDeletion.
+		admin.setWaitBeforeDeletion(SchemeValues.waitBeforeDeletion);
+
+		admin.setPassword(bCryptPasswordEncoder.encode(admin.getPassword()));
+
 		adminRepository.save(admin);
-		return admin;
+		return true;
+	}
+
+	public boolean updateAdmin(Admin adminToUpdate) throws ObjectNotFoundException, DatabaseException {
+
+		long id = adminToUpdate.getId();
+
+		Optional<Admin> optionalAdmin = adminRepository.findById(id);
+		if (optionalAdmin.isEmpty()) {
+			throw new ObjectNotFoundException("Admin with id " + id);
+		}
+
+		// needs id because will skip the check on current admin
+		if (isThisAdminEmailInUse(id, adminToUpdate.getEmail())) {
+			throw new DatabaseException("This admin email address is already in use.");
+		}
+
+		adminToUpdate.setPassword(bCryptPasswordEncoder.encode(adminToUpdate.getPassword()));
+
+		adminRepository.save(adminToUpdate);
+		return true;
 	}
 
 	public List<Davener> getAllDaveners() {
@@ -127,10 +184,6 @@ public class AdminService {
 	}
 
 	public Davener updateDavener(Davener davener) throws ObjectNotFoundException, EmptyInformationException {
-
-		if (davener == null) {
-			throw new EmptyInformationException("Could not update.  No davener information sent. ");
-		}
 
 		// Checking that davener exists so that it won't create a new one through
 		// save().
@@ -305,6 +358,13 @@ public class AdminService {
 
 	}
 
+	public void updateCurrentCategory() {
+		//Checking which is the next category in line.  Changing it's isCurrent to true, while the previous one to false.
+		Category nextCategory = utilities.getNextCategory(categoryRepository.getCurrent());
+		categoryRepository.updateCategoryCurrent(false, categoryRepository.getCurrent().getId());
+		categoryRepository.updateCategoryCurrent(true, nextCategory.getId());
+	}
+
 	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)
 			throws DatabaseException {
 
@@ -329,11 +389,10 @@ public class AdminService {
 
 	// A local method to check if an admin email exists (other than this one, of
 	// course).
-	public boolean isThisAdminEmailInUse(Admin admin) {
+	public boolean isThisAdminEmailInUse(long id, String email) {
 		List<Admin> allAdmins = adminRepository.findAll();
-		String thisAdminsEmail = admin.getEmail();
 		for (Admin a : allAdmins) {
-			if (a.getEmail().equalsIgnoreCase(thisAdminsEmail) && a.getId() != admin.getId()) {
+			if (a.getEmail().equalsIgnoreCase(email) && a.getId() != id) {
 				return true;
 			}
 		}

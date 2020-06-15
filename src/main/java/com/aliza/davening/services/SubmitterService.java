@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.aliza.davening.EmailScheme;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Admin;
+import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.repositories.AdminRepository;
@@ -68,13 +69,24 @@ public class SubmitterService {
 	public Davenfor addDavenfor(Davenfor davenfor, String submitterEmail)
 			throws EmptyInformationException, ObjectNotFoundException, EmailException {
 
+		/*
+		 * Ensuring there is a real category and associating it with the davenfor. TODO:
+		 * if change category to enum, with name, make sure it IS saved fully and
+		 * correctly under davenfor. For now, as long as id exists, it is okay for
+		 * davenfor to have the id even if category details are wrong, since the
+		 * connection is through id.
+		 */
+		Optional<Category> optionalCategory = categoryRepository.findById(davenfor.getCategory().getId());
+		if (optionalCategory.isEmpty()) {
+			throw new EmptyInformationException("No existing category chosen. ");
+		}
+		
 		// Trim all names nicely
 		davenfor.setNameEnglish(davenfor.getNameEnglish().trim());
 		davenfor.setNameHebrew(davenfor.getNameHebrew().trim());
 
 		// If davenfor needs 2 names (e.g. Zera shel Kayama), validate that second name
-		// is in
-		// too, and if indeed exist - trim them.
+		// is in too, and if indeed exist - trim them.
 
 		if (SchemeValues.banimName.equals(davenfor.getCategory().getEnglish())) {
 			if (davenfor.getNameEnglishSpouse() == null || davenfor.getNameHebrewSpouse() == null) {
@@ -100,12 +112,9 @@ public class SubmitterService {
 		// If admin's setting defines that admin should get an email upon new name being
 		// added:
 		if (getMyGroupSettings(SchemeValues.adminId).isNewNamePrompt()) {
-			String subject = "A new name has been added to your davening list. ";
-			String message = String.format(EmailScheme.getInformAdminOfNewName(), 
-					davenfor.getNameEnglish(), 
-					davenfor.getNameHebrew(), 
-					davenfor.getCategory().getEnglish(),
-					submitterEmail);
+			String subject = EmailScheme.getInformAdminOfNewNameSubject();
+			String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
+					davenfor.getNameHebrew(), davenfor.getCategory().getEnglish(), submitterEmail);
 			emailSender.informAdmin(subject, message);
 		}
 
@@ -142,9 +151,9 @@ public class SubmitterService {
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
 		if (SchemeValues.banimName.equals(davenforToUpdate.getCategory().getEnglish())) {
-			if (davenforToUpdate.getNameEnglishSpouse()==null
-					|| davenforToUpdate.getNameHebrewSpouse()==null) {
-				throw new EmptyInformationException("This category requires also a spouse name (English and Hebrew) to be submitted. ");
+			if (davenforToUpdate.getNameEnglishSpouse() == null || davenforToUpdate.getNameHebrewSpouse() == null) {
+				throw new EmptyInformationException(
+						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
 			} else {
 				davenforToUpdate.setNameEnglishSpouse(davenforToUpdate.getNameEnglishSpouse().trim());
 				davenforToUpdate.setNameHebrewSpouse(davenforToUpdate.getNameHebrewSpouse().trim());
@@ -162,29 +171,29 @@ public class SubmitterService {
 		davenforRepository.save(davenforToUpdate);
 
 		if (getMyGroupSettings(SchemeValues.adminId).isNewNamePrompt()) {
-		String subject = EmailScheme.getInformAdminOfUpdateSubject();
-		String message = String.format(EmailScheme.getInformAdminOfUpdate(), submitterEmail,
-				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
-				davenforToUpdate.getCategory().getEnglish());
-		emailSender.informAdmin(subject, message);
+			String subject = EmailScheme.getInformAdminOfUpdateSubject();
+			String message = String.format(EmailScheme.getInformAdminOfUpdate(), submitterEmail,
+					davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
+					davenforToUpdate.getCategory().getEnglish());
+			emailSender.informAdmin(subject, message);
 		}
-		
+
 		return davenforToUpdate;
 
 	}
 
-	public Davenfor extendDavenfor(long davenforId, String submitterEmail)
+	public boolean extendDavenfor(long davenforId, String submitterEmail)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 
-		if(submitterEmail==null) {
+		if (submitterEmail == null) {
 			throw new EmptyInformationException("No associated email address was received. ");
 		}
-		
+
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
 		if (optionalDavenfor.isEmpty()) {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
-		
+
 		Davenfor davenforToExtend = optionalDavenfor.get();
 
 		if (!davenforToExtend.getSubmitter().getEmail().equalsIgnoreCase(submitterEmail)) {
@@ -194,14 +203,13 @@ public class SubmitterService {
 
 		// Extending the davenfor's expiration date according to the defined length in
 		// its category.
-		davenforToExtend.setExpireAt(LocalDate.now().plusDays(davenforToExtend.getCategory().getUpdateRate()));
+		LocalDate extendedDate = LocalDate.now().plusDays(davenforToExtend.getCategory().getUpdateRate());
 		davenforToExtend.setUpdatedAt(LocalDate.now());
 		davenforToExtend.setLastConfirmedAt(LocalDate.now());
-		davenforRepository.save(davenforToExtend);
+		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());
 
-		return davenforToExtend;
-
-	}
+		return true;
+		}
 
 	public void deleteDavenfor(long davenforId, String submitterEmail)
 			throws ObjectNotFoundException, PermissionException {
@@ -229,5 +237,7 @@ public class SubmitterService {
 		}
 		return validSubmitter;
 	}
+	
+	
 
 }

@@ -50,8 +50,8 @@ public class EmailScheme {
 	// Text appearing in Admin's email requesting to daven urgently (can be Banim or
 	// any category)
 	private static String urgentDavenforEmailBanim = "Please daven for <b>%s - %s</b> and <b>%s - %s</b>, for: <b>%s</b>. <br>";
-	
-	private static String urgentDavenforEmail = "Please daven now for <b>%s - %s</b>, for: <b>%s<b/>. <br>";
+
+	private static String urgentDavenforEmailText = "Please daven now for <b>%s - %s</b>, for: <b>%s<b/>. <br>";
 
 	// The text in email informing admin of an update made to a name.
 	private static String informAdminOfUpdate = "<b>%s</b> has just updated the name: <br><b>%s <br> %s </b><br>  in the category: <br> <b>%s. </b><br><br> You might want to check that it was properly updated. ";
@@ -63,10 +63,19 @@ public class EmailScheme {
 	// putting one message first, in bold, with new line before other text.
 	private static String boldFirstMessage = "<h4>%s</h4>%s";
 
+	// putting second message, in bold, on new line after other text.
+	private static String boldSecondMessage = "%s<h4>%s</h4>";
+
 	private static String confirmationEmailSubject = "Davening list submission";
-	
+
 	private static String informAdminOfNewName = "The name: <br><b>%s <br> %s </b><br> has been added to the category: <br> <b>%s. </b><br> by <b>%s</b>"
 			+ "<br><br> You might want to check that it was properly entered. ";
+
+	private static String informAdminOfNewNameSubject = "A new name has been added to your davening list. ";
+
+	private static String weeklyAdminReminderSubject = "Davening list reminder: Send out the weekly list!";
+
+	private static String expiringNameSubject = "Davening List Confirmation";
 
 	public static int getImageWidth() {
 		return imageWidth;
@@ -160,8 +169,8 @@ public class EmailScheme {
 		return urgentDavenforEmailBanim;
 	}
 
-	public static String getUrgentDavenforEmail() {
-		return urgentDavenforEmail;
+	public static String getUrgentDavenforEmailText() {
+		return urgentDavenforEmailText;
 	}
 
 	public static String getInformAdminOfUpdate() {
@@ -180,12 +189,28 @@ public class EmailScheme {
 		return boldFirstMessage;
 	}
 
+	public static String getBoldSecondMessage() {
+		return boldSecondMessage;
+	}
+
 	public static String getConfirmationEmailSubject() {
 		return confirmationEmailSubject;
 	}
-	
+
 	public static String getInformAdminOfNewName() {
 		return informAdminOfNewName;
+	}
+
+	public static String getInformAdminOfNewNameSubject() {
+		return informAdminOfNewNameSubject;
+	}
+
+	public static String getExpiringNameSubject() {
+		return expiringNameSubject;
+	}
+
+	public static String getWeeklyAdminReminderSubject() {
+		return weeklyAdminReminderSubject;
 	}
 
 }

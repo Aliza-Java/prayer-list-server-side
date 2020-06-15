@@ -13,5 +13,29 @@ public class SchemeValues {
 	
 	public static String banimName="Zera Shel Kayama";
 	
+	//Links inserted to email allowing submitters to extend or delete names.  URL will change when uploaded to AWS
+	private final static String linkToExtend = "http://localhost:8080/dlist/extend/%s?email=%s";
+	private final static String linkToDelete = "http://localhost:8080/dlist/delete/%s?email=%s";
+	
+	//TODO: here insert the login page for client side
+	private final static String linkToLogin = "http://google.com";
+	private final static String linkToSendList = "http://localhost:8080/dlist/admin/weeklylist/";
+	
+	public static String getLinkToExtend() {
+		return linkToExtend;
+	}
+	
+	public static String getLinkToDelete() {
+		return linkToDelete;
+	}
+	
+	public static String getLinkToLogin() {
+		return linkToLogin;
+	}
+
+	public static String getLinkToSendList() {
+		return linkToSendList;
+	}
+	
 
 }

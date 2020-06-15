@@ -14,6 +14,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JEditorPane;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.aliza.davening.entities.Category;
@@ -27,6 +28,8 @@ import exceptions.DatabaseException;
 import exceptions.EmptyInformationException;
 import exceptions.ObjectNotFoundException;
 
+//A helper class for building long and winding messages and files
+
 @Component
 public class Utilities {
 
@@ -35,7 +38,13 @@ public class Utilities {
 
 	@Autowired
 	DavenforRepository davenforRepository;
-
+	
+	@Autowired
+	AdminService adminService;
+	
+	@Value("${spring.mail.username}")
+	private String adminEmail;
+	
 	public File buildListImage(Parasha parasha)
 			throws IOException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
 
@@ -113,7 +122,8 @@ public class Utilities {
 				String.format(EmailScheme.getNextWeekCategory(), nextCategory.getEnglish(), nextCategory.getHebrew()));
 
 		// Adding line to email with name and good news.
-		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), AdminService.thisAdmin.getEmail()));
+		//TODO: fix admin email according to how decided - dynamic? application.properties? 
+		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), adminEmail));
 
 		// Closing <body> tag
 		stringBuilder.append(EmailScheme.getHtmlBodyEnd());
@@ -177,4 +187,62 @@ public class Utilities {
 	public static Parasha findParasha(long parashaId) {
 		return new Parasha(9, "Bo", "בא");
 	}
+	
+	//Builds the long and complex email message that gets sent every week to Admin (to review and send list)
+	public static String setWeeklyAdminReminderMessage(long parashaId) {
+
+		// Prepare buttons
+		String button1 = createButton(SchemeValues.getLinkToLogin(), "#ffa200", "Review the list first");
+
+		// This button includes also a parasha id and needs to be built
+		String linkWithParasha = SchemeValues.getLinkToSendList() + parashaId;
+		String button2 = createButton(linkWithParasha, "#32a842", "Send out the list");
+
+		String buttonArea = "<table cellspacing='0' cellpadding='0'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+				+ "</tr></tbody></table>";
+
+		String message = "This is a reminder to send out the weekly davening list."
+				+ "<br><br> If you would like to review the lists first, please log in to the system first by clicking the orange button.  "
+				+ "<br><br> Or, click the green button to go ahead and send out the list. "
+				// Inserting the button tds to an html table and connecting them to the bottom of the message
+				+ buttonArea;
+		return message;
+	}
+	
+	public static String setExpiringNameMessage(Davenfor davenfor) {
+
+		// Building links that the buttons will refer to
+		String personalizedExtendLink = String.format(SchemeValues.getLinkToExtend(), davenfor.getId(),
+				davenfor.getSubmitter().getEmail());
+		String personalizedDeleteLink = String.format(SchemeValues.getLinkToDelete(), davenfor.getId(),
+				davenfor.getSubmitter().getEmail());
+
+		// Creating the button 'components' as html tds
+		String button1 = createButton(personalizedExtendLink, "#32a842", "Keep the name on the list");
+		String button2 = createButton(personalizedDeleteLink, "#d10a3f", "Remove this name");
+
+		// Inserting the button tds to an html table
+		String buttonArea = "<table cellspacing='0' cellpadding='0'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+				+ "</tr></tbody></table>";
+
+		// building the email message with the button area as a table at the bottom
+		String message = String.format("We've been davening for %s for %s.", davenfor.getNameEnglish(),
+				davenfor.getCategory().getEnglish())
+				+ "  In order to keep our lists relevant, please confirm that the davening is still relevant. "
+				+ "<br><br>  If the davening is no longer relevant for this list either simply ignore this email or click the big red remove button."
+				+ buttonArea;
+
+		return message;
+	}
+
+	
+	
+	// Creates a button according to varying parameters sent in
+		private static String createButton(String link, String buttonColor, String buttonText) {
+
+			return String.format(
+					"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;' align='center' bgcolor=%s width='300' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
+					buttonColor, link, buttonText);
+
+		}
 }

@@ -4,14 +4,22 @@ import java.io.IOException;
 
 import javax.mail.MessagingException;
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import com.aliza.davening.services.AdminService;
+import com.aliza.davening.services.EmailSender;
 import com.itextpdf.text.DocumentException;
+import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 import exceptions.DatabaseException;
 import exceptions.EmailException;
@@ -24,24 +32,40 @@ import exceptions.ReorderCategoriesException;
 @SpringBootApplication
 @EnableAutoConfiguration
 @EnableTransactionManagement
+@EnableEncryptableProperties
+@EnableScheduling
+
 public class DaveningApplication {
 
 //	@Autowired
 //	EmailSender emailSender;
 
-	public static void main(String[] args)
-			throws ObjectNotFoundException, EmptyInformationException, DatabaseException, IOException,
-			MessagingException, EmailException, NoRelatedEmailException, ReorderCategoriesException, DocumentException, PermissionException {
+	public static void main(String[] args) throws ObjectNotFoundException, EmptyInformationException, DatabaseException,
+			IOException, MessagingException, EmailException, NoRelatedEmailException, ReorderCategoriesException,
+			DocumentException, PermissionException {
 
-		// Using this instead of the common SpringApplication.run (Application.class,
-		// args) because the Swing frame that has to do with html2image is causing a
-		// java.awt.HeadlessException
-		SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
-		builder.headless(false);
-		ConfigurableApplicationContext context = builder.run(args);
-
-		AdminService adminService = context.getBean(AdminService.class);
 		
+		// Needed the below alternative for Utilities.buildListImage
+		 SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
+		 builder.headless(false);
+		 ConfigurableApplicationContext context = builder.run(args);
+
+		// For testing:
+		
+		// EmailSender emailSender = context.getBean(EmailSender.class);
+		// emailSender.sendOutWeekly(Utilities.findParasha(9), "What is headless anyway?");
+		 
+
+
+	}
+	
+
+	
+
+	//For encoding user passwords
+	@Bean
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
 	}
 
 }

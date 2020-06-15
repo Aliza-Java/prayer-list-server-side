@@ -12,6 +12,7 @@ import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -51,9 +52,15 @@ public class EmailSender {
 	@Autowired
 	private CategoryRepository categoryRepository;
 
+	//TODO: does this need to be autowired at all?
 	@Autowired
 	private Utilities utilities;
-
+	
+	//TODO: need to figure out at some point how and where to save relative adminEmail for each group. if at all.
+	@Value("${spring.mail.username}")
+	String adminEmail;
+	
+	
 	// A general method allowing Admin to send messages to system users
 	public void sendEmailFromAdmin(String recipient, String message) throws EmailException, EmptyInformationException {
 
@@ -65,7 +72,7 @@ public class EmailSender {
 		 * simple email where subject is defined in EmailScheme, message is received,
 		 * recipient is only one, and there is no bcc.
 		 */
-		doEmail(EmailScheme.getAdminMessageSubject(), message, recipient, null, null, null);
+		doEmail(EmailScheme.getAdminMessageSubject(), message, recipient, makeAdminTheBcc(), null, null);
 	}
 
 	public void sendOutWeekly(Parasha parasha, String message) throws IOException, MessagingException, EmailException,
@@ -80,6 +87,8 @@ public class EmailSender {
 		if (message != null) {
 			emailText = concatAdminMessage(message, emailText);
 		}
+		
+	
 
 		List<String> davenersList = davenerRepository.getAllDavenersEmails();
 
@@ -96,19 +105,20 @@ public class EmailSender {
 		 * private variable in this class, used a lot, instead of in each method.
 		 */ String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
 
-		doEmail(subject, message, adminEmail, davenersArray, utilities.buildListImage(parasha), fileName);
+		doEmail(subject, emailText, adminEmail, davenersArray, utilities.buildListImage(parasha), fileName);
 	}
 
-	public void sendUrgentEmail(List<String> recipientList, Davenfor davenfor, String davenforNote)
-			throws EmailException, EmptyInformationException {
+	public void sendUrgentEmail(Davenfor davenfor) throws EmailException, EmptyInformationException {
 
 		if (davenfor == null) {
 			throw new EmptyInformationException("The name you submitted for davening is incomplete.  ");
 		}
 
+		List<String> davenersList = davenerRepository.getAllDavenersEmails();
+
 		// Converting list to array, to match MimeMessageHelper.setTo()
-		String[] recipientsArray = new String[recipientList.size()];
-		recipientsArray = recipientList.toArray(recipientsArray);
+		String[] davenersArray = new String[davenersList.size()];
+		davenersArray = davenersList.toArray(davenersArray);
 
 		// Specifying the name in order to avoid Gmail from bunching up many urgent
 		// names under a single email thread.
@@ -121,19 +131,19 @@ public class EmailSender {
 		// If category is banim, need to list also spouse name (if exists in at least
 		// one language).
 		if (SchemeValues.banimName.equals(davenfor.getCategory().getEnglish())
-				&& davenfor.getNameEnglishSpouse() != null || davenfor.getNameHebrewSpouse() != null) {
+				&& (davenfor.getNameEnglishSpouse() != null || davenfor.getNameHebrewSpouse() != null)) {
 			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailBanim(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
 					SchemeValues.banimName);
 		}
 
 		else {
-			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmail(), davenfor.getNameEnglish(),
+			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailText(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getCategory().getEnglish());
 		}
 
-		if (davenforNote != null) {
-			urgentMessage = concatAdminMessage(davenforNote, urgentMessage);
+		if (davenfor.getNote() != null) {
+			urgentMessage = concatAdminMessageAfter(davenfor.getNote(), urgentMessage);
 		}
 
 		/*
@@ -142,14 +152,14 @@ public class EmailSender {
 		 */
 		String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
 
-		doEmail(subject, urgentMessage, adminEmail, recipientsArray, null, null);
+		doEmail(subject, urgentMessage, adminEmail, davenersArray, null, null);
 	}
 
 	public void informAdmin(String subject, String message) throws EmailException {
 
 		String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
-
-		doEmail(subject, message, adminEmail, null, null, null);
+		
+		doEmail(subject, message, adminEmail, makeAdminTheBcc(), null, null);
 
 	}
 
@@ -184,7 +194,7 @@ public class EmailSender {
 		String to = confirmedDavenfor.getSubmitter().getEmail();
 
 		try {
-			doEmail(subject, personalizedEmailText, to, null, null, null);
+			doEmail(subject, personalizedEmailText, to, makeAdminTheBcc(), null, null);
 
 		} catch (Exception e) {
 			throw new EmailException(String.format("Could not send confirmation email to %s",
@@ -197,6 +207,22 @@ public class EmailSender {
 	public void notifyDisactivatedDavener(String email) throws EmailException, EmptyInformationException {
 
 		sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
+	}
+
+	public void offerExtensionOrDelete(Davenfor davenfor) throws EmailException {
+
+		String subject = EmailScheme.getExpiringNameSubject();
+		String message = String.format(Utilities.setExpiringNameMessage(davenfor));
+		String recipient = davenfor.getSubmitter().getEmail();
+
+		try {
+			doEmail(subject, message, recipient, makeAdminTheBcc(), null, null);
+		} catch (EmailException e) {
+		//	throw new EmailException(
+					//String.format("Unable to send an email to %s offering to extend or delete the name %s.", recipient,
+							//davenfor.getNameEnglish()));
+			e.printStackTrace();
+		}
 	}
 
 	private void doEmail(String subject, String message, String to, String[] bcc, File attachment,
@@ -226,9 +252,20 @@ public class EmailSender {
 	}
 
 	private String concatAdminMessage(String adminMessage, String emailText) {
-		// adding admin message first and bolding it according to settings in
+		// adding admin message before name and bolding it according to settings in
 		// EmailScheme.
 		return String.format(EmailScheme.getBoldFirstMessage(), adminMessage, emailText);
+	}
+
+	private String concatAdminMessageAfter(String adminMessage, String emailText) {
+		// adding admin message after name and bolding it according to settings in
+		// EmailScheme.
+		return String.format(EmailScheme.getBoldSecondMessage(), emailText, adminMessage);
+	}
+	
+	private String[]  makeAdminTheBcc() {
+		String[] adminEmailAsArray = { adminEmail }; 
+		return adminEmailAsArray;
 	}
 
 }
