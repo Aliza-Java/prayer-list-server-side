@@ -3,9 +3,6 @@ package com.aliza.davening.services;
 import java.util.List;
 import java.util.Optional;
 
-import javax.servlet.http.HttpSession;
-
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
@@ -21,19 +18,18 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
+import com.aliza.davening.exceptions.DatabaseException;
+import com.aliza.davening.exceptions.EmailException;
+import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.exceptions.LoginException;
+import com.aliza.davening.exceptions.NoRelatedEmailException;
+import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.exceptions.ReorderCategoriesException;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
-
-import exceptions.DatabaseException;
-import exceptions.EmailException;
-import exceptions.EmptyInformationException;
-import exceptions.LoginException;
-import exceptions.NoRelatedEmailException;
-import exceptions.ObjectNotFoundException;
-import exceptions.ReorderCategoriesException;
 
 @Service("adminService")
 @EnableTransactionManagement
@@ -59,34 +55,33 @@ public class AdminService {
 
 	@Autowired
 	Utilities utilities;
-	
+
 	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
-	
 
 	public Admin thisAdmin = null;
 
-	// TODO: change to null when have login system in place, so that by default it's
-	// null and changes only if properly logged in.
-	//public static Admin thisAdmin = new Admin(11, "davening.list@gmail.com", "adminPass66", false, 7);
+	// public static Admin thisAdmin = new Admin(11, "davening.list@gmail.com",
+	// "adminPass66", false, 7);
 
-	//Returning Admin so that session can store the admin with Id and details.
+	// Returning Admin so that session can store the admin with Id and details.
 	public Admin login(String email, String password) throws LoginException {
 		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
-		
-		//Check if the admin was found by email.
+
+		// Check if the admin was found by email.
 		if (!optionalAdmin.isPresent()) {
 			throw new LoginException("The email you provided is not associated with an admin.");
 		}
-		
-		//At this point save retrieved admin, to check password and (if passes check) to save for future.
+
+		// At this point save retrieved admin, to check password and (if passes check)
+		// to save for future.
 		thisAdmin = optionalAdmin.get();
-		
-		//Check if password is correct
+
+		// Check if password is correct
 		if (!BCrypt.checkpw(password, thisAdmin.getPassword())) {
 			return null;
 		}
-		
+
 		return thisAdmin;
 	}
 
@@ -138,7 +133,7 @@ public class AdminService {
 		return davenerRepository.findAll();
 	}
 
-	public String addDavener(Davener davener) throws NoRelatedEmailException {
+	public List<Davener> addDavener(Davener davener) throws NoRelatedEmailException {
 
 		// saving davener's email, as it may be used multiple times in this method.
 		String davenersEmail = davener.getEmail();
@@ -149,9 +144,7 @@ public class AdminService {
 			throw new NoRelatedEmailException("Cannot enter this davener into the system.  No email associated. ");
 		}
 
-		// preparing return message for different cases.
-		String returnMessage = String.format("We will now send weekly davening lists to %s. ", davenersEmail);
-
+		
 		/*
 		 * If davener already exists on database (but was disactivated at a different
 		 * time from receiving weekly emails), will change to active and save him under
@@ -163,12 +156,13 @@ public class AdminService {
 
 		if (existingDavener != null) {
 			davener = existingDavener; // giving davener the existing id
-			davener.setActive(true); //
-			returnMessage = returnMessage.concat(" (By the way, this email existed on the database already.) ");
+			davener.setActive(true); 
 		}
+		else { // new davener - save full incoming data
 		davenerRepository.save(davener);
+		}
 
-		return returnMessage;
+		return davenerRepository.findAll();
 	}
 
 	public Davener getDavener(long id) throws ObjectNotFoundException {
@@ -183,7 +177,7 @@ public class AdminService {
 		return optionalDavener.get();
 	}
 
-	public Davener updateDavener(Davener davener) throws ObjectNotFoundException, EmptyInformationException {
+	public List<Davener> updateDavener(Davener davener) throws ObjectNotFoundException, EmptyInformationException {
 
 		// Checking that davener exists so that it won't create a new one through
 		// save().
@@ -194,7 +188,7 @@ public class AdminService {
 		// In case the external davenerId is different than the id sent with the davener
 		// object
 		davenerRepository.save(davener);
-		return davener;
+		return davenerRepository.findAll();
 	}
 
 	public void deleteDavener(long id) throws ObjectNotFoundException {
@@ -214,8 +208,12 @@ public class AdminService {
 		return davenforRepository.findAll();
 	}
 
-	public List<Category> getAllCategories() {
-		return categoryRepository.findAll();
+	public void deleteDavenfor(long id) throws ObjectNotFoundException {
+		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
+		if (optionalDavenfor.isEmpty()) {
+			throw new ObjectNotFoundException("Name with id: " + id);
+		}
+		davenforRepository.deleteById(optionalDavenfor.get().getId());
 	}
 
 	// A helper method set up primarily for changeCategoryOrder()
@@ -344,22 +342,51 @@ public class AdminService {
 		}
 	}
 
-	public void disactivateDavener(String davenerEmail)
+	public List<Davener> disactivateDavener(String davenerEmail)
 			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
 
+		List<Davener> davenerList = null;
 		Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
 		if (davenerToDisactivate.isActive() == false) {
 			throw new DatabaseException(String.format(
 					"The email %s has already been disactivated from receiving the davening lists. ", davenerEmail));
 		}
 
-		davenerRepository.disactivateDavener(davenerEmail);
-		emailSender.notifyDisactivatedDavener(davenerEmail);
+		try {
+			davenerRepository.disactivateDavener(davenerEmail);
+			emailSender.notifyDisactivatedDavener(davenerEmail);
+		} finally { // in case there were previous errors (such as in emailSender), return
+					// davenerList anyway.
+			davenerList = davenerRepository.findAll();
+		}
+		return davenerList;
 
 	}
 
+	public List<Davener> activateDavener(String davenerEmail)
+			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
+
+		List<Davener> davenerList = null;
+
+		Davener davenerToActivate = davenerRepository.findByEmail(davenerEmail);
+		if (davenerToActivate.isActive() == true) {
+			throw new DatabaseException(
+					String.format("The email %s is already receiving the davening lists. ", davenerEmail));
+		}
+
+		try {
+			davenerRepository.activateDavener(davenerEmail);
+			emailSender.notifyActivatedDavener(davenerEmail);
+		} finally {// in case there were previous errors (such as in emailSender), return
+			// davenerList anyway.
+			davenerList = davenerRepository.findAll();
+		}
+		return davenerList;
+	}
+
 	public void updateCurrentCategory() {
-		//Checking which is the next category in line.  Changing it's isCurrent to true, while the previous one to false.
+		// Checking which is the next category in line. Changing it's isCurrent to true,
+		// while the previous one to false.
 		Category nextCategory = utilities.getNextCategory(categoryRepository.getCurrent());
 		categoryRepository.updateCategoryCurrent(false, categoryRepository.getCurrent().getId());
 		categoryRepository.updateCategoryCurrent(true, nextCategory.getId());
@@ -385,6 +412,10 @@ public class AdminService {
 		}
 
 		return false;
+	}
+
+	public List<Category> getAllCategories() {
+		return categoryRepository.findAllOrderById();
 	}
 
 	// A local method to check if an admin email exists (other than this one, of

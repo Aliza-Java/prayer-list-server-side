@@ -24,9 +24,9 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.services.AdminService;
 
-import exceptions.DatabaseException;
-import exceptions.EmptyInformationException;
-import exceptions.ObjectNotFoundException;
+import com.aliza.davening.exceptions.DatabaseException;
+import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.exceptions.ObjectNotFoundException;
 
 //A helper class for building long and winding messages and files
 

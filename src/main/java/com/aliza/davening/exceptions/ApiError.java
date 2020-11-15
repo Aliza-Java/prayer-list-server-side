@@ -1,4 +1,4 @@
-package exceptions;
+package com.aliza.davening.exceptions;
 
 
 import java.util.Arrays;

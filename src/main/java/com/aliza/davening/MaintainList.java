@@ -9,11 +9,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.aliza.davening.entities.Davenfor;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
-
-import exceptions.EmailException;
 
 @Component
 public class MaintainList {

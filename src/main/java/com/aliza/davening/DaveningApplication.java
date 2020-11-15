@@ -4,30 +4,25 @@ import java.io.IOException;
 
 import javax.mail.MessagingException;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import com.aliza.davening.services.AdminService;
-import com.aliza.davening.services.EmailSender;
+import com.aliza.davening.exceptions.DatabaseException;
+import com.aliza.davening.exceptions.EmailException;
+import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.exceptions.NoRelatedEmailException;
+import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.exceptions.PermissionException;
+import com.aliza.davening.exceptions.ReorderCategoriesException;
+import com.aliza.davening.services.SubmitterService;
 import com.itextpdf.text.DocumentException;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
-
-import exceptions.DatabaseException;
-import exceptions.EmailException;
-import exceptions.EmptyInformationException;
-import exceptions.NoRelatedEmailException;
-import exceptions.ObjectNotFoundException;
-import exceptions.PermissionException;
-import exceptions.ReorderCategoriesException;
 
 @SpringBootApplication
 @EnableAutoConfiguration
@@ -52,10 +47,9 @@ public class DaveningApplication {
 
 		// For testing:
 		
-		// EmailSender emailSender = context.getBean(EmailSender.class);
-		// emailSender.sendOutWeekly(Utilities.findParasha(9), "What is headless anyway?");
+		 //SubmitterService submitterService = context.getBean(SubmitterService.class);
+		 //emailSender.sendOutWeekly(Utilities.findParasha(9), "What is headless anyway?");
 		 
-
 
 	}
 	

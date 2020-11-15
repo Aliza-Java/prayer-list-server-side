@@ -5,8 +5,8 @@ import java.util.List;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,15 +15,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
+import com.aliza.davening.exceptions.EmailException;
+import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.services.SubmitterService;
 
-import exceptions.EmailException;
-import exceptions.EmptyInformationException;
-import exceptions.ObjectNotFoundException;
-import exceptions.PermissionException;
-
 @RestController
+@CrossOrigin(origins = "http://localhost:4200")
 public class SubmitterWebService {
 
 	@Autowired
@@ -43,7 +44,7 @@ public class SubmitterWebService {
 	@PutMapping(path = "updatename/{email}")
 	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException {
-			return submitterService.updateDavenfor(davenfor, email);
+		return submitterService.updateDavenfor(davenfor, email);
 	}
 
 	@RequestMapping("extend/{davenforId}")
@@ -51,10 +52,22 @@ public class SubmitterWebService {
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 		submitterService.extendDavenfor(davenforId, email);
 	}
-	
-	@RequestMapping("delete/{id}")
+
+	@DeleteMapping("delete/{id}")
 	public void deleteDavenfor(@PathVariable long id, @RequestParam("email") String email)
 			throws ObjectNotFoundException, PermissionException {
 		submitterService.deleteDavenfor(id, email);
 	}
+
+	@RequestMapping(path = "categories")
+	public List<Category> findAllCategories() {
+		return submitterService.getAllCategories();
+	}
+	
+	@RequestMapping(path = "category/{id}")
+	public Category findCategory(@PathVariable long id) throws ObjectNotFoundException {
+		return submitterService.getCategory(id);
+	}
+	
+
 }

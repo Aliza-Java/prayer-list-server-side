@@ -1,4 +1,4 @@
-package exceptions;
+package com.aliza.davening.exceptions;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,13 +14,14 @@ import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
 public class SystemExceptionHandler {
 
 	// Catch-All - if does not fit any of the extended methods to Throwable, will
-	// default to this one.
-	@ExceptionHandler(Throwable.class)
-	public ResponseEntity<Object> handleThrowable(Throwable e) {
-		ApiError apiError = new ApiError("SERVER_ERROR",
-				"We are sorry, but something wrong happened. Please contact the admin.");
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-	}
+	// default to this one. 
+	//TODO: uncomment to enable
+//	@ExceptionHandler(Throwable.class)
+//	public ResponseEntity<Object> handleThrowable(Throwable e) {
+//		ApiError apiError = new ApiError("SERVER_ERROR",
+//				"We are sorry, but something wrong happened. Please contact the admin.");
+//		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+//	}
 
 	@ExceptionHandler({ DaveningSystemException.class, ReorderCategoriesException.class })
 	public ResponseEntity<Object> handleGeneralException(DaveningSystemException e) {

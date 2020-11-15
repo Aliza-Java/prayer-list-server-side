@@ -1,4 +1,4 @@
-package exceptions;
+package com.aliza.davening.exceptions;
 
 @SuppressWarnings("serial")
 public class LoginException extends Exception {

@@ -11,6 +11,7 @@ import com.aliza.davening.EmailScheme;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
+import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.repositories.AdminRepository;
@@ -18,10 +19,10 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
 
-import exceptions.EmailException;
-import exceptions.EmptyInformationException;
-import exceptions.ObjectNotFoundException;
-import exceptions.PermissionException;
+import com.aliza.davening.exceptions.EmailException;
+import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.exceptions.PermissionException;
 
 @Service("submitterService")
 public class SubmitterService {
@@ -218,7 +219,8 @@ public class SubmitterService {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
 		Davenfor davenforToDelete = optionalDavenfor.get();
-		if (davenforToDelete.getSubmitter().getEmail().equalsIgnoreCase(submitterEmail)) {
+		String email = submitterEmail.trim();
+		if (davenforToDelete.getSubmitter().getEmail().equalsIgnoreCase(email)) {
 			davenforRepository.delete(davenforToDelete);
 		} else {
 			throw new PermissionException(
@@ -226,6 +228,10 @@ public class SubmitterService {
 		}
 	}
 
+	public List<Category> getAllCategories() {
+		return categoryRepository.findAllOrderById();
+	}
+	
 	// Private helper method for Finding submitter according to email
 	public Submitter existingOrNewSubmitter(String submitterEmail) {
 		Submitter validSubmitter = submitterRepository.findByEmail(submitterEmail);
@@ -238,6 +244,17 @@ public class SubmitterService {
 		return validSubmitter;
 	}
 	
+	public Category getCategory(long id) throws ObjectNotFoundException {
+		Optional<Category> optionalCategory = categoryRepository.findById(id);
+
+		// We are not sure category is present. If not found, will throw an
+		// exception.
+		if (!optionalCategory.isPresent()) {
+			throw new ObjectNotFoundException("Category with id " + id);
+		}
+
+		return optionalCategory.get();
+	}
 	
 
 }

@@ -22,6 +22,13 @@ public interface DavenerRepository extends JpaRepository<Davener, Long> {
 	 @Query("update Davener d set d.active=false where email=?1")
 	 public void disactivateDavener(String email);
 	 
+	 @Modifying
+	 @Transactional
+	 @Query("update Davener d set d.active=true where email=?1")
+	 public void activateDavener(String email);
+	 
 	 Davener findByEmail(String email);
+	 
+	 List<Davener> findAll();
 
 }

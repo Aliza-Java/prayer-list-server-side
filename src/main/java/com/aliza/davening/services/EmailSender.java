@@ -29,10 +29,10 @@ import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.itextpdf.text.DocumentException;
 
-import exceptions.DatabaseException;
-import exceptions.EmailException;
-import exceptions.EmptyInformationException;
-import exceptions.ObjectNotFoundException;
+import com.aliza.davening.exceptions.DatabaseException;
+import com.aliza.davening.exceptions.EmailException;
+import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.exceptions.ObjectNotFoundException;
 
 @Service
 public class EmailSender {
@@ -209,6 +209,11 @@ public class EmailSender {
 		sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
 	}
 
+	public void notifyActivatedDavener(String email) throws EmailException, EmptyInformationException {
+
+		sendEmailFromAdmin(email, EmailScheme.getDavenerActivated());
+	}
+	
 	public void offerExtensionOrDelete(Davenfor davenfor) throws EmailException {
 
 		String subject = EmailScheme.getExpiringNameSubject();
