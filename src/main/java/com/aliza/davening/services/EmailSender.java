@@ -22,17 +22,17 @@ import com.aliza.davening.SchemeValues;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
-import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.repositories.AdminRepository;
-import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenerRepository;
-import com.aliza.davening.repositories.DavenforRepository;
-import com.itextpdf.text.DocumentException;
-
+import com.aliza.davening.entities.Weekly;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.repositories.AdminRepository;
+import com.aliza.davening.repositories.CategoryRepository;
+import com.aliza.davening.repositories.DavenerRepository;
+import com.aliza.davening.repositories.DavenforRepository;
+import com.aliza.davening.repositories.ParashaRepository;
+import com.itextpdf.text.DocumentException;
 
 @Service
 public class EmailSender {
@@ -52,6 +52,8 @@ public class EmailSender {
 	@Autowired
 	private CategoryRepository categoryRepository;
 
+	@Autowired
+	private ParashaRepository parashaRepository;
 	//TODO: does this need to be autowired at all?
 	@Autowired
 	private Utilities utilities;
@@ -75,28 +77,49 @@ public class EmailSender {
 		doEmail(EmailScheme.getAdminMessageSubject(), message, recipient, makeAdminTheBcc(), null, null);
 	}
 
-	public void sendOutWeekly(Parasha parasha, String message) throws IOException, MessagingException, EmailException,
+	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException, DocumentException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
+		Weekly simplified = new Weekly();
+		simplified.parashaName = parashaRepository.findCurrent().getEnglishName();
+		simplified.fullWeekName = parashaRepository.findCurrent().getEnglishName() + " - " + parashaRepository.findCurrent().getHebrewName();
+		simplified.categoryId = categoryRepository.getCurrent().getId();
+		simplified.message = null;
+		sendOutWeekly(simplified);
+	}
+	
+	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException,
 			DocumentException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
-		Category currentCategory = categoryRepository.getCurrent();
+		
+		
+		Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
+		if(optionalCategory.isEmpty()) {
+			throw new ObjectNotFoundException("category of id "+ info.categoryId);
+		}
+		Category category = optionalCategory.get();
+		
+//		LocalDate date = LocalDate.now();
+//		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+//		String todaysDate = dateFormat.format(date);
+		String todaysDate = "2020-27-11";
+		//TODO: get date dynamically
 
-		String subject = String.format(EmailScheme.getWeeklyEmailSubject(), currentCategory.getEnglish());
+String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parashaName.length()>0?info.parashaName:todaysDate);
 
 		String emailText = EmailScheme.getWeeklyEmailText();
 
 		// If there is a message from the admin, add it beforehand.
-		if (message != null) {
-			emailText = concatAdminMessage(message, emailText);
+		if (info.message != null) {
+			emailText = concatAdminMessage(info.message, emailText);
 		}
 		
-	
-
-		List<String> davenersList = davenerRepository.getAllDavenersEmails();
+			List<String> davenersList = davenerRepository.getAllDavenersEmails();
 
 		// Converting list to array, to match MimeMessageHelper.setTo()
 		String[] davenersArray = new String[davenersList.size()];
 		davenersArray = davenersList.toArray(davenersArray);
-
-		String fileName = String.format(EmailScheme.getWeeklyFileName(), parasha.getEnglishName());
+		
+		
+		
+		String fileName = String.format(EmailScheme.getWeeklyFileName(), todaysDate);
 
 		/*
 		 * 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
@@ -105,7 +128,8 @@ public class EmailSender {
 		 * private variable in this class, used a lot, instead of in each method.
 		 */ String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
 
-		doEmail(subject, emailText, adminEmail, davenersArray, utilities.buildListImage(parasha), fileName);
+		doEmail(subject, emailText, adminEmail, davenersArray, utilities.buildListImage(category, info.parashaName, info.fullWeekName), fileName);
+		//TODO: some kind of builder pattern?  too winding.
 	}
 
 	public void sendUrgentEmail(Davenfor davenfor) throws EmailException, EmptyInformationException {
@@ -191,14 +215,14 @@ public class EmailSender {
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
 				confirmedDavenfor.getCategory().getEnglish(), confirmedDavenfor.getId());
 
-		String to = confirmedDavenfor.getSubmitter().getEmail();
+		String to = confirmedDavenfor.getSubmitterEmail();
 
 		try {
 			doEmail(subject, personalizedEmailText, to, makeAdminTheBcc(), null, null);
 
 		} catch (Exception e) {
 			throw new EmailException(String.format("Could not send confirmation email to %s",
-					confirmedDavenfor.getSubmitter().getEmail()));
+					confirmedDavenfor.getSubmitterEmail()));
 		}
 		return true;
 
@@ -218,7 +242,7 @@ public class EmailSender {
 
 		String subject = EmailScheme.getExpiringNameSubject();
 		String message = String.format(Utilities.setExpiringNameMessage(davenfor));
-		String recipient = davenfor.getSubmitter().getEmail();
+		String recipient = davenfor.getSubmitterEmail();
 
 		try {
 			doEmail(subject, message, recipient, makeAdminTheBcc(), null, null);

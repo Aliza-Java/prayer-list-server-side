@@ -20,13 +20,12 @@ import org.springframework.stereotype.Component;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenforRepository;
-import com.aliza.davening.services.AdminService;
-
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.repositories.CategoryRepository;
+import com.aliza.davening.repositories.DavenforRepository;
+import com.aliza.davening.services.AdminService;
 
 //A helper class for building long and winding messages and files
 
@@ -38,109 +37,36 @@ public class Utilities {
 
 	@Autowired
 	DavenforRepository davenforRepository;
-	
+
 	@Autowired
 	AdminService adminService;
-	
+
 	@Value("${spring.mail.username}")
 	private String adminEmail;
-	
-	public File buildListImage(Parasha parasha)
+
+	// TODO: this class does way too many things. Simplify.
+	public File buildListImage(Category category, String weekName, String fullWeekName)
 			throws IOException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
-
-		if (parasha == null) {
-			throw new ObjectNotFoundException("The current Parasha");
-		}
-
-		// Declaring here, so that currentCategory is recognized outside of try/catch
-		Category currentCategory;
-
-		try {
-			currentCategory = categoryRepository.getCurrent();
-		} catch (Exception e) {
-			throw new DatabaseException("There was a problem finding the current category.");
-		}
-
-		if (currentCategory == null) {
-			throw new ObjectNotFoundException("Current category");
-		}
-
-		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(currentCategory);
-
-		if (categoryDavenfors.isEmpty()) {
-			throw new EmptyInformationException("There are no names to daven for in this category. ");
-		}
 
 		int imageWidth = EmailScheme.getImageWidth();
 		int imageHeight = EmailScheme.getImageHeight();
-		StringBuilder stringBuilder = new StringBuilder();
 
-		// building standard html format: head and opening <body> tag
-		stringBuilder.append(EmailScheme.getHtmlHead());
-		stringBuilder.append(EmailScheme.getHtmlBodyStart());
-
-		// building headlines and starting table
-		stringBuilder.append(String.format(EmailScheme.getSimpleHeader(), EmailScheme.getInMemoryHebrew()));
-		stringBuilder.append(String.format(EmailScheme.getSimpleHeader(), EmailScheme.getInMemoryEnglish()));
-		stringBuilder.append(
-				String.format(EmailScheme.getBilingualHeader(), parasha.getEnglishName(), parasha.getHebrewName()));
-		stringBuilder.append(String.format(EmailScheme.getBilingualHeader(), currentCategory.getEnglish(),
-				currentCategory.getHebrew()));
-		stringBuilder.append(EmailScheme.getTableStart());
-
-		// Running through names, adding them in columns - English and Hebrew
-
-		// banim category prints nusach first, and includes name and spouse name in one
-		// box
-		if (currentCategory.getEnglish().equalsIgnoreCase(SchemeValues.banimName)) {
-			stringBuilder.append(String.format(EmailScheme.getHtmlNameRowInList(), EmailScheme.getBanimLineEnglish(),
-					EmailScheme.getBanimLineHebrew()));
-
-			// Inserting in one box both name and spouse name. If spouse name is null (it is
-			// not mandatory), just put an empty string.
-			for (Davenfor d : categoryDavenfors) {
-				stringBuilder.append(String.format(EmailScheme.getHtmlBanimRowInList(), d.getNameEnglish(),
-						d.getNameEnglishSpouse() != null ? d.getNameEnglishSpouse() : "", d.getNameHebrew(),
-						d.getNameHebrewSpouse() != null ? d.getNameHebrewSpouse() : ""));
-			}
-		}
-
-		// All other categories print every name in a single row
-		else {
-			for (Davenfor d : categoryDavenfors) {
-				stringBuilder.append(
-						String.format(EmailScheme.getHtmlNameRowInList(), d.getNameEnglish(), d.getNameHebrew()));
-			}
-		}
-
-		// Closing table
-		stringBuilder.append(EmailScheme.getTableClose());
-
-		// Adding line about next week's category
-		Category nextCategory = getNextCategory(currentCategory);
-		stringBuilder.append(
-				String.format(EmailScheme.getNextWeekCategory(), nextCategory.getEnglish(), nextCategory.getHebrew()));
-
-		// Adding line to email with name and good news.
-		//TODO: fix admin email according to how decided - dynamic? application.properties? 
-		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), adminEmail));
-
-		// Closing <body> tag
-		stringBuilder.append(EmailScheme.getHtmlBodyEnd());
-		String finalString = stringBuilder.toString();
+		String weeklyHtml = createWeeklyHtml(category, weekName);
 
 		BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
 				.getDefaultConfiguration().createCompatibleImage(imageWidth, imageHeight);
 
 		Graphics graphics = image.createGraphics();
 
-		JEditorPane jep = new JEditorPane("text/html", finalString);
+		JEditorPane jep = new JEditorPane("text/html", weeklyHtml);
 		jep.setSize(imageWidth, imageHeight);
 		jep.print(graphics);
 
-		String fileName = "builtFiles/" + parasha.getEnglishName() + "_" + LocalDate.now().toString() + ".png";
+		String fileName = "builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png";
 
-		Path filePath = Paths.get("builtFiles/" + parasha.getEnglishName() + "_" + LocalDate.now().toString() + ".png");
+		// TODO: I saved todaysDate somewhere too. Might be superfluous.
+
+		Path filePath = Paths.get("builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png");
 
 		// png seems to be better than jpeg, writes without a blotch behind the text
 		ImageIO.write(image, "png", new File(fileName));
@@ -183,19 +109,20 @@ public class Utilities {
 		return nextCategory;
 	}
 
-	//TODO: make it read from a file/DB and find by id.
+	// TODO: make it read from DB and find by id.
 	public static Parasha findParasha(long parashaId) {
-		return new Parasha(9, "Bo", "בא");
+		return null;
 	}
-	
-	//Builds the long and complex email message that gets sent every week to Admin (to review and send list)
-	public static String setWeeklyAdminReminderMessage(long parashaId) {
+
+	// Builds the long and complex email message that gets sent every week to Admin
+	// (to review and send list)
+	public static String setWeeklyAdminReminderMessage() {
 
 		// Prepare buttons
-		String button1 = createButton(SchemeValues.getLinkToLogin(), "#ffa200", "Review the list first");
+		String button1 = createButton(SchemeValues.getLinkToReviewWeekly(), "#ffa200", "Review the list first");
 
 		// This button includes also a parasha id and needs to be built
-		String linkWithParasha = SchemeValues.getLinkToSendList() + parashaId;
+		String linkWithParasha = SchemeValues.getLinkToSendList();
 		String button2 = createButton(linkWithParasha, "#32a842", "Send out the list");
 
 		String buttonArea = "<table cellspacing='0' cellpadding='0'>	<tbody>	<tr> " + button1 + "<tr>" + button2
@@ -204,18 +131,19 @@ public class Utilities {
 		String message = "This is a reminder to send out the weekly davening list."
 				+ "<br><br> If you would like to review the lists first, please log in to the system first by clicking the orange button.  "
 				+ "<br><br> Or, click the green button to go ahead and send out the list. "
-				// Inserting the button tds to an html table and connecting them to the bottom of the message
+				// Inserting the button tds to an html table and connecting them to the bottom
+				// of the message
 				+ buttonArea;
 		return message;
 	}
-	
+
 	public static String setExpiringNameMessage(Davenfor davenfor) {
 
 		// Building links that the buttons will refer to
 		String personalizedExtendLink = String.format(SchemeValues.getLinkToExtend(), davenfor.getId(),
-				davenfor.getSubmitter().getEmail());
+				davenfor.getSubmitterEmail());
 		String personalizedDeleteLink = String.format(SchemeValues.getLinkToDelete(), davenfor.getId(),
-				davenfor.getSubmitter().getEmail());
+				davenfor.getSubmitterEmail());
 
 		// Creating the button 'components' as html tds
 		String button1 = createButton(personalizedExtendLink, "#32a842", "Keep the name on the list");
@@ -235,14 +163,80 @@ public class Utilities {
 		return message;
 	}
 
-	
-	
-	// Creates a button according to varying parameters sent in
-		private static String createButton(String link, String buttonColor, String buttonText) {
+	public String createWeeklyHtml(Category category, String weekName) throws EmptyInformationException {
+		StringBuilder stringBuilder = new StringBuilder();
 
-			return String.format(
-					"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;' align='center' bgcolor=%s width='300' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
-					buttonColor, link, buttonText);
+		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category);
 
+		if (categoryDavenfors.isEmpty()) {
+			throw new EmptyInformationException("There are no names to daven for in this category. ");
 		}
+
+		// building standard html format: head and opening <body> tag
+		stringBuilder.append(EmailScheme.getHtmlHead());
+		stringBuilder.append(EmailScheme.getHtmlBodyStart());
+
+		// building headlines and starting table
+		stringBuilder.append(String.format(EmailScheme.getSimpleHeader(), EmailScheme.getInMemoryHebrew()));
+		stringBuilder.append(String.format(EmailScheme.getSimpleHeader(), EmailScheme.getInMemoryEnglish()));
+		stringBuilder.append(weekName);
+
+		stringBuilder
+				.append(String.format(EmailScheme.getBilingualHeader(), category.getEnglish(), category.getHebrew()));
+		stringBuilder.append(EmailScheme.getTableStart());
+
+		// Running through names, adding them in columns - English and Hebrew
+
+		// banim category prints nusach first, and includes name and spouse name in one
+		// box
+		if (category.getEnglish().equalsIgnoreCase(SchemeValues.banimName)) {
+			stringBuilder.append(String.format(EmailScheme.getHtmlNameRowInList(), EmailScheme.getBanimLineEnglish(),
+					EmailScheme.getBanimLineHebrew()));
+
+			// Inserting in one box both name and spouse name. If spouse name is null (it is
+			// not mandatory), just put an empty string.
+			for (Davenfor d : categoryDavenfors) {
+				stringBuilder.append(String.format(EmailScheme.getHtmlBanimRowInList(), d.getNameEnglish(),
+						d.getNameEnglishSpouse() != null ? d.getNameEnglishSpouse() : "", d.getNameHebrew(),
+						d.getNameHebrewSpouse() != null ? d.getNameHebrewSpouse() : ""));
+			}
+		}
+
+		// All other categories print every name in a single row
+		else {
+			for (Davenfor d : categoryDavenfors) {
+				stringBuilder.append(
+						String.format(EmailScheme.getHtmlNameRowInList(), d.getNameEnglish(), d.getNameHebrew()));
+			}
+		}
+
+		// Closing table
+		stringBuilder.append(EmailScheme.getTableClose());
+
+		// Adding line about next week's category
+		Category nextCategory = getNextCategory(category);
+		stringBuilder.append(
+				String.format(EmailScheme.getNextWeekCategory(), nextCategory.getEnglish(), nextCategory.getHebrew()));
+
+		// Adding line to email with name and good news.
+		// TODO: fix admin email according to how decided - dynamic?
+		// application.properties?
+		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), adminEmail));
+
+		// Closing <body> tag
+		stringBuilder.append(EmailScheme.getHtmlBodyEnd());
+		String finalString = stringBuilder.toString();
+
+		return finalString;
+
+	}
+
+	// Creates a button according to varying parameters sent in
+	private static String createButton(String link, String buttonColor, String buttonText) {
+
+		return String.format(
+				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;' align='center' bgcolor=%s width='300' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
+				buttonColor, link, buttonText);
+
+	}
 }

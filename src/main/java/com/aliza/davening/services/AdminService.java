@@ -1,5 +1,7 @@
 package com.aliza.davening.services;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,7 +19,9 @@ import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
+import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.Submitter;
+import com.aliza.davening.entities.Weekly;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -29,6 +33,7 @@ import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
+import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
 
 @Service("adminService")
@@ -51,7 +56,10 @@ public class AdminService {
 	AdminRepository adminRepository;
 
 	@Autowired
-	EmailSender emailSender;
+	ParashaRepository parashaRepository;
+	
+	@Autowired
+EmailSender emailSender;
 
 	@Autowired
 	Utilities utilities;
@@ -208,12 +216,13 @@ public class AdminService {
 		return davenforRepository.findAll();
 	}
 
-	public void deleteDavenfor(long id) throws ObjectNotFoundException {
+	public List<Davenfor> deleteDavenfor(long id) throws ObjectNotFoundException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
 		if (optionalDavenfor.isEmpty()) {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
 		davenforRepository.deleteById(optionalDavenfor.get().getId());
+		return davenforRepository.findAll();
 	}
 
 	// A helper method set up primarily for changeCategoryOrder()
@@ -347,9 +356,8 @@ public class AdminService {
 
 		List<Davener> davenerList = null;
 		Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
-		if (davenerToDisactivate.isActive() == false) {
-			throw new DatabaseException(String.format(
-					"The email %s has already been disactivated from receiving the davening lists. ", davenerEmail));
+		if (davenerToDisactivate.isActive() == false) { //Just to log/notify, and continue business as usual, returning most recent daveners list.
+			System.out.println(String.format("The email %s has already been disactivated from receiving the davening lists. ", davenerEmail));
 		}
 
 		try {
@@ -369,9 +377,8 @@ public class AdminService {
 		List<Davener> davenerList = null;
 
 		Davener davenerToActivate = davenerRepository.findByEmail(davenerEmail);
-		if (davenerToActivate.isActive() == true) {
-			throw new DatabaseException(
-					String.format("The email %s is already receiving the davening lists. ", davenerEmail));
+		if (davenerToActivate.isActive() == true) { //Just to log/notify, and continue business as usual, returning most recent daveners list.
+			System.out.println(String.format("The email %s is already receiving the davening lists. ", davenerEmail));
 		}
 
 		try {
@@ -430,4 +437,27 @@ public class AdminService {
 		return false;
 	}
 
+	public List<Parasha> getAllParashot(){
+	return this.parashaRepository.findAll();
+	}
+	
+	public Parasha findCurrentParasha() {
+		return this.parashaRepository.findCurrent();
+	}
+	
+	public Category findCurrentCategory() {
+		return this.categoryRepository.getCurrent();
+	}
+
+public String previewWeekly(Weekly info) throws ObjectNotFoundException, IOException, DatabaseException, EmptyInformationException {
+	
+	//TODO: can put this in a class.  maybe even generic, it repeats many times.
+	Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
+	if(optionalCategory.isEmpty()) {
+		throw new ObjectNotFoundException("category of id "+ info.categoryId);
+	}
+	Category category = optionalCategory.get();
+	
+	return utilities.createWeeklyHtml(category, info.parashaName);
+}
 }

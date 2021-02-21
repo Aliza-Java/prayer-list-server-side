@@ -53,10 +53,10 @@ public class SubmitterWebService {
 		submitterService.extendDavenfor(davenforId, email);
 	}
 
-	@DeleteMapping("delete/{id}")
-	public void deleteDavenfor(@PathVariable long id, @RequestParam("email") String email)
+	@DeleteMapping("delete/{id}/{email}")//TODO: email should be sent in token for validation.
+	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
-		submitterService.deleteDavenfor(id, email);
+		return submitterService.deleteDavenfor(id, email);
 	}
 
 	@RequestMapping(path = "categories")

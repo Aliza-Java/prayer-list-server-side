@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.repositories.DavenforRepository;
+import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
 
@@ -25,6 +26,9 @@ public class MaintainList {
 	
 	@Autowired
 	EmailSender emailSender;
+	
+	@Autowired
+	ParashaRepository parashaRepository;
 	
 	@Value("${wait.before.deletion}")
 	private long waitBeforeDeletion;
@@ -48,9 +52,9 @@ public class MaintainList {
 	}
 	
 	//Every Thursday at 8 a.m. an email will be sent to Admin with a link to see list and send out, with link to his login page.
-	@Scheduled(cron = "0 0 8 * * THU")
-	public void remindAdmin() throws EmailException {
-		emailSender.informAdmin(EmailScheme.getWeeklyAdminReminderSubject(), Utilities.setWeeklyAdminReminderMessage(9));
+	//TODO: enable @Scheduled(cron = "0 0 8 * * THU")
+		public void remindAdmin() throws EmailException {
+		emailSender.informAdmin(EmailScheme.getWeeklyAdminReminderSubject(), Utilities.setWeeklyAdminReminderMessage());
 	}
 	
 	//Every Sunday at 2 a.m. changes category

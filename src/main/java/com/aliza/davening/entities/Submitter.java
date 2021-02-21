@@ -51,11 +51,6 @@ public class Submitter {
 	@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
 	private String phone;
 
-	@OneToMany(cascade = { CascadeType.REMOVE }, mappedBy = "submitter")
-	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-	@JsonIgnore
-	private List<Davenfor> davenfors;
-
 	// Constructor with only email, for quick creation.
 	public Submitter(
 			@NotBlank(message = "Submitter's email missing. ") @Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Please provide a valid email for submitter. ") String email) {

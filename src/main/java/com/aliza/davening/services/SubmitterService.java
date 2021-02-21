@@ -1,6 +1,7 @@
 package com.aliza.davening.services;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,18 +12,16 @@ import com.aliza.davening.EmailScheme;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
-import com.aliza.davening.repositories.AdminRepository;
-import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenforRepository;
-import com.aliza.davening.repositories.SubmitterRepository;
-
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
+import com.aliza.davening.repositories.AdminRepository;
+import com.aliza.davening.repositories.CategoryRepository;
+import com.aliza.davening.repositories.DavenforRepository;
+import com.aliza.davening.repositories.SubmitterRepository;
 
 @Service("submitterService")
 public class SubmitterService {
@@ -62,7 +61,7 @@ public class SubmitterService {
 		// differentiating between non-existing email (this if) and empty list (which
 		// will return fine and will be discerned)
 		if (submitterRepository.findByEmail(email) == null) {
-			throw new ObjectNotFoundException("Submitter with this email: " + email);
+			return new ArrayList<Davenfor>();
 		}
 		return davenforRepository.findAllDavenforBySubmitterEmail(email);
 	}
@@ -100,7 +99,7 @@ public class SubmitterService {
 			}
 		}
 
-		davenfor.setSubmitter(existingOrNewSubmitter(submitterEmail));
+		davenfor.setSubmitterEmail(existingOrNewSubmitter(submitterEmail));
 
 		davenfor.setCreatedAt(LocalDate.now());
 		davenfor.setLastConfirmedAt(LocalDate.now());
@@ -140,7 +139,7 @@ public class SubmitterService {
 
 		// Comparing email with davenfor-submitter from Database, since the davenfor
 		// coming in may have empty email and lead to null pointer exception.
-		if (!optionalDavenfor.get().getSubmitter().getEmail().equalsIgnoreCase(submitterEmail)) {
+		if (!optionalDavenfor.get().getSubmitterEmail().equalsIgnoreCase(submitterEmail)) {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to update it.");
 		}
@@ -161,7 +160,7 @@ public class SubmitterService {
 			}
 		}
 
-		davenforToUpdate.setSubmitter(existingOrNewSubmitter(submitterEmail));
+		davenforToUpdate.setSubmitterEmail(existingOrNewSubmitter(submitterEmail));
 
 		davenforToUpdate.setUpdatedAt(LocalDate.now());
 		davenforToUpdate.setLastConfirmedAt(LocalDate.now());
@@ -197,7 +196,7 @@ public class SubmitterService {
 
 		Davenfor davenforToExtend = optionalDavenfor.get();
 
-		if (!davenforToExtend.getSubmitter().getEmail().equalsIgnoreCase(submitterEmail)) {
+		if (!davenforToExtend.getSubmitterEmail().equalsIgnoreCase(submitterEmail)) {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to update it.");
 		}
@@ -212,7 +211,7 @@ public class SubmitterService {
 		return true;
 		}
 
-	public void deleteDavenfor(long davenforId, String submitterEmail)
+	public List<Davenfor> deleteDavenfor(long davenforId, String submitterEmail)
 			throws ObjectNotFoundException, PermissionException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
 		if (optionalDavenfor.isEmpty()) {
@@ -220,12 +219,13 @@ public class SubmitterService {
 		}
 		Davenfor davenforToDelete = optionalDavenfor.get();
 		String email = submitterEmail.trim();
-		if (davenforToDelete.getSubmitter().getEmail().equalsIgnoreCase(email)) {
+		if (davenforToDelete.getSubmitterEmail().equalsIgnoreCase(email)) {
 			davenforRepository.delete(davenforToDelete);
 		} else {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
+		return davenforRepository.findAllDavenforBySubmitterEmail(submitterEmail);
 	}
 
 	public List<Category> getAllCategories() {
@@ -233,7 +233,7 @@ public class SubmitterService {
 	}
 	
 	// Private helper method for Finding submitter according to email
-	public Submitter existingOrNewSubmitter(String submitterEmail) {
+	public String existingOrNewSubmitter(String submitterEmail) {
 		Submitter validSubmitter = submitterRepository.findByEmail(submitterEmail);
 
 		// If submitter has never submitted a name, need to create a new one in
@@ -241,7 +241,7 @@ public class SubmitterService {
 		if (validSubmitter == null) {
 			validSubmitter = submitterRepository.save(new Submitter(submitterEmail));
 		}
-		return validSubmitter;
+		return submitterEmail;
 	}
 	
 	public Category getCategory(long id) throws ObjectNotFoundException {

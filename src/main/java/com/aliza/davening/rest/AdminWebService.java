@@ -6,6 +6,8 @@ import java.util.List;
 import javax.mail.MessagingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -13,25 +15,25 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.aliza.davening.MaintainList;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.services.AdminService;
-import com.aliza.davening.services.EmailSender;
-import com.itextpdf.text.DocumentException;
-
+import com.aliza.davening.entities.Weekly;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
+import com.aliza.davening.services.AdminService;
+import com.aliza.davening.services.EmailSender;
+import com.itextpdf.text.DocumentException;
 
 @RestController
 @RequestMapping("admin")
@@ -43,6 +45,9 @@ public class AdminWebService {
 
 	@Autowired
 	EmailSender emailSender;
+	
+	@Autowired
+	MaintainList maintainList; //TODO: this might not be necessary (testing only)
 
 	@PostMapping(path = "new")
 	public boolean setAdmin(@RequestBody Admin admin) throws DatabaseException, EmptyInformationException {
@@ -63,8 +68,8 @@ public class AdminWebService {
 	}
 
 	@DeleteMapping("delete/{id}")
-	public void deleteDavenfor(@PathVariable long id) throws ObjectNotFoundException, PermissionException {
-		adminService.deleteDavenfor(id);
+	public List<Davenfor> deleteDavenfor(@PathVariable long id) throws ObjectNotFoundException, PermissionException {
+		return adminService.deleteDavenfor(id);
 	}
 
 	@RequestMapping(path = "daveners")
@@ -93,7 +98,7 @@ public class AdminWebService {
 	public List<Davener> disactivateDavener(@PathVariable String davenerEmail)
 			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
 		return adminService.disactivateDavener(davenerEmail);
-		
+
 	}
 
 	@PostMapping(path = "activate/{davenerEmail}")
@@ -101,23 +106,26 @@ public class AdminWebService {
 			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
 		return adminService.activateDavener(davenerEmail);
 	}
-	
-	@PostMapping(path = "weeklylist/{parashaId}")
-	public boolean sendOutWeekly(@PathVariable long parashaId, @RequestBody String message)
-			throws EmptyInformationException, IOException, MessagingException, EmailException, DocumentException,
-			ObjectNotFoundException, DatabaseException {
-		Parasha parasha = Utilities.findParasha(parashaId);
-		emailSender.sendOutWeekly(parasha, message);
+
+	@PostMapping(path = "weekly")
+	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
+			MessagingException, EmailException, DocumentException, DatabaseException, ObjectNotFoundException {
+		emailSender.sendOutWeekly(weeklyInfo);
 		return true;
+	}
+
+	@PostMapping(path = "preview", produces="text/plain")
+	public String previewWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
+			MessagingException, EmailException, DocumentException, DatabaseException, ObjectNotFoundException {
+		 return adminService.previewWeekly(weeklyInfo);
 	}
 
 	// A simplified sendOutWeekly which takes a GET request (for the one sent
 	// through Admin's email link)
-	@RequestMapping(path = "weeklylist/{parashaId}")
-	public boolean sendOutWeeklyFromEmail(@PathVariable long parashaId) throws EmptyInformationException, IOException,
+	@RequestMapping(path = "weeklylist")
+	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException,
 			MessagingException, EmailException, DocumentException, ObjectNotFoundException, DatabaseException {
-		Parasha parasha = Utilities.findParasha(parashaId);
-		emailSender.sendOutWeekly(parasha, null);
+		emailSender.sendSimplifiedWeekly();
 		return true;
 	}
 
@@ -132,4 +140,25 @@ public class AdminWebService {
 		return adminService.getAllCategories();
 	}
 
+	@RequestMapping(path = "parashot")
+	public List<Parasha> findAllParashas() {
+		return adminService.getAllParashot();
+	}
+
+	@RequestMapping(path = "parasha")
+	public Parasha getCurrentParasha() {
+		return adminService.findCurrentParasha();
+	}
+
+	@RequestMapping(path = "category")
+	public Category getCurrentCategory() {
+		return adminService.findCurrentCategory();
+	}
+	
+	//TODO: remove.  This is just for testing purposes
+	@RequestMapping(path="remind")
+	public boolean remindAdmin() throws EmailException {
+	maintainList.remindAdmin();
+	return true;
+	}
 }

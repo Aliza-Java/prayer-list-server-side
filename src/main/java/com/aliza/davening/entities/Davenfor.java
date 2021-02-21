@@ -34,8 +34,7 @@ public class Davenfor {
 	private long id;
 
 	@NotNull(message = "No submitter associated with this name. ")
-	@ManyToOne(fetch = FetchType.EAGER)
-	private Submitter submitter;
+	private String submitterEmail;
 
 	// Which type of cause does this person need to be davened for.
 	@ManyToOne(fetch = FetchType.EAGER)

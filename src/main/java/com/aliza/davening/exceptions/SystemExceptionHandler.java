@@ -1,16 +1,16 @@
 package com.aliza.davening.exceptions;
 
+import javax.mail.SendFailedException;
+import javax.mail.internet.AddressException;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.mail.MailParseException;
-import javax.mail.internet.AddressException;
-import javax.mail.SendFailedException;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
-@ControllerAdvice // Directing exceptions to be handled here before handling defaultively
+//@ControllerAdvice // Directing exceptions to be handled here before handling defaultively
 public class SystemExceptionHandler {
 
 	// Catch-All - if does not fit any of the extended methods to Throwable, will

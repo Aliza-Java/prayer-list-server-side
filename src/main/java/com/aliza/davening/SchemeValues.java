@@ -18,8 +18,9 @@ public class SchemeValues {
 	private final static String linkToDelete = "http://localhost:8080/dlist/delete/%s?email=%s";
 	
 	//TODO: here insert the login page for client side
-	private final static String linkToLogin = "http://google.com";
-	private final static String linkToSendList = "http://localhost:8080/dlist/admin/weeklylist/";
+	private final static String linkToLogin = "http://localhost:4200/admin";
+	private final static String linkToSendList = "http://localhost:8080/dlist/admin/weeklylist";
+	private final static String linkToReviewWeekly = "http://localhost:4200/admin/weekly";
 	
 	public static String getLinkToExtend() {
 		return linkToExtend;
@@ -37,5 +38,8 @@ public class SchemeValues {
 		return linkToSendList;
 	}
 	
+	public static String getLinkToReviewWeekly() {
+		return linkToReviewWeekly;
+	}
 
 }
