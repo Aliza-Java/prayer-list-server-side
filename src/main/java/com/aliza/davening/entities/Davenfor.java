@@ -38,8 +38,9 @@ public class Davenfor {
 
 	// Which type of cause does this person need to be davened for.
 	@ManyToOne(fetch = FetchType.EAGER)
-	//added jsonIgnoreProperties when fetching categoryname of Davenfor.  if works anyway (in SubmitterService.addDavenfor), remove this line.
-	//@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
+	// added jsonIgnoreProperties when fetching categoryname of Davenfor. if works
+	// anyway (in SubmitterService.addDavenfor), remove this line.
+	// @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	@NotNull(message = "The name must belong to some category. ")
 	private Category category;
 
@@ -85,5 +86,5 @@ public class Davenfor {
 	private LocalDate updatedAt;
 
 	private String note;
-	
+
 }

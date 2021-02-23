@@ -36,7 +36,6 @@ public class EmailScheme {
 
 	private static String htmlBodyEnd = "</body></html>";
 
-	// TODO: change link to real unsubscribe with id
 	private static String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='http://www.google.com'>HERE</a>";
 
 	// Subject includes the category
@@ -47,9 +46,8 @@ public class EmailScheme {
 
 	private static String davenerDisactivated = "We are confirming that your participation on the davening list has been disactivated. <br><br> You will no longer receive emails regarding the davening list.  You may resubscribe at any time.  <br><br>If you think you did not disactivate your participation on the list, please contact your list admin immediately. ";
 
-	//TODO: Concat admin email to end of message activate/disactivate messages, if want. 
 	private static String davenerActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receive emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
-		
+
 	// Text appearing in Admin's email requesting to daven urgently (can be Banim or
 	// any category)
 	private static String urgentDavenforEmailBanim = "Please daven for <b>%s - %s</b> and <b>%s - %s</b>, for: <b>%s</b>. <br>";
@@ -167,7 +165,7 @@ public class EmailScheme {
 	public static String getDavenerDisactivated() {
 		return davenerDisactivated;
 	}
-	
+
 	public static String getDavenerActivated() {
 		return davenerActivated;
 	}

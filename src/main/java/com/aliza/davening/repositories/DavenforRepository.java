@@ -30,7 +30,7 @@ public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 	public void setLastConfirmedAt(LocalDate today, long davenforId);
 
 	public List<Davenfor> findByExpireAtLessThan(LocalDate expireAt);
-	
+
 	@Transactional
 	@Modifying
 	public void deleteByExpireAtLessThan(LocalDate expireAt);

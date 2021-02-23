@@ -45,9 +45,6 @@ public class AdminWebService {
 
 	@Autowired
 	EmailSender emailSender;
-	
-	@Autowired
-	MaintainList maintainList; //TODO: this might not be necessary (testing only)
 
 	@PostMapping(path = "new")
 	public boolean setAdmin(@RequestBody Admin admin) throws DatabaseException, EmptyInformationException {
@@ -114,17 +111,17 @@ public class AdminWebService {
 		return true;
 	}
 
-	@PostMapping(path = "preview", produces="text/plain")
+	@PostMapping(path = "preview", produces = "text/plain")
 	public String previewWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
 			MessagingException, EmailException, DocumentException, DatabaseException, ObjectNotFoundException {
-		 return adminService.previewWeekly(weeklyInfo);
+		return adminService.previewWeekly(weeklyInfo);
 	}
 
 	// A simplified sendOutWeekly which takes a GET request (for the one sent
 	// through Admin's email link)
 	@RequestMapping(path = "weeklylist")
-	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException,
-			MessagingException, EmailException, DocumentException, ObjectNotFoundException, DatabaseException {
+	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException, MessagingException,
+			EmailException, DocumentException, ObjectNotFoundException, DatabaseException {
 		emailSender.sendSimplifiedWeekly();
 		return true;
 	}
@@ -154,11 +151,5 @@ public class AdminWebService {
 	public Category getCurrentCategory() {
 		return adminService.findCurrentCategory();
 	}
-	
-	//TODO: remove.  This is just for testing purposes
-	@RequestMapping(path="remind")
-	public boolean remindAdmin() throws EmailException {
-	maintainList.remindAdmin();
-	return true;
-	}
+
 }

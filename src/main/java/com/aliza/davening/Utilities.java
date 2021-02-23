@@ -44,7 +44,6 @@ public class Utilities {
 	@Value("${spring.mail.username}")
 	private String adminEmail;
 
-	// TODO: this class does way too many things. Simplify.
 	public File buildListImage(Category category, String weekName, String fullWeekName)
 			throws IOException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
 
@@ -63,8 +62,6 @@ public class Utilities {
 		jep.print(graphics);
 
 		String fileName = "builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png";
-
-		// TODO: I saved todaysDate somewhere too. Might be superfluous.
 
 		Path filePath = Paths.get("builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png");
 
@@ -109,7 +106,6 @@ public class Utilities {
 		return nextCategory;
 	}
 
-	// TODO: make it read from DB and find by id.
 	public static Parasha findParasha(long parashaId) {
 		return null;
 	}
@@ -219,8 +215,6 @@ public class Utilities {
 				String.format(EmailScheme.getNextWeekCategory(), nextCategory.getEnglish(), nextCategory.getHebrew()));
 
 		// Adding line to email with name and good news.
-		// TODO: fix admin email according to how decided - dynamic?
-		// application.properties?
 		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), adminEmail));
 
 		// Closing <body> tag

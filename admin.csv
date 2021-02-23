@@ -1,0 +1,16 @@
+id,new_name_prompt,wait_before_deletion,email,password
+1,1,0,what@isit.com,shortbutlong8
+16,0,17,fromJson17@gmail.com,passnew17
+15,0,7,fromJson15@gmail.com,passnew15
+4,1,7,fromJson1@gmail.com,passnew188
+13,0,7,true13@gmail.com,trueree13
+10,0,7,davening.list@gmail.com,falser88
+14,1,7,fromJson2@gmail.com,longerpass88
+11,1,7,fromJson1@gmail.com,passnew188
+17,1,17,changeemail@gmail.com,oldadmin17
+18,1,16,alsoencrypted@gmail.com,$2a$10$6j0HIsqzHhksyBTF6ePhTeA8BbALoHeHCJSrjDHomTmE48SaI2Txu
+19,1,7,encrypted8@gmail.com,$2a$10$3WeCmErauNxSPBhkyGZDoe.GcQKQpBb4TXpQllIjBa89H0yEqvHpW
+20,0,7,encryptedtester@gmail.com,$2a$10$qOE2.0/W0UmmXK6srGnSC.F7IjvNlswyos96mLmw5vluMKujKu7aq
+21,0,7,encryptedtester2@gmail.com,$2a$10$UpAMqzQBzZFwWeKSjbyfleWeps7CojQ6Ae73ZS8tNohBc/4OhPzjK
+22,0,7,enclogin@gmail.com,$2a$10$v2j5Ly1R.CLflj7xDZ29ieOi4Qw0OUhv0rGZM.7KaC4gwkSy6I6qK
+23,0,7,admin@gmail.com,$2a$10$LK58LEGtQbqwr4vdU5QUzep6ecpSFV013LVsTkNkOZgDAyeKNpIQG

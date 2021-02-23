@@ -47,9 +47,8 @@ public class SubmitterService {
 	private Admin getMyGroupSettings(long adminId) throws ObjectNotFoundException {
 
 		Optional<Admin> groupSettings = adminRepository.findById(adminId);
-		if (groupSettings.isEmpty()) {
+		if (!groupSettings.isPresent()) {
 			throw new ObjectNotFoundException("Davening group with id " + adminId);
-
 		}
 		return groupSettings.get();
 
@@ -70,17 +69,13 @@ public class SubmitterService {
 			throws EmptyInformationException, ObjectNotFoundException, EmailException {
 
 		/*
-		 * Ensuring there is a real category and associating it with the davenfor. TODO:
-		 * if change category to enum, with name, make sure it IS saved fully and
-		 * correctly under davenfor. For now, as long as id exists, it is okay for
-		 * davenfor to have the id even if category details are wrong, since the
-		 * connection is through id.
+		 * Ensuring there is a real category and associating it with the davenfor.
 		 */
 		Optional<Category> optionalCategory = categoryRepository.findById(davenfor.getCategory().getId());
-		if (optionalCategory.isEmpty()) {
+		if (!optionalCategory.isPresent()) {
 			throw new EmptyInformationException("No existing category chosen. ");
 		}
-		
+
 		// Trim all names nicely
 		davenfor.setNameEnglish(davenfor.getNameEnglish().trim());
 		davenfor.setNameHebrew(davenfor.getNameHebrew().trim());
@@ -133,7 +128,7 @@ public class SubmitterService {
 		long id = davenforToUpdate.getId();
 
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
-		if (optionalDavenfor.isEmpty()) {
+		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
 
@@ -190,7 +185,7 @@ public class SubmitterService {
 		}
 
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
-		if (optionalDavenfor.isEmpty()) {
+		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
 
@@ -209,12 +204,12 @@ public class SubmitterService {
 		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());
 
 		return true;
-		}
+	}
 
 	public List<Davenfor> deleteDavenfor(long davenforId, String submitterEmail)
 			throws ObjectNotFoundException, PermissionException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
-		if (optionalDavenfor.isEmpty()) {
+		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
 		Davenfor davenforToDelete = optionalDavenfor.get();
@@ -231,7 +226,7 @@ public class SubmitterService {
 	public List<Category> getAllCategories() {
 		return categoryRepository.findAllOrderById();
 	}
-	
+
 	// Private helper method for Finding submitter according to email
 	public String existingOrNewSubmitter(String submitterEmail) {
 		Submitter validSubmitter = submitterRepository.findByEmail(submitterEmail);
@@ -243,7 +238,7 @@ public class SubmitterService {
 		}
 		return submitterEmail;
 	}
-	
+
 	public Category getCategory(long id) throws ObjectNotFoundException {
 		Optional<Category> optionalCategory = categoryRepository.findById(id);
 
@@ -255,6 +250,5 @@ public class SubmitterService {
 
 		return optionalCategory.get();
 	}
-	
 
 }

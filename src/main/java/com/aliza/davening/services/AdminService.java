@@ -1,6 +1,5 @@
 package com.aliza.davening.services;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -57,9 +56,9 @@ public class AdminService {
 
 	@Autowired
 	ParashaRepository parashaRepository;
-	
+
 	@Autowired
-EmailSender emailSender;
+	EmailSender emailSender;
 
 	@Autowired
 	Utilities utilities;
@@ -122,7 +121,7 @@ EmailSender emailSender;
 		long id = adminToUpdate.getId();
 
 		Optional<Admin> optionalAdmin = adminRepository.findById(id);
-		if (optionalAdmin.isEmpty()) {
+		if (!optionalAdmin.isPresent()) {
 			throw new ObjectNotFoundException("Admin with id " + id);
 		}
 
@@ -152,7 +151,6 @@ EmailSender emailSender;
 			throw new NoRelatedEmailException("Cannot enter this davener into the system.  No email associated. ");
 		}
 
-		
 		/*
 		 * If davener already exists on database (but was disactivated at a different
 		 * time from receiving weekly emails), will change to active and save him under
@@ -164,10 +162,9 @@ EmailSender emailSender;
 
 		if (existingDavener != null) {
 			davener = existingDavener; // giving davener the existing id
-			davener.setActive(true); 
-		}
-		else { // new davener - save full incoming data
-		davenerRepository.save(davener);
+			davener.setActive(true);
+		} else { // new davener - save full incoming data
+			davenerRepository.save(davener);
 		}
 
 		return davenerRepository.findAll();
@@ -218,7 +215,7 @@ EmailSender emailSender;
 
 	public List<Davenfor> deleteDavenfor(long id) throws ObjectNotFoundException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
-		if (optionalDavenfor.isEmpty()) {
+		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
 		davenforRepository.deleteById(optionalDavenfor.get().getId());
@@ -356,8 +353,10 @@ EmailSender emailSender;
 
 		List<Davener> davenerList = null;
 		Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
-		if (davenerToDisactivate.isActive() == false) { //Just to log/notify, and continue business as usual, returning most recent daveners list.
-			System.out.println(String.format("The email %s has already been disactivated from receiving the davening lists. ", davenerEmail));
+		if (davenerToDisactivate.isActive() == false) { // Just to log/notify, and continue business as usual, returning
+														// most recent daveners list.
+			System.out.println(String.format(
+					"The email %s has already been disactivated from receiving the davening lists. ", davenerEmail));
 		}
 
 		try {
@@ -377,7 +376,8 @@ EmailSender emailSender;
 		List<Davener> davenerList = null;
 
 		Davener davenerToActivate = davenerRepository.findByEmail(davenerEmail);
-		if (davenerToActivate.isActive() == true) { //Just to log/notify, and continue business as usual, returning most recent daveners list.
+		if (davenerToActivate.isActive() == true) { // Just to log/notify, and continue business as usual, returning
+													// most recent daveners list.
 			System.out.println(String.format("The email %s is already receiving the davening lists. ", davenerEmail));
 		}
 
@@ -437,27 +437,27 @@ EmailSender emailSender;
 		return false;
 	}
 
-	public List<Parasha> getAllParashot(){
-	return this.parashaRepository.findAll();
+	public List<Parasha> getAllParashot() {
+		return this.parashaRepository.findAll();
 	}
-	
+
 	public Parasha findCurrentParasha() {
 		return this.parashaRepository.findCurrent();
 	}
-	
+
 	public Category findCurrentCategory() {
 		return this.categoryRepository.getCurrent();
 	}
 
-public String previewWeekly(Weekly info) throws ObjectNotFoundException, IOException, DatabaseException, EmptyInformationException {
-	
-	//TODO: can put this in a class.  maybe even generic, it repeats many times.
-	Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
-	if(optionalCategory.isEmpty()) {
-		throw new ObjectNotFoundException("category of id "+ info.categoryId);
+	public String previewWeekly(Weekly info)
+			throws ObjectNotFoundException, IOException, DatabaseException, EmptyInformationException {
+
+		Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
+		if (!optionalCategory.isPresent()) {
+			throw new ObjectNotFoundException("category of id " + info.categoryId);
+		}
+		Category category = optionalCategory.get();
+
+		return utilities.createWeeklyHtml(category, info.parashaName);
 	}
-	Category category = optionalCategory.get();
-	
-	return utilities.createWeeklyHtml(category, info.parashaName);
-}
 }

@@ -41,7 +41,7 @@ public class Category {
 		this.updateRate = updateRate;
 		this.catOrder = catOrder;
 	}
-	
+
 	public Category(String english, String hebrew, boolean current, int updateRate, int catOrder) {
 		this.english = english;
 		this.hebrew = hebrew;
@@ -87,8 +87,5 @@ public class Category {
 		return "Category [id=" + id + ", english=" + english + ", hebrew=" + hebrew + ", isCurrent=" + isCurrent
 				+ ", updateRate=" + updateRate + ", catOrder=" + catOrder + "]";
 	}
-
-
-	
 
 }

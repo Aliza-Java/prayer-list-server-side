@@ -4,7 +4,6 @@ import com.aliza.davening.entities.Category;
 
 public class Setup {
 
-	//TODO: this needs to be initialized staticly somewhere
 	static Category[] categories = new Category[20];
 
 	static void buildCategories() {

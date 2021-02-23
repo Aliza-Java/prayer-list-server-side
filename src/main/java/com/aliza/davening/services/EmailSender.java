@@ -54,15 +54,13 @@ public class EmailSender {
 
 	@Autowired
 	private ParashaRepository parashaRepository;
-	//TODO: does this need to be autowired at all?
+
 	@Autowired
 	private Utilities utilities;
-	
-	//TODO: need to figure out at some point how and where to save relative adminEmail for each group. if at all.
+
 	@Value("${spring.mail.username}")
 	String adminEmail;
-	
-	
+
 	// A general method allowing Admin to send messages to system users
 	public void sendEmailFromAdmin(String recipient, String message) throws EmailException, EmptyInformationException {
 
@@ -77,32 +75,33 @@ public class EmailSender {
 		doEmail(EmailScheme.getAdminMessageSubject(), message, recipient, makeAdminTheBcc(), null, null);
 	}
 
-	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException, DocumentException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
+	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException, DocumentException,
+			ObjectNotFoundException, DatabaseException, EmptyInformationException {
 		Weekly simplified = new Weekly();
 		simplified.parashaName = parashaRepository.findCurrent().getEnglishName();
-		simplified.fullWeekName = parashaRepository.findCurrent().getEnglishName() + " - " + parashaRepository.findCurrent().getHebrewName();
+		simplified.fullWeekName = parashaRepository.findCurrent().getEnglishName() + " - "
+				+ parashaRepository.findCurrent().getHebrewName();
 		simplified.categoryId = categoryRepository.getCurrent().getId();
 		simplified.message = null;
 		sendOutWeekly(simplified);
 	}
-	
-	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException,
-			DocumentException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
-		
-		
+
+	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException, DocumentException,
+			ObjectNotFoundException, DatabaseException, EmptyInformationException {
+
 		Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
-		if(optionalCategory.isEmpty()) {
-			throw new ObjectNotFoundException("category of id "+ info.categoryId);
+		if (!optionalCategory.isPresent()) {
+			throw new ObjectNotFoundException("category of id " + info.categoryId);
 		}
 		Category category = optionalCategory.get();
-		
+
 //		LocalDate date = LocalDate.now();
 //		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 //		String todaysDate = dateFormat.format(date);
 		String todaysDate = "2020-27-11";
-		//TODO: get date dynamically
 
-String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parashaName.length()>0?info.parashaName:todaysDate);
+		String subject = String.format(EmailScheme.getWeeklyEmailSubject(),
+				info.parashaName.length() > 0 ? info.parashaName : todaysDate);
 
 		String emailText = EmailScheme.getWeeklyEmailText();
 
@@ -110,26 +109,22 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 		if (info.message != null) {
 			emailText = concatAdminMessage(info.message, emailText);
 		}
-		
-			List<String> davenersList = davenerRepository.getAllDavenersEmails();
+
+		List<String> davenersList = davenerRepository.getAllDavenersEmails();
 
 		// Converting list to array, to match MimeMessageHelper.setTo()
 		String[] davenersArray = new String[davenersList.size()];
 		davenersArray = davenersList.toArray(davenersArray);
-		
-		
-		
+
 		String fileName = String.format(EmailScheme.getWeeklyFileName(), todaysDate);
 
 		/*
 		 * 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
-		 * therefore including admin's email. TODO: make sure this works with dynamic
-		 * adminId after login layer in place. TODO: consider saving adminEmail as
-		 * private variable in this class, used a lot, instead of in each method.
+		 * therefore including admin's email.
 		 */ String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
 
-		doEmail(subject, emailText, adminEmail, davenersArray, utilities.buildListImage(category, info.parashaName, info.fullWeekName), fileName);
-		//TODO: some kind of builder pattern?  too winding.
+		doEmail(subject, emailText, adminEmail, davenersArray,
+				utilities.buildListImage(category, info.parashaName, info.fullWeekName), fileName);
 	}
 
 	public void sendUrgentEmail(Davenfor davenfor) throws EmailException, EmptyInformationException {
@@ -182,7 +177,7 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 	public void informAdmin(String subject, String message) throws EmailException {
 
 		String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
-		
+
 		doEmail(subject, message, adminEmail, makeAdminTheBcc(), null, null);
 
 	}
@@ -193,7 +188,7 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 			throws EmailException, IOException, EmptyInformationException, ObjectNotFoundException {
 
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
-		if (optionalDavenfor.isEmpty()) {
+		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
 
@@ -206,9 +201,6 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 		 * defined in SchemeValues), replaces values with specific davenfor values and
 		 * sets it as the email body.
 		 */
-		// TODO: Once controllers in place turn links in email buttons to real
-		// confirm/delete links with a message
-		// 'thank you for confirming/deleting...'
 
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.getConfirmationEmailTextLocation())),
 				StandardCharsets.UTF_8);
@@ -221,8 +213,8 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 			doEmail(subject, personalizedEmailText, to, makeAdminTheBcc(), null, null);
 
 		} catch (Exception e) {
-			throw new EmailException(String.format("Could not send confirmation email to %s",
-					confirmedDavenfor.getSubmitterEmail()));
+			throw new EmailException(
+					String.format("Could not send confirmation email to %s", confirmedDavenfor.getSubmitterEmail()));
 		}
 		return true;
 
@@ -237,7 +229,7 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 
 		sendEmailFromAdmin(email, EmailScheme.getDavenerActivated());
 	}
-	
+
 	public void offerExtensionOrDelete(Davenfor davenfor) throws EmailException {
 
 		String subject = EmailScheme.getExpiringNameSubject();
@@ -247,9 +239,10 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 		try {
 			doEmail(subject, message, recipient, makeAdminTheBcc(), null, null);
 		} catch (EmailException e) {
-		//	throw new EmailException(
-					//String.format("Unable to send an email to %s offering to extend or delete the name %s.", recipient,
-							//davenfor.getNameEnglish()));
+			// throw new EmailException(
+			// String.format("Unable to send an email to %s offering to extend or delete the
+			// name %s.", recipient,
+			// davenfor.getNameEnglish()));
 			e.printStackTrace();
 		}
 	}
@@ -291,9 +284,9 @@ String subject = String.format(EmailScheme.getWeeklyEmailSubject(), info.parasha
 		// EmailScheme.
 		return String.format(EmailScheme.getBoldSecondMessage(), emailText, adminMessage);
 	}
-	
-	private String[]  makeAdminTheBcc() {
-		String[] adminEmailAsArray = { adminEmail }; 
+
+	private String[] makeAdminTheBcc() {
+		String[] adminEmailAsArray = { adminEmail };
 		return adminEmailAsArray;
 	}
 

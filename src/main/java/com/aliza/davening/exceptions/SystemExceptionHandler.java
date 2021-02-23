@@ -15,7 +15,6 @@ public class SystemExceptionHandler {
 
 	// Catch-All - if does not fit any of the extended methods to Throwable, will
 	// default to this one. 
-	//TODO: uncomment to enable
 //	@ExceptionHandler(Throwable.class)
 //	public ResponseEntity<Object> handleThrowable(Throwable e) {
 //		ApiError apiError = new ApiError("SERVER_ERROR",
