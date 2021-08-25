@@ -41,8 +41,8 @@ public class DaveningApplication {
 
 		
 		// Needed the below alternative for Utilities.buildListImage
-		 SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
-		 builder.headless(false);
+		 SpringApplicationBuilder builder  = new SpringApplicationBuilder(DaveningApplication.class);
+		 builder.headless(true); //made headless true as false gives some sun.awt error when sending weekly list from AWS (Linux system)
 		 ConfigurableApplicationContext context = builder.run(args);
 
 		// For testing:

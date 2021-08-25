@@ -8,19 +8,22 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailParseException;
 import org.springframework.orm.jpa.JpaObjectRetrievalFailureException;
+import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-//@ControllerAdvice // Directing exceptions to be handled here before handling defaultively
+import com.aliza.davening.SchemeValues;
+
+@ControllerAdvice // Directing exceptions to be handled here before handling defaultively
 public class SystemExceptionHandler {
 
 	// Catch-All - if does not fit any of the extended methods to Throwable, will
 	// default to this one. 
-//	@ExceptionHandler(Throwable.class)
-//	public ResponseEntity<Object> handleThrowable(Throwable e) {
-//		ApiError apiError = new ApiError("SERVER_ERROR",
-//				"We are sorry, but something wrong happened. Please contact the admin.");
-//		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-//	}
+	//@ExceptionHandler(Throwable.class)
+	//public ResponseEntity<Object> handleThrowable(Throwable e) {
+	//	ApiError apiError = new ApiError("SERVER_ERROR",
+	//			"We are sorry, but something wrong happened. Please contact the admin.");
+	//	return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+	//}
 
 	@ExceptionHandler({ DaveningSystemException.class, ReorderCategoriesException.class })
 	public ResponseEntity<Object> handleGeneralException(DaveningSystemException e) {
@@ -65,7 +68,12 @@ public class SystemExceptionHandler {
 	@ExceptionHandler(LoginException.class)
 	public ResponseEntity<Object> handleLoginException(LoginException e) {
 		ApiError apiError = new ApiError("LOGIN_ERROR", e.getMessage());
-		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+		if(e.getMessage()==SchemeValues.getNotAdminsEmailMessage()) {
+			apiError.setCode("NOT_ADMIN_EMAIL");
+		}
+		ResponseEntity<Object> res = new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.UNAUTHORIZED);
+		System.out.println(res);
+		return res;
 	}
 
 }

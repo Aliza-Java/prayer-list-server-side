@@ -77,7 +77,7 @@ public class AdminService {
 
 		// Check if the admin was found by email.
 		if (!optionalAdmin.isPresent()) {
-			throw new LoginException("The email you provided is not associated with an admin.");
+			throw new LoginException(SchemeValues.getNotAdminsEmailMessage());
 		}
 
 		// At this point save retrieved admin, to check password and (if passes check)

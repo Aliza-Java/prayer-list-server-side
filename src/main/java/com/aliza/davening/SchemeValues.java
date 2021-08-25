@@ -22,6 +22,8 @@ public class SchemeValues {
 	private final static String linkToSendList = "http://localhost:8080/dlist/admin/weeklylist";
 	private final static String linkToReviewWeekly = "http://localhost:4200/admin/weekly";
 
+	private final static String notAdminsEmail = "The email you provided is not associated with an admin.";
+	
 	public static String getLinkToExtend() {
 		return linkToExtend;
 	}
@@ -42,4 +44,7 @@ public class SchemeValues {
 		return linkToReviewWeekly;
 	}
 
+	public static String getNotAdminsEmailMessage() {
+		return notAdminsEmail;
+	}
 }

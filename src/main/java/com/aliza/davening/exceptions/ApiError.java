@@ -15,6 +15,10 @@ public class ApiError {
 			this.code = code;
 			this.messages = Arrays.asList(messages);
 		}
+		
+		public void setCode(String code) {
+			this.code = code;
+		}
 
 		public String getCode() {
 			return code;
