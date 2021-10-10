@@ -44,7 +44,7 @@ public class SubmitterWebService {
 	@PutMapping(path = "updatename/{email}")
 	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException {
-		return submitterService.updateDavenfor(davenfor, email);
+		return submitterService.updateDavenfor(davenfor, email, false);
 	}
 
 	@RequestMapping("extend/{davenforId}")

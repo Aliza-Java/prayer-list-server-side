@@ -4,10 +4,9 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.mail.MessagingException;
+import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,8 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aliza.davening.MaintainList;
-import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
@@ -33,6 +30,7 @@ import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
+import com.aliza.davening.services.SubmitterService;
 import com.itextpdf.text.DocumentException;
 
 @RestController
@@ -45,6 +43,9 @@ public class AdminWebService {
 
 	@Autowired
 	EmailSender emailSender;
+	
+	@Autowired
+	SubmitterService submitterService;
 
 	@PostMapping(path = "new")
 	public boolean setAdmin(@RequestBody Admin admin) throws DatabaseException, EmptyInformationException {
@@ -125,6 +126,19 @@ public class AdminWebService {
 		emailSender.sendSimplifiedWeekly();
 		return true;
 	}
+	
+	@PutMapping(path="updatedavenfor")
+	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor) throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException{
+		submitterService.updateDavenfor(davenfor, null, true);
+		return adminService.getAllDavenfors();
+	}
+	
+	@PutMapping(path = "updatename/{email}")
+	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
+			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException {
+		return submitterService.updateDavenfor(davenfor, email, false);
+	}
+
 
 	@PostMapping(path = "urgent")
 	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmailException, EmptyInformationException {

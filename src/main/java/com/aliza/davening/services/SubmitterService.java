@@ -117,7 +117,7 @@ public class SubmitterService {
 
 	}
 
-	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail)
+	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail, boolean isAdmin)
 			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException {
 
 		if (davenforToUpdate == null) {
@@ -132,11 +132,13 @@ public class SubmitterService {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
 
-		// Comparing email with davenfor-submitter from Database, since the davenfor
-		// coming in may have empty email and lead to null pointer exception.
-		if (!optionalDavenfor.get().getSubmitterEmail().equalsIgnoreCase(submitterEmail)) {
-			throw new PermissionException(
-					"This name is registered under a different email address.  You do not have the permission to update it.");
+		if(!isAdmin) {
+			// Comparing email with davenfor-submitter from Database, since the davenfor
+			// coming in may have empty email and lead to null pointer exception.
+			if (!optionalDavenfor.get().getSubmitterEmail().equalsIgnoreCase(submitterEmail)) {
+				throw new PermissionException(
+						"This name is registered under a different email address.  You do not have the permission to update it.");
+			}
 		}
 
 		// Trim all names nicely
@@ -155,8 +157,9 @@ public class SubmitterService {
 			}
 		}
 
-		davenforToUpdate.setSubmitterEmail(existingOrNewSubmitter(submitterEmail));
-
+		if(!isAdmin) {
+			davenforToUpdate.setSubmitterEmail(existingOrNewSubmitter(submitterEmail));
+		}
 		davenforToUpdate.setUpdatedAt(LocalDate.now());
 		davenforToUpdate.setLastConfirmedAt(LocalDate.now());
 
@@ -167,7 +170,7 @@ public class SubmitterService {
 
 		if (getMyGroupSettings(SchemeValues.adminId).isNewNamePrompt()) {
 			String subject = EmailScheme.getInformAdminOfUpdateSubject();
-			String message = String.format(EmailScheme.getInformAdminOfUpdate(), submitterEmail,
+			String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
 					davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
 					davenforToUpdate.getCategory().getEnglish());
 			emailSender.informAdmin(subject, message);
