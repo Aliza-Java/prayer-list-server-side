@@ -165,5 +165,4 @@ public class AdminWebService {
 	public Category getCurrentCategory() {
 		return adminService.findCurrentCategory();
 	}
-
 }

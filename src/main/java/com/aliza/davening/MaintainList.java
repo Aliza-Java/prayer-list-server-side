@@ -29,15 +29,21 @@ public class MaintainList {
 
 	@Autowired
 	ParashaRepository parashaRepository;
-
-	@Value("${wait.before.deletion}")
-	private long waitBeforeDeletion;
+	
+	@Value("${admin.id}")
+	private long adminId;
 
 	// Deletes davenfors which have expired, even past the grace period of
 	// wait.before.deletion
 	// Fires at 1 a.m. every day
 	@Scheduled(cron = "0 0 1 * * ?")
 	public void deleteExpired() {
+		// TODO: when add more admins, will need to add admin_id to each davenfor
+		// (unless in different DBs?), and method will check each davenfor according to
+		// the admin's properties.
+		
+		int waitBeforeDeletion = adminService.getWaitBeforeDeletion(adminId);
+
 		davenforRepository.deleteByExpireAtLessThan(LocalDate.now().minusDays(waitBeforeDeletion));
 	}
 

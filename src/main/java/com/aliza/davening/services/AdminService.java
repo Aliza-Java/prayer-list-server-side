@@ -68,9 +68,6 @@ public class AdminService {
 
 	public Admin thisAdmin = null;
 
-	// public static Admin thisAdmin = new Admin(11, "davening.list@gmail.com",
-	// "adminPass66", false, 7);
-
 	// Returning Admin so that session can store the admin with Id and details.
 	public Admin login(String email, String password) throws LoginException {
 		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
@@ -107,9 +104,8 @@ public class AdminService {
 		}
 		admin.setId(SchemeValues.NON_EXIST);// Ensuring the DB will enter a new row.
 
-		// Setting default value for waitBeforeDeletion.
 		admin.setWaitBeforeDeletion(SchemeValues.waitBeforeDeletion);
-
+		admin.setNewNamePrompt(SchemeValues.adminNewNamePrompt);
 		admin.setPassword(bCryptPasswordEncoder.encode(admin.getPassword()));
 
 		adminRepository.save(admin);
@@ -130,10 +126,12 @@ public class AdminService {
 			throw new DatabaseException("This admin email address is already in use.");
 		}
 
-		adminToUpdate.setPassword(bCryptPasswordEncoder.encode(adminToUpdate.getPassword()));
-
 		adminRepository.save(adminToUpdate);
 		return true;
+	}
+	
+	public int getWaitBeforeDeletion(long id) {
+		return adminRepository.getWaitBeforeDeletion(id);
 	}
 
 	public List<Davener> getAllDaveners() {

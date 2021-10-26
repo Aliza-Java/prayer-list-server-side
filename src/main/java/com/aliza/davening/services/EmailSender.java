@@ -220,14 +220,24 @@ public class EmailSender {
 
 	}
 
-	public void notifyDisactivatedDavener(String email) throws EmailException, EmptyInformationException {
+	public void notifyDisactivatedDavener(String email) throws EmptyInformationException {
 
-		sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
+		try {
+			sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
+		} catch (EmailException e) {
+			//for now just notify in log. 
+			System.out.println("There was a problem sending the email.");
+		}
 	}
 
-	public void notifyActivatedDavener(String email) throws EmailException, EmptyInformationException {
+	public void notifyActivatedDavener(String email) throws EmptyInformationException {
 
-		sendEmailFromAdmin(email, EmailScheme.getDavenerActivated());
+		try {
+			sendEmailFromAdmin(email, EmailScheme.getDavenerActivated());
+		} catch (EmailException e) {
+			//for now just notify in log. 
+			System.out.println("There was a problem sending the email.");
+		}
 	}
 
 	public void offerExtensionOrDelete(Davenfor davenfor) throws EmailException {

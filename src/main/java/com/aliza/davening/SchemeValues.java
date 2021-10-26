@@ -8,6 +8,7 @@ public class SchemeValues {
 	// The default amount of days to wait after warning a submitter before deleting
 	// a davenfor.
 	public static int waitBeforeDeletion = 7;
+	public static boolean adminNewNamePrompt = false;
 
 	public static String banimName = "Zera Shel Kayama";
 
