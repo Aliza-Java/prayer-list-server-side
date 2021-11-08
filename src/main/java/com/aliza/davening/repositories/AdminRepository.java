@@ -20,4 +20,7 @@ public interface AdminRepository extends JpaRepository<Admin, Long>{
 
 	@Query("select waitBeforeDeletion from Admin a where id=?1")
 	public int getWaitBeforeDeletion(long id);	
+	
+	Boolean existsByEmail(String email);
+
 }

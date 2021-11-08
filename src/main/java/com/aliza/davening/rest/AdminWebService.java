@@ -31,11 +31,12 @@ import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.SubmitterService;
+import com.aliza.davening.util_classes.AdminSettings;
 import com.itextpdf.text.DocumentException;
 
 @RestController
 @RequestMapping("admin")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials="true")
 public class AdminWebService {
 
 	@Autowired
@@ -58,6 +59,11 @@ public class AdminWebService {
 			throws DatabaseException, ObjectNotFoundException, EmptyInformationException {
 		adminService.updateAdmin(admin);
 		return true;
+	}
+	
+	@RequestMapping("settings/{email}")
+	public AdminSettings getAdminSettings(@PathVariable String email) throws ObjectNotFoundException {
+		return adminService.getAdminSettings(email);
 	}
 
 	@RequestMapping(path = "davenfors")

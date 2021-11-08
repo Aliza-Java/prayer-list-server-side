@@ -34,6 +34,7 @@ import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
+import com.aliza.davening.util_classes.AdminSettings;
 
 @Service("adminService")
 @EnableTransactionManagement
@@ -110,6 +111,14 @@ public class AdminService {
 
 		adminRepository.save(admin);
 		return true;
+	}
+
+	public Admin findAdminByEmail(String email) throws ObjectNotFoundException{
+		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
+		if (!optionalAdmin.isPresent()) {
+			throw new ObjectNotFoundException("Admin with email " + email);
+		}
+		return optionalAdmin.get();
 	}
 
 	public boolean updateAdmin(Admin adminToUpdate) throws ObjectNotFoundException, DatabaseException {
@@ -457,5 +466,10 @@ public class AdminService {
 		Category category = optionalCategory.get();
 
 		return utilities.createWeeklyHtml(category, info.parashaName);
+	}
+
+	public AdminSettings getAdminSettings(String email) throws ObjectNotFoundException {
+		Admin admin = findAdminByEmail(email);
+		return new AdminSettings(admin.getEmail(), admin.isNewNamePrompt(), admin.getWaitBeforeDeletion());
 	}
 }

@@ -24,7 +24,8 @@ import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.services.SubmitterService;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:4200")
+@RequestMapping("sub")
+@CrossOrigin(origins = "http://localhost:4200", allowCredentials="true")
 public class SubmitterWebService {
 
 	@Autowired

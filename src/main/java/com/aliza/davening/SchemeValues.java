@@ -16,11 +16,11 @@ public class SchemeValues {
 
 	// Links inserted to email allowing submitters to extend or delete names. URL
 	// will change when uploaded to AWS
-	private final static String linkToExtend = "http://localhost:8080/dlist/extend/%s?email=%s";
-	private final static String linkToDelete = "http://localhost:8080/dlist/delete/%s?email=%s";
+	private final static String linkToExtend = "http://localhost:5000/dlist/extend/%s?email=%s";
+	private final static String linkToDelete = "http://localhost:5000/dlist/delete/%s?email=%s";
 
 	private final static String linkToLogin = "http://localhost:4200/admin";
-	private final static String linkToSendList = "http://localhost:8080/dlist/admin/weeklylist";
+	private final static String linkToSendList = "http://localhost:5000/dlist/admin/weeklylist";
 	private final static String linkToReviewWeekly = "http://localhost:4200/admin/weekly";
 
 	private final static String notAdminsEmail = "The email you provided is not associated with an admin.";
