@@ -5,7 +5,12 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.mail.MessagingException;
@@ -95,13 +100,12 @@ public class EmailSender {
 		}
 		Category category = optionalCategory.get();
 
-//		LocalDate date = LocalDate.now();
-//		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-//		String todaysDate = dateFormat.format(date);
-		String todaysDate = "2020-27-11";
-
+		LocalDate date = LocalDate.now();
+		String todaysDate = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(date);
+		
+		
 		String subject = String.format(EmailScheme.getWeeklyEmailSubject(),
-				info.parashaName.length() > 0 ? info.parashaName : todaysDate);
+				(info.parashaName!=null&&info.parashaName.length() > 0) ? info.parashaName : todaysDate);
 
 		String emailText = EmailScheme.getWeeklyEmailText();
 

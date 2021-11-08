@@ -7,7 +7,9 @@ import javax.mail.MessagingException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -40,7 +42,13 @@ public class DaveningApplication {
 			IOException, MessagingException, EmailException, NoRelatedEmailException, ReorderCategoriesException,
 			DocumentException, PermissionException {
 
-		SpringApplication.run(DaveningApplication.class, args);
+		//SpringApplication.run(DaveningApplication.class, args);
+		
+		//Need headless configuration for building the image.
+		SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
+		builder.headless(false);
+		ConfigurableApplicationContext context = builder.run(args);
+		
 
 		// For testing:
 
