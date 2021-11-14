@@ -65,9 +65,14 @@ public class AdminWebService {
 	public AdminSettings getAdminSettings(@PathVariable String email) throws ObjectNotFoundException {
 		return adminService.getAdminSettings(email);
 	}
+	
+	@PostMapping("checkpass/{email}")
+	public boolean checkPassword(@RequestBody String password, @PathVariable String email) throws ObjectNotFoundException {
+		return adminService.checkPassword(password, email);
+	}
 
-	@RequestMapping(path = "davenfors")
-	public List<Davenfor> findAllDavenfors() {
+	@RequestMapping("davenfors")
+ 	public List<Davenfor> findAllDavenfors() {
 		return adminService.getAllDavenfors();
 	}
 

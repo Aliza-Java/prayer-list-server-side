@@ -41,6 +41,9 @@ import com.aliza.davening.util_classes.AdminSettings;
 public class AdminService {
 
 	@Autowired
+	BCryptPasswordEncoder passwordEncoder;
+	
+	@Autowired
 	DavenerRepository davenerRepository;
 
 	@Autowired
@@ -137,6 +140,19 @@ public class AdminService {
 
 		adminRepository.save(adminToUpdate);
 		return true;
+	}
+	
+	public boolean checkPassword(String password, String email) throws ObjectNotFoundException {
+		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
+		if (!optionalAdmin.isPresent()) {
+			throw new ObjectNotFoundException("Admin with email " + email);
+		}
+		
+		System.out.println(optionalAdmin.get().getPassword());
+		System.out.println(passwordEncoder.encode(password));
+		System.out.println(password);
+		
+		return (optionalAdmin.get().getPassword().equals(passwordEncoder.encode(password)));
 	}
 	
 	public int getWaitBeforeDeletion(long id) {
