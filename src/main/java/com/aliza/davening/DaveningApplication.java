@@ -28,7 +28,7 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 
 @SpringBootApplication
 //@EnableAutoConfiguration
-@EnableTransactionManagement
+//@EnableTransactionManagement
 //@EnableEncryptableProperties
 //@EnableScheduling
 //@ServletComponentScan
