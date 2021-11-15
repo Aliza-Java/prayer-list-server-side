@@ -4,14 +4,12 @@ import java.io.IOException;
 
 import javax.mail.MessagingException;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -27,11 +25,11 @@ import com.itextpdf.text.DocumentException;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @SpringBootApplication
-//@EnableAutoConfiguration
-//@EnableTransactionManagement
-//@EnableEncryptableProperties
-//@EnableScheduling
-//@ServletComponentScan
+@EnableAutoConfiguration
+@EnableTransactionManagement
+@EnableEncryptableProperties
+@EnableScheduling
+@ServletComponentScan
 
 public class DaveningApplication {
 
@@ -57,8 +55,8 @@ public class DaveningApplication {
 	}
 
 	// For encoding user passwords - rest of application needs this (leave it!)
-//	@Bean
-//	public BCryptPasswordEncoder bCryptPasswordEncoder() {
-//		return new BCryptPasswordEncoder();
-//	}
+	@Bean
+	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
 }
