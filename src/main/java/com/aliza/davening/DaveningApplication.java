@@ -27,11 +27,11 @@ import com.itextpdf.text.DocumentException;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @SpringBootApplication
-@EnableAutoConfiguration
+//@EnableAutoConfiguration
 @EnableTransactionManagement
-@EnableEncryptableProperties
-@EnableScheduling
-@ServletComponentScan
+//@EnableEncryptableProperties
+//@EnableScheduling
+//@ServletComponentScan
 
 public class DaveningApplication {
 
@@ -57,8 +57,8 @@ public class DaveningApplication {
 	}
 
 	// For encoding user passwords - rest of application needs this (leave it!)
-	@Bean
-	public BCryptPasswordEncoder bCryptPasswordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
+//	@Bean
+//	public BCryptPasswordEncoder bCryptPasswordEncoder() {
+//		return new BCryptPasswordEncoder();
+//	}
 }

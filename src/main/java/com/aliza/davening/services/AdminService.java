@@ -40,7 +40,7 @@ import com.aliza.davening.util_classes.AdminSettings;
 @EnableTransactionManagement
 public class AdminService {
 
-	@Autowired
+//	@Autowired
 	BCryptPasswordEncoder passwordEncoder;
 	
 	@Autowired
@@ -67,7 +67,7 @@ public class AdminService {
 	@Autowired
 	Utilities utilities;
 
-	@Autowired
+//	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public Admin thisAdmin = null;
@@ -110,7 +110,7 @@ public class AdminService {
 
 		admin.setWaitBeforeDeletion(SchemeValues.waitBeforeDeletion);
 		admin.setNewNamePrompt(SchemeValues.adminNewNamePrompt);
-		admin.setPassword(bCryptPasswordEncoder.encode(admin.getPassword()));
+		//admin.setPassword(bCryptPasswordEncoder.encode(admin.getPassword()));
 
 		adminRepository.save(admin);
 		return true;
@@ -149,10 +149,11 @@ public class AdminService {
 		}
 		
 		System.out.println(optionalAdmin.get().getPassword());
-		System.out.println(passwordEncoder.encode(password));
+	//	System.out.println(passwordEncoder.encode(password));
 		System.out.println(password);
 		
-		return (optionalAdmin.get().getPassword().equals(passwordEncoder.encode(password)));
+		//return (optionalAdmin.get().getPassword().equals(passwordEncoder.encode(password)));
+		return true;
 	}
 	
 	public int getWaitBeforeDeletion(long id) {

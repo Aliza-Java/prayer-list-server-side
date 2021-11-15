@@ -20,13 +20,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 		// jsr250Enabled = true,
 		prePostEnabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-	@Autowired
+	//@Autowired
 	UserDetailsServiceImpl userDetailsService;
 
-	@Autowired
+	//@Autowired
 	BCryptPasswordEncoder passwordEncoder;
 	
-	@Autowired
+	//@Autowired
 	private AuthEntryPointJwt unauthorizedHandler;
 
 	@Bean
@@ -36,7 +36,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-		authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
+		//authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder);
 	}
 
 	@Bean
