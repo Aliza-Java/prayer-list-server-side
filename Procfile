@@ -1,1 +1,1 @@
-web: java -jar C:\Users\Aliza\Documents\Programming\davening\target\davening-0.0.1-SNAPSHOT.jar
+web: java -jar C:/Users/Aliza/Documents/Programming/davening/target/davening-0.0.1-SNAPSHOT.jar
