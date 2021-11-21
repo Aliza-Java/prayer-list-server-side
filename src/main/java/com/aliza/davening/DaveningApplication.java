@@ -4,14 +4,12 @@ import java.io.IOException;
 
 import javax.mail.MessagingException;
 
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -43,7 +41,7 @@ public class DaveningApplication {
 			DocumentException, PermissionException {
 
 		//SpringApplication.run(DaveningApplication.class, args);
-		
+		//Non-essential change to force new heroku build
 		//Need headless configuration for building the image.
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
 		builder.headless(false);
