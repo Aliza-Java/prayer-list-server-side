@@ -1,2 +1,1 @@
-web: java -jar C:/Users/Aliza/Documents/Programming/davening/target/*.jar
-
+web: java -jar target/davening.jar
