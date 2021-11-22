@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aliza.davening.repositories.AdminRepository;
 
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
+@CrossOrigin(origins = ("${client.origin}"), maxAge = 3600, allowCredentials="true")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
