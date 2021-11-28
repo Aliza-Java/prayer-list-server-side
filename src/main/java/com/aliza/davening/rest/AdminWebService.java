@@ -49,12 +49,6 @@ public class AdminWebService {
 	@Autowired
 	SubmitterService submitterService;
 
-	@PostMapping(path = "new")
-	public boolean setAdmin(@RequestBody Admin admin) throws DatabaseException, EmptyInformationException {
-		adminService.setAdmin(admin);
-		return true;
-	}
-
 	@PutMapping(path = "update")
 	public boolean updateAdminSettings(@RequestBody Admin admin)
 			throws DatabaseException, ObjectNotFoundException, EmptyInformationException {
