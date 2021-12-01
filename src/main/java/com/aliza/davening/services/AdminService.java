@@ -34,6 +34,7 @@ import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
+import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
 
 @Service("adminService")
@@ -72,45 +73,51 @@ public class AdminService {
 
 	public Admin thisAdmin = null;
 
+	//old - used with session
 	// Returning Admin so that session can store the admin with Id and details.
-	public Admin login(String email, String password) throws LoginException {
-		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
-
-		// Check if the admin was found by email.
-		if (!optionalAdmin.isPresent()) {
-			throw new LoginException(SchemeValues.getNotAdminsEmailMessage());
-		}
-
-		// At this point save retrieved admin, to check password and (if passes check)
-		// to save for future.
-		thisAdmin = optionalAdmin.get();
-
-		// Check if password is correct
-		if (!BCrypt.checkpw(password, thisAdmin.getPassword())) {
-			return null;
-		}
-
-		return thisAdmin;
-	}
+//	public Admin login(String email, String password) throws LoginException {
+//		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
+//
+//		// Check if the admin was found by email.
+//		if (!optionalAdmin.isPresent()) {
+//			throw new LoginException(SchemeValues.getNotAdminsEmailMessage());
+//		}
+//
+//		// At this point save retrieved admin, to check password and (if passes check)
+//		// to save for future.
+//		thisAdmin = optionalAdmin.get();
+//
+//		// Check if password is correct
+//		if (!BCrypt.checkpw(password, thisAdmin.getPassword())) {
+//			return null;
+//		}
+//
+//		return thisAdmin;
+//	}
 
 	/*
 	 * This method is used on initial start (when admin.id=Non_Exist, will send a
 	 * newly created Admin).
 	 */
-	public boolean setAdmin(Admin admin) throws DatabaseException {
+	public boolean setAdmin(LoginRequest credentials) throws DatabaseException {
 
 		/*
 		 * ensuring no two admins have the same email. In this case sending to compare
 		 * with Non_Exist since no need to compare with this id (not in the DB yet)
 		 */
-		if (isThisAdminEmailInUse(SchemeValues.NON_EXIST, admin.getEmail())) {
+		if (isThisAdminEmailInUse(SchemeValues.NON_EXIST, credentials.getUsername())) {
 			throw new DatabaseException("This admin email address is already in use.");
 		}
+		
+		Admin admin = new Admin();
+		
 		admin.setId(SchemeValues.NON_EXIST);// Ensuring the DB will enter a new row.
-
+		admin.setEmail(credentials.getUsername());
+		admin.setPassword(passwordEncoder.encode(credentials.getPassword()));
 		admin.setWaitBeforeDeletion(SchemeValues.waitBeforeDeletion);
 		admin.setNewNamePrompt(SchemeValues.adminNewNamePrompt);
-		admin.setPassword(bCryptPasswordEncoder.encode(admin.getPassword()));
+		
+		System.out.println(admin);
 
 		adminRepository.save(admin);
 		return true;
@@ -147,10 +154,6 @@ public class AdminService {
 		if (!optionalAdmin.isPresent()) {
 			throw new ObjectNotFoundException("Admin with email " + email);
 		}
-		
-		System.out.println(optionalAdmin.get().getPassword());
-		System.out.println(passwordEncoder.encode(password));
-		System.out.println(password);
 		
 		return (optionalAdmin.get().getPassword().equals(passwordEncoder.encode(password)));
 	}

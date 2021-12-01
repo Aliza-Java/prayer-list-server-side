@@ -1,5 +1,7 @@
 package com.aliza.davening;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class SchemeValues {
 
 	// a static field to stand for id's that have not been created.
@@ -13,15 +15,21 @@ public class SchemeValues {
 	public static String banimName = "Zera Shel Kayama";
 
 	public static int adminId = 10;
-
+	
+	@Value("${client.origin}")
+	public static String client;
+	
+	@Value("${server.url}")
+	public static String server;
+	
 	// Links inserted to email allowing submitters to extend or delete names. URL
-	// will change when uploaded to AWS
-	private final static String linkToExtend = "http://localhost:5000/dlist/extend/%s?email=%s";
-	private final static String linkToDelete = "http://localhost:5000/dlist/delete/%s?email=%s";
+	// will change when uploaded to cloud
+	private final static String linkToExtend = server + "extend/%s?email=%s";
+	private final static String linkToDelete = server + "delete/%s?email=%s";
 
-	private final static String linkToLogin = "http://localhost:4200/admin";
-	private final static String linkToSendList = "http://localhost:5000/dlist/admin/weeklylist";
-	private final static String linkToReviewWeekly = "http://localhost:4200/admin/weekly";
+	private final static String linkToLogin = client + "/admin";
+	private final static String linkToSendList = server + "admin/weeklylist";
+	private final static String linkToReviewWeekly = client + "/admin/weekly";
 
 	private final static String notAdminsEmail = "The email you provided is not associated with an admin.";
 	

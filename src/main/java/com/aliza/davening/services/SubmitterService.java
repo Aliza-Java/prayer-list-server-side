@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.aliza.davening.EmailScheme;
@@ -44,6 +45,9 @@ public class SubmitterService {
 	// All submitter functions receive his email address and allow him to proceed if
 	// his email matches davenfor.getSubmitter().getEmail()
 
+	@Value("${admin.id}")
+	public long adminId;
+	
 	private Admin getMyGroupSettings(long adminId) throws ObjectNotFoundException {
 
 		Optional<Admin> groupSettings = adminRepository.findById(adminId);
@@ -106,7 +110,7 @@ public class SubmitterService {
 
 		// If admin's setting defines that admin should get an email upon new name being
 		// added:
-		if (getMyGroupSettings(SchemeValues.adminId).isNewNamePrompt()) {
+		if (getMyGroupSettings(adminId).isNewNamePrompt()) {
 			String subject = EmailScheme.getInformAdminOfNewNameSubject();
 			String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getCategory().getEnglish(), submitterEmail);
@@ -168,7 +172,7 @@ public class SubmitterService {
 
 		davenforRepository.save(davenforToUpdate);
 
-		if (getMyGroupSettings(SchemeValues.adminId).isNewNamePrompt()) {
+		if (getMyGroupSettings(adminId).isNewNamePrompt()) {
 			String subject = EmailScheme.getInformAdminOfUpdateSubject();
 			String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
 					davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),

@@ -65,6 +65,9 @@ public class EmailSender {
 
 	@Value("${spring.mail.username}")
 	String adminEmail;
+	
+	@Value("${admin.id}")
+	long adminId;
 
 	// A general method allowing Admin to send messages to system users
 	public void sendEmailFromAdmin(String recipient, String message) throws EmailException, EmptyInformationException {
@@ -125,7 +128,7 @@ public class EmailSender {
 		/*
 		 * 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		 * therefore including admin's email.
-		 */ String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
+		 */ String adminEmail = adminRepository.FindAdminEmailById(adminId);
 
 		doEmail(subject, emailText, adminEmail, davenersArray,
 				utilities.buildListImage(category, info.parashaName, info.fullWeekName), fileName);
@@ -173,14 +176,14 @@ public class EmailSender {
 		 * 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		 * therefore including admin's email.
 		 */
-		String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
+		String adminEmail = adminRepository.FindAdminEmailById(adminId);
 
 		doEmail(subject, urgentMessage, adminEmail, davenersArray, null, null);
 	}
 
 	public void informAdmin(String subject, String message) throws EmailException {
 
-		String adminEmail = adminRepository.FindAdminEmailById(SchemeValues.adminId);
+		String adminEmail = adminRepository.FindAdminEmailById(adminId);
 
 		doEmail(subject, message, adminEmail, makeAdminTheBcc(), null, null);
 

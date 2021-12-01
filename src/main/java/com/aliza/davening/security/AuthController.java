@@ -8,15 +8,19 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aliza.davening.repositories.AdminRepository;
+import com.aliza.davening.entities.Admin;
+import com.aliza.davening.exceptions.DatabaseException;
+import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.services.AdminService;
 
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600, allowCredentials="true")
+@CrossOrigin(origins = ("${client.origin}"), maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -24,7 +28,7 @@ public class AuthController {
 	AuthenticationManager authenticationManager;
 
 	@Autowired
-	AdminRepository adminRepository;
+	AdminService adminService;
 
 	@Autowired
 	JwtUtils jwtUtils;
@@ -38,13 +42,20 @@ public class AuthController {
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 
-		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
 		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername()));
 	}
 
-//	@PostMapping("/signup")
-//	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+	@PostMapping(path = "/signup")
+	public ResponseEntity<?> setAdmin(@RequestBody LoginRequest credentials)
+			throws DatabaseException, EmptyInformationException {
+		if (adminService.setAdmin(credentials)) {
+			return ResponseEntity.ok("New admin registered successfully!");
+		}
+		return ResponseEntity.badRequest().body("Could not create new admin.");
+	}
+//	public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
 //		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
 //			return ResponseEntity
 //					.badRequest()

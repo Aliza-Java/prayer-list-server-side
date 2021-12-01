@@ -7,6 +7,7 @@ import javax.mail.MessagingException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ import com.itextpdf.text.DocumentException;
 
 @RestController
 @RequestMapping("admin")
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials="true")
+@CrossOrigin(origins = ("${client.origin}"), allowCredentials="true")
 public class AdminWebService {
 
 	@Autowired
@@ -47,12 +48,6 @@ public class AdminWebService {
 	
 	@Autowired
 	SubmitterService submitterService;
-
-	@PostMapping(path = "new")
-	public boolean setAdmin(@RequestBody Admin admin) throws DatabaseException, EmptyInformationException {
-		adminService.setAdmin(admin);
-		return true;
-	}
 
 	@PutMapping(path = "update")
 	public boolean updateAdminSettings(@RequestBody Admin admin)

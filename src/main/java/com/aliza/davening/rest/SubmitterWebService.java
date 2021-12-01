@@ -25,7 +25,7 @@ import com.aliza.davening.services.SubmitterService;
 
 @RestController
 @RequestMapping("sub")
-@CrossOrigin(origins = "http://localhost:4200", allowCredentials="true")
+@CrossOrigin(origins = ("${client.origin}"), allowCredentials="true")
 public class SubmitterWebService {
 
 	@Autowired
