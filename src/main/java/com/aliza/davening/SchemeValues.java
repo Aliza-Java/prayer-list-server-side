@@ -27,9 +27,9 @@ public class SchemeValues {
 	private final static String linkToExtend = server + "extend/%s?email=%s";
 	private final static String linkToDelete = server + "delete/%s?email=%s";
 
-	private final static String linkToLogin = client + "/admin";
+	private final static String linkToLogin = client + "admin";
 	private final static String linkToSendList = server + "admin/weeklylist";
-	private final static String linkToReviewWeekly = client + "/admin/weekly";
+	private final static String linkToReviewWeekly = client + "admin/weekly";
 
 	private final static String notAdminsEmail = "The email you provided is not associated with an admin.";
 	
