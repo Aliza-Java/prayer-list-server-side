@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.aliza.davening.SchemeValues;
+
 import io.jsonwebtoken.*;
 
 @Component
@@ -17,8 +19,7 @@ public class JwtUtils {
 	@Value("${jwt.secret}")
 	private String jwtSecret;
 
-	@Value("${jwt.expiration.ms}")
-	private int jwtExpirationMs;
+	private int jwtExpirationMs = 900000;
 
 	public String generateJwtToken(Authentication authentication) {
 
