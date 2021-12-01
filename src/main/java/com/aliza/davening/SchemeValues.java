@@ -12,6 +12,8 @@ public class SchemeValues {
 	public static int waitBeforeDeletion = 7;
 	public static boolean adminNewNamePrompt = false;
 
+	public static int jwtExpirationMS = 900000;
+	
 	public static String banimName = "Zera Shel Kayama";
 
 	public static int adminId = 10;
