@@ -77,8 +77,8 @@ public class EmailSender {
 	@Autowired
 	private Utilities utilities;
 
-	@Value("${admin.email}")
-	String adminEmail;
+	//@Value("${admin.email}")
+	String adminEmail="davening.list@gmail.com";
 
 	@Value("${admin.id}")
 	long adminId;

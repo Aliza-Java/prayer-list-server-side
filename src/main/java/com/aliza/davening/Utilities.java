@@ -41,8 +41,8 @@ public class Utilities {
 	@Autowired
 	AdminService adminService;
 
-	@Value("${admin.email}")
-	private String adminEmail;
+	//@Value("${admin.email}")
+	private String adminEmail="davening.list@gmail.com";
 
 	public File buildListImage(Category category, String weekName, String fullWeekName)
 			throws IOException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
