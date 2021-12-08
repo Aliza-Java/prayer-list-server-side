@@ -80,7 +80,7 @@ public class EmailSender {
 	//@Value("${admin.email}")
 	String adminEmail="davening.list@gmail.com";
 
-	@Value("${admin.id}")
+	//@Value("${admin.id}")
 	long adminId=1;
 
 	@Value("${mailgun.smtp.login}")

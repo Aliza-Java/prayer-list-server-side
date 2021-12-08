@@ -45,7 +45,7 @@ public class SubmitterService {
 	// All submitter functions receive his email address and allow him to proceed if
 	// his email matches davenfor.getSubmitter().getEmail()
 
-	@Value("${admin.id}")
+//	@Value("${admin.id}")
 	public long adminId=1;
 	
 	private Admin getMyGroupSettings(long adminId) throws ObjectNotFoundException {
