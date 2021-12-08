@@ -81,7 +81,7 @@ public class EmailSender {
 	String adminEmail="davening.list@gmail.com";
 
 	@Value("${admin.id}")
-	long adminId;
+	long adminId=1;
 
 	@Value("${mailgun.smtp.login}")
 	String emailUsername;

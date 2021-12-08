@@ -31,7 +31,7 @@ public class MaintainList {
 	ParashaRepository parashaRepository;
 	
 	@Value("${admin.id}")
-	private long adminId;
+	private long adminId=1;
 
 	// Deletes davenfors which have expired, even past the grace period of
 	// wait.before.deletion

@@ -46,7 +46,7 @@ public class SubmitterService {
 	// his email matches davenfor.getSubmitter().getEmail()
 
 	@Value("${admin.id}")
-	public long adminId;
+	public long adminId=1;
 	
 	private Admin getMyGroupSettings(long adminId) throws ObjectNotFoundException {
 
