@@ -77,7 +77,7 @@ public class EmailSender {
 	@Autowired
 	private Utilities utilities;
 
-	@Value("${spring.mail.username}")
+	@Value("${admin.email}")
 	String adminEmail;
 
 	@Value("${admin.id}")
