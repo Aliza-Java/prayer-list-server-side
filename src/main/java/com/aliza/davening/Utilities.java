@@ -41,7 +41,7 @@ public class Utilities {
 	@Autowired
 	AdminService adminService;
 
-	@Value("${spring.mail.username}")
+	@Value("${admin.email}")
 	private String adminEmail;
 
 	public File buildListImage(Category category, String weekName, String fullWeekName)
