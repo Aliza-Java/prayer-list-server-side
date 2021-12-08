@@ -55,7 +55,7 @@ public class MaintainList {
 		List<Davenfor> expiredDavenfors = davenforRepository.findByExpireAtLessThan(LocalDate.now());
 		System.out.println(expiredDavenfors);
 		for (Davenfor d : expiredDavenfors) {
-			emailSender.offerExtensionOrDelete(d);
+		//	emailSender.offerExtensionOrDelete(d);
 		}
 	}
 
@@ -63,7 +63,7 @@ public class MaintainList {
 	// list and send out, with link to his login page.
 	@Scheduled(cron = "0 0 8 * * THU")
 	public void remindAdmin() throws EmailException {
-		emailSender.informAdmin(EmailScheme.getWeeklyAdminReminderSubject(), Utilities.setWeeklyAdminReminderMessage());
+	//	emailSender.informAdmin(EmailScheme.getWeeklyAdminReminderSubject(), Utilities.setWeeklyAdminReminderMessage());
 	}
 
 	// Every Sunday at 2 a.m. changes category

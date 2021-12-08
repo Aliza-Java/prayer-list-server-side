@@ -387,7 +387,7 @@ public class AdminService {
 
 		try {
 			davenerRepository.disactivateDavener(davenerEmail);
-			emailSender.notifyDisactivatedDavener(davenerEmail);
+		//	emailSender.notifyDisactivatedDavener(davenerEmail);
 		} finally { // in case there were previous errors (such as in emailSender), return
 					// davenerList anyway.
 			davenerList = davenerRepository.findAll();
@@ -409,7 +409,7 @@ public class AdminService {
 
 		try {
 			davenerRepository.activateDavener(davenerEmail);
-			emailSender.notifyActivatedDavener(davenerEmail);
+		//	emailSender.notifyActivatedDavener(davenerEmail);
 		} finally {// in case there were previous errors (such as in emailSender), return
 			// davenerList anyway.
 			davenerList = davenerRepository.findAll();

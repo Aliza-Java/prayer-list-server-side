@@ -2,6 +2,7 @@ package com.aliza.davening.rest;
 
 import java.util.List;
 
+import javax.mail.MessagingException;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
+import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.SubmitterService;
 
 @RestController
@@ -30,10 +32,19 @@ public class SubmitterWebService {
 
 	@Autowired
 	SubmitterService submitterService;
+	
+	@Autowired 
+	EmailSender emailSender;
 
 	@RequestMapping(path = "getmynames/{email}")
 	public List<Davenfor> getSubmitterDavenfors(@PathVariable String email) throws ObjectNotFoundException {
 		return submitterService.getAllSubmitterDavenfors(email);
+	}
+	
+	//TODO: REMOVE IF UNNECESSARY, CONFIGURING EMAIL
+	@PostMapping("testemail")
+	public boolean sendTestEmail() throws MessagingException {
+		return emailSender.sendEmail("custom subject", "hopefully this will go through", "aliza.shanet@gmail.com");
 	}
 
 	@PostMapping(path = "{email}")

@@ -132,7 +132,12 @@
 			<version>0.1.0</version>
 		</dependency>
 
-
+<!-- Lightweight http client library, used for email (with Mailgun) -->
+<dependency>
+    <groupId>com.mashape.unirest</groupId>
+    <artifactId>unirest-java</artifactId>
+    <version>1.4.9</version>
+</dependency>
 
 	</dependencies>
 

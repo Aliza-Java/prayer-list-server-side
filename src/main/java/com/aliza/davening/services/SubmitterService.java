@@ -114,7 +114,7 @@ public class SubmitterService {
 			String subject = EmailScheme.getInformAdminOfNewNameSubject();
 			String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getCategory().getEnglish(), submitterEmail);
-			emailSender.informAdmin(subject, message);
+			//emailSender.informAdmin(subject, message);
 		}
 
 		return davenfor;
@@ -177,7 +177,7 @@ public class SubmitterService {
 			String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
 					davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
 					davenforToUpdate.getCategory().getEnglish());
-			emailSender.informAdmin(subject, message);
+			//emailSender.informAdmin(subject, message);
 		}
 
 		return davenforToUpdate;

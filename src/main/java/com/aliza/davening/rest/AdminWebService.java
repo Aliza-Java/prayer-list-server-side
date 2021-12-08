@@ -114,7 +114,7 @@ public class AdminWebService {
 	@PostMapping(path = "weekly")
 	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
 			MessagingException, EmailException, DocumentException, DatabaseException, ObjectNotFoundException {
-		emailSender.sendOutWeekly(weeklyInfo);
+	//	emailSender.sendOutWeekly(weeklyInfo);
 		return true;
 	}
 
@@ -129,7 +129,7 @@ public class AdminWebService {
 	@RequestMapping(path = "weeklylist")
 	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException, MessagingException,
 			EmailException, DocumentException, ObjectNotFoundException, DatabaseException {
-		emailSender.sendSimplifiedWeekly();
+	//	emailSender.sendSimplifiedWeekly();
 		return true;
 	}
 	
@@ -145,10 +145,9 @@ public class AdminWebService {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}
 
-
 	@PostMapping(path = "urgent")
 	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmailException, EmptyInformationException {
-		emailSender.sendUrgentEmail(davenfor);
+	//	emailSender.sendUrgentEmail(davenfor);
 		return true;
 	}
 

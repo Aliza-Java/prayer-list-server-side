@@ -1,8 +1,20 @@
 package com.aliza.davening;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public class EmailScheme {
 	private static int imageWidth = 500;
 	private static int imageHeight = 800;
+
+	@Value("${mailgun.api.username}")
+	public static String mailGunAPIUsername;
+	@Value("${mailgun.api.password}")
+	public static String mailGunAPIPassword;
+	@Value("${mailgun.api.base.url}")
+	public static String mailGunAPIBaseUrl;
+	@Value("${mailgun.api.messages.url}")
+	public static String mailGunAPIMessagesUrl;
+
 
 	private static String simpleHeader = "<h2>%s</h2>";
 
