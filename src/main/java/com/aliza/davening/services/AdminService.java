@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -72,29 +73,11 @@ public class AdminService {
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public Admin thisAdmin = null;
+	
+	@Value("${admin.id}")
+	long adminId;
 
-	//old - used with session
-	// Returning Admin so that session can store the admin with Id and details.
-//	public Admin login(String email, String password) throws LoginException {
-//		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
-//
-//		// Check if the admin was found by email.
-//		if (!optionalAdmin.isPresent()) {
-//			throw new LoginException(SchemeValues.getNotAdminsEmailMessage());
-//		}
-//
-//		// At this point save retrieved admin, to check password and (if passes check)
-//		// to save for future.
-//		thisAdmin = optionalAdmin.get();
-//
-//		// Check if password is correct
-//		if (!BCrypt.checkpw(password, thisAdmin.getPassword())) {
-//			return null;
-//		}
-//
-//		return thisAdmin;
-//	}
-
+	
 	/*
 	 * This method is used on initial start (when admin.id=Non_Exist, will send a
 	 * newly created Admin).
@@ -131,21 +114,19 @@ public class AdminService {
 		return optionalAdmin.get();
 	}
 
-	public boolean updateAdmin(Admin adminToUpdate) throws ObjectNotFoundException, DatabaseException {
+	public boolean updateAdmin(AdminSettings settings) throws ObjectNotFoundException, DatabaseException {
 
-		long id = adminToUpdate.getId();
-
-		Optional<Admin> optionalAdmin = adminRepository.findById(id);
+		Optional<Admin> optionalAdmin = adminRepository.findById(adminId);
 		if (!optionalAdmin.isPresent()) {
-			throw new ObjectNotFoundException("Admin with id " + id);
+			throw new ObjectNotFoundException("Admin with id " + adminId);
 		}
 
 		// needs id because will skip the check on current admin
-		if (isThisAdminEmailInUse(id, adminToUpdate.getEmail())) {
+		if (isThisAdminEmailInUse(adminId, settings.getEmail())) {
 			throw new DatabaseException("This admin email address is already in use.");
 		}
 
-		adminRepository.save(adminToUpdate);
+		adminRepository.updateSettings(adminId, settings.getEmail(), settings.isNewNamePrompt(), settings.getWaitBeforeDeletion());
 		return true;
 	}
 	

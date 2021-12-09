@@ -43,19 +43,19 @@ public class SubmitterWebService {
 	
 	//TODO: REMOVE IF UNNECESSARY, CONFIGURING EMAIL
 	@PostMapping("testemail")
-	public boolean sendTestEmail() throws MessagingException {
-		return emailSender.sendEmail("custom subject", "hopefully this will go through", "aliza.shanet@gmail.com");
+	public boolean sendTestEmail() throws MessagingException, EmailException {
+		return emailSender.sendEmail("custom subject", "hopefully this will go through", "aliza.shanet@gmail.com", null, null, null);
 	}
 
 	@PostMapping(path = "{email}")
 	public Davenfor addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException {
+			throws EmptyInformationException, ObjectNotFoundException, EmailException, MessagingException {
 		return submitterService.addDavenfor(davenfor, email);
 	}
 
 	@PutMapping(path = "updatename/{email}")
 	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException {
+			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}
 

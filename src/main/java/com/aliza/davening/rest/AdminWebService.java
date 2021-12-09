@@ -48,11 +48,14 @@ public class AdminWebService {
 	
 	@Autowired
 	SubmitterService submitterService;
+	
+	@Value("${admin.id}")
+	long adminId;
 
 	@PutMapping(path = "update")
-	public boolean updateAdminSettings(@RequestBody Admin admin)
+	public boolean updateAdminSettings(@RequestBody AdminSettings settings)
 			throws DatabaseException, ObjectNotFoundException, EmptyInformationException {
-		adminService.updateAdmin(admin);
+		adminService.updateAdmin(settings);
 		return true;
 	}
 	
@@ -134,14 +137,14 @@ public class AdminWebService {
 	}
 	
 	@PutMapping(path="updatedavenfor")
-	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor) throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException{
+	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor) throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException{
 		submitterService.updateDavenfor(davenfor, null, true);
 		return adminService.getAllDavenfors();
 	}
 	
 	@PutMapping(path = "updatename/{email}")
 	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException {
+			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}
 

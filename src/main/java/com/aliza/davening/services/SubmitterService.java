@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.mail.MessagingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -70,7 +72,7 @@ public class SubmitterService {
 	}
 
 	public Davenfor addDavenfor(Davenfor davenfor, String submitterEmail)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException {
+			throws EmptyInformationException, ObjectNotFoundException, EmailException, MessagingException {
 
 		/*
 		 * Ensuring there is a real category and associating it with the davenfor.
@@ -114,7 +116,7 @@ public class SubmitterService {
 			String subject = EmailScheme.getInformAdminOfNewNameSubject();
 			String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getCategory().getEnglish(), submitterEmail);
-			//emailSender.informAdmin(subject, message);
+			emailSender.informAdmin(subject, message);
 		}
 
 		return davenfor;
@@ -122,7 +124,7 @@ public class SubmitterService {
 	}
 
 	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail, boolean isAdmin)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException {
+			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException {
 
 		if (davenforToUpdate == null) {
 			throw new EmptyInformationException("No information submitted regarding the name you wish to update. ");
@@ -177,7 +179,7 @@ public class SubmitterService {
 			String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
 					davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
 					davenforToUpdate.getCategory().getEnglish());
-			//emailSender.informAdmin(subject, message);
+			emailSender.informAdmin(subject, message);
 		}
 
 		return davenforToUpdate;
