@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
@@ -33,6 +32,7 @@ import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.SubmitterService;
 import com.aliza.davening.util_classes.AdminSettings;
+import com.aliza.davening.util_classes.Password;
 import com.itextpdf.text.DocumentException;
 
 @RestController
@@ -65,8 +65,9 @@ public class AdminWebService {
 	}
 	
 	@PostMapping("checkpass/{email}")
-	public boolean checkPassword(@RequestBody String password, @PathVariable String email) throws ObjectNotFoundException {
-		return adminService.checkPassword(password, email);
+	//saved Password as its own object, to allow passing in request body
+	public boolean checkPassword(@RequestBody Password password, @PathVariable String email) throws ObjectNotFoundException {
+		return adminService.checkPassword(password.getPassword(), email);
 	}
 
 	@RequestMapping("davenfors")
@@ -103,21 +104,21 @@ public class AdminWebService {
 
 	@PostMapping(path = "disactivate/{davenerEmail}")
 	public List<Davener> disactivateDavener(@PathVariable String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
+			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
 		return adminService.disactivateDavener(davenerEmail);
 
 	}
 
 	@PostMapping(path = "activate/{davenerEmail}")
 	public List<Davener> activateDavener(@PathVariable String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
+			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
 		return adminService.activateDavener(davenerEmail);
 	}
 
 	@PostMapping(path = "weekly")
 	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
 			MessagingException, EmailException, DocumentException, DatabaseException, ObjectNotFoundException {
-	//	emailSender.sendOutWeekly(weeklyInfo);
+		emailSender.sendOutWeekly(weeklyInfo);
 		return true;
 	}
 
@@ -132,7 +133,7 @@ public class AdminWebService {
 	@RequestMapping(path = "weeklylist")
 	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException, MessagingException,
 			EmailException, DocumentException, ObjectNotFoundException, DatabaseException {
-	//	emailSender.sendSimplifiedWeekly();
+		emailSender.sendSimplifiedWeekly();
 		return true;
 	}
 	
@@ -149,8 +150,8 @@ public class AdminWebService {
 	}
 
 	@PostMapping(path = "urgent")
-	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmailException, EmptyInformationException {
-	//	emailSender.sendUrgentEmail(davenfor);
+	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmailException, EmptyInformationException, MessagingException {
+		emailSender.sendUrgentEmail(davenfor);
 		return true;
 	}
 

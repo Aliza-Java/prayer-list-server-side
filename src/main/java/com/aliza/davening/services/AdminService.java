@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+import javax.mail.MessagingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -25,7 +26,6 @@ import com.aliza.davening.entities.Weekly;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
-import com.aliza.davening.exceptions.LoginException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.ReorderCategoriesException;
@@ -41,9 +41,6 @@ import com.aliza.davening.util_classes.AdminSettings;
 @Service("adminService")
 @EnableTransactionManagement
 public class AdminService {
-
-	@Autowired
-	BCryptPasswordEncoder passwordEncoder;
 	
 	@Autowired
 	DavenerRepository davenerRepository;
@@ -96,7 +93,7 @@ public class AdminService {
 		
 		admin.setId(SchemeValues.NON_EXIST);// Ensuring the DB will enter a new row.
 		admin.setEmail(credentials.getUsername());
-		admin.setPassword(passwordEncoder.encode(credentials.getPassword()));
+		admin.setPassword(bCryptPasswordEncoder.encode(credentials.getPassword()));
 		admin.setWaitBeforeDeletion(SchemeValues.waitBeforeDeletion);
 		admin.setNewNamePrompt(SchemeValues.adminNewNamePrompt);
 		
@@ -136,7 +133,7 @@ public class AdminService {
 			throw new ObjectNotFoundException("Admin with email " + email);
 		}
 		
-		return (optionalAdmin.get().getPassword().equals(passwordEncoder.encode(password)));
+		return bCryptPasswordEncoder.matches(password,optionalAdmin.get().getPassword());
 	}
 	
 	public int getWaitBeforeDeletion(long id) {
@@ -356,7 +353,7 @@ public class AdminService {
 	}
 
 	public List<Davener> disactivateDavener(String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
+			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
 
 		List<Davener> davenerList = null;
 		Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
@@ -368,7 +365,7 @@ public class AdminService {
 
 		try {
 			davenerRepository.disactivateDavener(davenerEmail);
-		//	emailSender.notifyDisactivatedDavener(davenerEmail);
+			emailSender.notifyDisactivatedDavener(davenerEmail);
 		} finally { // in case there were previous errors (such as in emailSender), return
 					// davenerList anyway.
 			davenerList = davenerRepository.findAll();
@@ -378,7 +375,7 @@ public class AdminService {
 	}
 
 	public List<Davener> activateDavener(String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException {
+			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
 
 		List<Davener> davenerList = null;
 
@@ -390,7 +387,7 @@ public class AdminService {
 
 		try {
 			davenerRepository.activateDavener(davenerEmail);
-		//	emailSender.notifyActivatedDavener(davenerEmail);
+			emailSender.notifyActivatedDavener(davenerEmail);
 		} finally {// in case there were previous errors (such as in emailSender), return
 			// davenerList anyway.
 			davenerList = davenerRepository.findAll();

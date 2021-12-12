@@ -34,7 +34,6 @@ import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
-import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
@@ -48,8 +47,6 @@ public class EmailSender {
 //	@Autowired
 //	private JavaMailSender javaMailSender;
 
-	@Autowired
-	private AdminRepository adminRepository;
 
 	@Autowired
 	private DavenforRepository davenforRepository;
@@ -96,19 +93,26 @@ public class EmailSender {
 
 		try {
 			Session session = Session.getInstance(props, null);
+			
 			MimeMessage msg = new MimeMessage(session);
+			MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
+
 			// MimeMessage msg = javaMailSender.createMimeMessage();
-			msg.setFrom(new InternetAddress(adminEmail));
+			helper.setFrom(new InternetAddress(adminEmail));
 
 			InternetAddress[] addrs = InternetAddress.parse(to, false);
-			msg.setRecipients(Message.RecipientType.TO, addrs);
+			helper.setTo(addrs);
+			helper.setSubject(subject);
+			
+			//msg.setSubject(subject, "utf-8");
+			
+			helper.setText(text, true);
+			//charset=UTF-8";
+			helper.setSentDate(new Date());
 
-			msg.setSubject(subject);
-			msg.setText(text);
-			msg.setSentDate(new Date());
+			
 
 			if (attachment != null) {
-				MimeMessageHelper helper = new MimeMessageHelper(msg);
 				helper.addAttachment(attachmentName, attachment);
 			}
 

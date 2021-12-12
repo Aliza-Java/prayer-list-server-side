@@ -3,6 +3,8 @@ package com.aliza.davening;
 import java.time.LocalDate;
 import java.util.List;
 
+import javax.mail.MessagingException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -51,19 +53,19 @@ public class MaintainList {
 	// be deleted.
 	// Fires at 1 a.m. every day
 	@Scheduled(cron = "0 0 1 * * ?")
-	public void offerExtensionOrDelete() throws EmailException {
+	public void offerExtensionOrDelete() throws EmailException, MessagingException {
 		List<Davenfor> expiredDavenfors = davenforRepository.findByExpireAtLessThan(LocalDate.now());
 		System.out.println(expiredDavenfors);
 		for (Davenfor d : expiredDavenfors) {
-		//	emailSender.offerExtensionOrDelete(d);
+			emailSender.offerExtensionOrDelete(d);
 		}
 	}
 
 	// Every Thursday at 8 a.m. an email will be sent to Admin with a link to see
 	// list and send out, with link to his login page.
 	@Scheduled(cron = "0 0 8 * * THU")
-	public void remindAdmin() throws EmailException {
-	//	emailSender.informAdmin(EmailScheme.getWeeklyAdminReminderSubject(), Utilities.setWeeklyAdminReminderMessage());
+	public void remindAdmin() throws EmailException, MessagingException {
+		emailSender.informAdmin(EmailScheme.getWeeklyAdminReminderSubject(), Utilities.setWeeklyAdminReminderMessage());
 	}
 
 	// Every Sunday at 2 a.m. changes category
