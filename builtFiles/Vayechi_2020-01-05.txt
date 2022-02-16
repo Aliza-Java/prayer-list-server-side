@@ -1,1 +1,0 @@
-<html><body><br/><table style='border:2px solid black'><br/><tr><br/><td>Rachel</td><br/><td>רחל</td><br/><td><tr><br/><td>one</td><br/><td>רחל</td><br/><td><tr><br/><td>two</td><br/><td>רחל</td><br/><td><tr><br/><td>three</td><br/><td>רחל</td><br/><td></table></br></body></html>
