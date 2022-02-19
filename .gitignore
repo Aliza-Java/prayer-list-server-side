@@ -5,6 +5,7 @@ target/
 !**/src/test/**
 src/main/resources/application.properties
 builtFiles/**
+admin.csv
 
 ### STS ###
 .apt_generated
