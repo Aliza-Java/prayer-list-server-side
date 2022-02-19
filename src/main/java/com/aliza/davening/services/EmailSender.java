@@ -29,7 +29,6 @@ import com.aliza.davening.SchemeValues;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
-import com.aliza.davening.entities.Weekly;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -38,6 +37,7 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
+import com.aliza.davening.util_classes.Weekly;
 import com.itextpdf.text.DocumentException;
 import com.sun.mail.smtp.SMTPTransport;
 

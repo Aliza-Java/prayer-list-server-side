@@ -1,3 +1,4 @@
+//Helpful miscellaneous functions
 package com.aliza.davening;
 
 import java.awt.Graphics;

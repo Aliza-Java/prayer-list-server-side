@@ -1,3 +1,4 @@
+//Scheduled actions to maintain the list
 package com.aliza.davening;
 
 import java.time.LocalDate;

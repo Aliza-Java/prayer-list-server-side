@@ -16,6 +16,9 @@ import com.aliza.davening.SchemeValues;
 @ControllerAdvice // Directing exceptions to be handled here before handling defaultively
 public class SystemExceptionHandler {
 
+	//commenting Throwable.class to enable developer to see error sources.  
+	//After project is completed with all forseeable cases taken care of, allow Throwable to make errors nice and readable
+	
 	// Catch-All - if does not fit any of the extended methods to Throwable, will
 	// default to this one. 
 	//@ExceptionHandler(Throwable.class)

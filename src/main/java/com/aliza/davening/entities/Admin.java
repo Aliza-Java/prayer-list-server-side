@@ -40,7 +40,6 @@ public class Admin {
 	private boolean newNamePrompt;
 
 	// how many days to wait after submitter was warned name is expired default 7
-	// (set in application.properties)
 	private int waitBeforeDeletion;
 
 }

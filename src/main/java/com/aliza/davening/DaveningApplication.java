@@ -1,3 +1,4 @@
+//The starting point of the project
 package com.aliza.davening;
 
 import java.io.IOException;

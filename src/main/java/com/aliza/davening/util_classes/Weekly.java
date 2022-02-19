@@ -1,4 +1,4 @@
-package com.aliza.davening.entities;
+package com.aliza.davening.util_classes;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -12,8 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 
-public class Weekly {
-	
+public class Weekly {	
     public String parashaName;
     public String fullWeekName;
     public long categoryId;

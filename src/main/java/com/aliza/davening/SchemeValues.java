@@ -1,3 +1,4 @@
+//General variables throughout the project (email variables are stored in EmailScheme)
 package com.aliza.davening;
 
 import org.springframework.beans.factory.annotation.Value;

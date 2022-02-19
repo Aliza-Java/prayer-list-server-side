@@ -22,7 +22,6 @@ import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.Submitter;
-import com.aliza.davening.entities.Weekly;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -37,6 +36,7 @@ import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
+import com.aliza.davening.util_classes.Weekly;
 
 @Service("adminService")
 @EnableTransactionManagement

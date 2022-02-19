@@ -21,7 +21,6 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.entities.Weekly;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -33,6 +32,7 @@ import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.SubmitterService;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Password;
+import com.aliza.davening.util_classes.Weekly;
 import com.itextpdf.text.DocumentException;
 
 @RestController

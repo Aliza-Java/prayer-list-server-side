@@ -1,3 +1,4 @@
+//Variables needed for email-related actions
 package com.aliza.davening;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -6,6 +7,7 @@ public class EmailScheme {
 	private static int imageWidth = 500;
 	private static int imageHeight = 800;
 
+	//Values in application properties
 	@Value("${mailgun.api.username}")
 	public static String mailGunAPIUsername;
 	@Value("${mailgun.api.password}")
