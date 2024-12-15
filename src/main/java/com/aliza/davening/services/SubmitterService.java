@@ -232,8 +232,11 @@ public class SubmitterService {
 		return davenforRepository.findAllDavenforBySubmitterEmail(submitterEmail);
 	}
 
-	public List<Category> getAllCategories() {
-		return categoryRepository.findAllOrderById();
+	public List<Category> getAllCategories() throws ObjectNotFoundException {
+		List<Category> categories = categoryRepository.findAllOrderById();
+		if (categories.size()<1)
+			throw new ObjectNotFoundException("System categories");
+		return categories;
 	}
 
 	// Private helper method for Finding submitter according to email
