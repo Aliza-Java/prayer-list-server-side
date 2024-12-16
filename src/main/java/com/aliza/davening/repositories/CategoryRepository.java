@@ -30,4 +30,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 	@Query("select c from Category c order by c.id")
 	public List<Category> findAllOrderById();
 	
+	@Query
+	public Category findByCname(String name);
+	
 }

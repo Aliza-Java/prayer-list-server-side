@@ -22,7 +22,6 @@ import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.exceptions.ReorderCategoriesException;
-import com.itextpdf.text.DocumentException;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @SpringBootApplication
@@ -39,7 +38,7 @@ public class DaveningApplication {
 
 	public static void main(String[] args) throws ObjectNotFoundException, EmptyInformationException, DatabaseException,
 			IOException, MessagingException, EmailException, NoRelatedEmailException, ReorderCategoriesException,
-			DocumentException, PermissionException {
+			PermissionException {
 
 		//SpringApplication.run(DaveningApplication.class, args);
 		//Non-essential change to force new heroku build

@@ -8,13 +8,11 @@ import java.util.Optional;
 import javax.mail.MessagingException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.aliza.davening.EmailScheme;
-import com.aliza.davening.SchemeValues;
-import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
+import com.aliza.davening.entities.CategoryType;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.exceptions.EmailException;
@@ -50,15 +48,16 @@ public class SubmitterService {
 //	@Value("${admin.id}")
 	public long adminId=1;
 	
-	private Admin getMyGroupSettings(long adminId) throws ObjectNotFoundException {
-
-		Optional<Admin> groupSettings = adminRepository.findById(adminId);
-		if (!groupSettings.isPresent()) {
-			throw new ObjectNotFoundException("Davening group with id " + adminId);
-		}
-		return groupSettings.get();
-
-	}
+	//TODO: In future, make option to add more groups and run each individually
+//	private Admin getMyGroupSettings(long adminId) throws ObjectNotFoundException {
+//
+//		Optional<Admin> groupSettings = adminRepository.findById(adminId);
+//		if (!groupSettings.isPresent()) {
+//			throw new ObjectNotFoundException("Davening group with id " + adminId);
+//		}
+//		return groupSettings.get();
+//
+//	}
 
 	// According to email address submitter can see all names he submitted.
 	public List<Davenfor> getAllSubmitterDavenfors(String email) throws ObjectNotFoundException {
@@ -77,10 +76,11 @@ public class SubmitterService {
 		/*
 		 * Ensuring there is a real category and associating it with the davenfor.
 		 */
-		Optional<Category> optionalCategory = categoryRepository.findById(davenfor.getCategory().getId());
-		if (!optionalCategory.isPresent()) {
-			throw new EmptyInformationException("No existing category chosen. ");
-		}
+		//TODO - fix so that checks correctly that its a normal category.
+//		Optional<Category> optionalCategory = categoryRepository.findById(davenfor.getCategory().getId());
+//		if (!optionalCategory.isPresent()) {
+//			throw new EmptyInformationException("No existing category chosen. ");
+//		}
 
 		// Trim all names nicely
 		davenfor.setNameEnglish(davenfor.getNameEnglish().trim());
@@ -89,7 +89,7 @@ public class SubmitterService {
 		// If davenfor needs 2 names (e.g. Zera shel Kayama), validate that second name
 		// is in too, and if indeed exist - trim them.
 
-		if (SchemeValues.banimName.equals(davenfor.getCategory().getEnglish())) {
+		if (CategoryType.BANIM.equals(davenfor.getCategory().getCname())) {
 			if (davenfor.getNameEnglishSpouse() == null || davenfor.getNameHebrewSpouse() == null) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
@@ -105,19 +105,19 @@ public class SubmitterService {
 		davenfor.setCreatedAt(LocalDate.now());
 		davenfor.setLastConfirmedAt(LocalDate.now());
 
-		// Davenfor will expire in future according to it's category's settings.
+		// Davenfor will expire in future according to its category's settings.
 		davenfor.setExpireAt(LocalDate.now().plusDays(davenfor.getCategory().getUpdateRate()));
 
 		davenforRepository.save(davenfor);
 
-		// If admin's setting defines that admin should get an email upon new name being
+		//TODO: in future - allow email if admin wants. If admin's setting defines that admin should get an email upon new name being
 		// added:
-		if (getMyGroupSettings(adminId).isNewNamePrompt()) {
+		//if (getMyGroupSettings(adminId).isNewNamePrompt()) {
 			String subject = EmailScheme.getInformAdminOfNewNameSubject();
 			String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), davenfor.getCategory().getEnglish(), submitterEmail);
+					davenfor.getNameHebrew(), davenfor.getCategory().getCname(), submitterEmail);
 			emailSender.informAdmin(subject, message);
-		}
+		//}
 
 		return davenfor;
 
@@ -153,7 +153,8 @@ public class SubmitterService {
 
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
-		if (SchemeValues.banimName.equals(davenforToUpdate.getCategory().getEnglish())) {
+		//TODO - change this banim condition to 'isBanim' across the board
+		if (CategoryType.BANIM.equals(davenforToUpdate.getCategory().getCname())) {
 			if (davenforToUpdate.getNameEnglishSpouse() == null || davenforToUpdate.getNameHebrewSpouse() == null) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
@@ -174,13 +175,13 @@ public class SubmitterService {
 
 		davenforRepository.save(davenforToUpdate);
 
-		if (getMyGroupSettings(adminId).isNewNamePrompt()) {
+	//	if (getMyGroupSettings(adminId).isNewNamePrompt()) {
 			String subject = EmailScheme.getInformAdminOfUpdateSubject();
 			String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
 					davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
-					davenforToUpdate.getCategory().getEnglish());
+					davenforToUpdate.getCategory().getCname());
 			emailSender.informAdmin(subject, message);
-		}
+	//	}
 
 		return davenforToUpdate;
 
@@ -207,7 +208,9 @@ public class SubmitterService {
 
 		// Extending the davenfor's expiration date according to the defined length in
 		// its category.
-		LocalDate extendedDate = LocalDate.now().plusDays(davenforToExtend.getCategory().getUpdateRate());
+		//LocalDate extendedDate = LocalDate.now().plusDays(categoryRepository.findByName(davenforToExtend.getCatType().toString()).getUpdateRate());
+		//todo! - how to extend date correctly?  Gives error.
+		LocalDate extendedDate = LocalDate.now().plusDays(30);
 		davenforToExtend.setUpdatedAt(LocalDate.now());
 		davenforToExtend.setLastConfirmedAt(LocalDate.now());
 		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());

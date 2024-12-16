@@ -13,7 +13,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
 
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.internet.InternetAddress;
@@ -28,6 +27,7 @@ import com.aliza.davening.EmailScheme;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Category;
+import com.aliza.davening.entities.CategoryType;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
@@ -38,7 +38,6 @@ import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.util_classes.Weekly;
-import com.itextpdf.text.DocumentException;
 import com.sun.mail.smtp.SMTPTransport;
 
 @Service
@@ -140,7 +139,7 @@ public class EmailSender {
 		sendEmail(EmailScheme.getAdminMessageSubject(), message, recipient, makeAdminTheBcc(), null, null);
 	}
 
-	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException, DocumentException,
+	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException,
 			ObjectNotFoundException, DatabaseException, EmptyInformationException {
 		Weekly simplified = new Weekly();
 		simplified.parashaName = parashaRepository.findCurrent().getEnglishName();
@@ -151,8 +150,7 @@ public class EmailSender {
 		sendOutWeekly(simplified);
 	}
 
-	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException, DocumentException,
-			ObjectNotFoundException, DatabaseException, EmptyInformationException {
+	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
 
 		Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
 		if (!optionalCategory.isPresent()) {
@@ -211,7 +209,7 @@ public class EmailSender {
 
 		// If category is banim, need to list also spouse name (if exists in at least
 		// one language).
-		if (SchemeValues.banimName.equals(davenfor.getCategory().getEnglish())
+		if (CategoryType.BANIM.equals(davenfor.getCategory().getCname())
 				&& (davenfor.getNameEnglishSpouse() != null || davenfor.getNameHebrewSpouse() != null)) {
 			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailBanim(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
@@ -220,7 +218,7 @@ public class EmailSender {
 
 		else {
 			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailText(), davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), davenfor.getCategory().getEnglish());
+					davenfor.getNameHebrew(), davenfor.getCategory().getCname());
 		}
 
 		if (davenfor.getNote() != null) {
@@ -262,7 +260,7 @@ public class EmailSender {
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.getConfirmationEmailTextLocation())),
 				StandardCharsets.UTF_8);
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
-				confirmedDavenfor.getCategory().getEnglish(), confirmedDavenfor.getId());
+				confirmedDavenfor.getCategory().getCname(), confirmedDavenfor.getId());
 
 		String to = confirmedDavenfor.getSubmitterEmail();
 

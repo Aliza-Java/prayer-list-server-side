@@ -269,6 +269,8 @@ public class AdminService {
 		return sortedCategories;
 	}
 
+	//todo - when ready, implement
+	/*
 	public Category addCategory(Category category) throws DatabaseException, EmptyInformationException {
 
 		// Checking if added category is null
@@ -312,7 +314,7 @@ public class AdminService {
 		 * Once we verified that the category to update is an existing valid one
 		 * (judging also by the id), we can use the verified ID in case the external
 		 * categoryId is different than the id sent with the category object
-		 */
+	
 		categoryToUpdate.setId(categoryId);
 
 		// Trim incoming names before comparing them.
@@ -323,7 +325,7 @@ public class AdminService {
 		 * checking if name is being updated, and if so that it is not already in use.
 		 * No need to exclude comparing with name itself because sent only if not
 		 * matching.
-		 */
+		
 		boolean englishNameHasBeenChanged = !optionalCategory.get().getEnglish()
 				.equalsIgnoreCase(suggestedCategoryNameEnglish);
 		boolean hebrewNameHasBeenChanged = !optionalCategory.get().getHebrew()
@@ -350,7 +352,7 @@ public class AdminService {
 		} catch (EmptyResultDataAccessException e) {
 			throw new ObjectNotFoundException("Category with id " + id);
 		}
-	}
+	}*/
 
 	public List<Davener> disactivateDavener(String davenerEmail)
 			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
@@ -403,27 +405,27 @@ public class AdminService {
 		categoryRepository.updateCategoryCurrent(true, nextCategory.getId());
 	}
 
-	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)
-			throws DatabaseException {
-
-		// names should be compared only after trimming, as spaces do not change the
-		// word inherently
-		english = english.toLowerCase().trim();
-		hebrew = hebrew.trim();
-
-		for (Category c : categories) {
-			if (c.getId() != id) { // do this check only if checked category is not the one in question
-
-				if (english.equalsIgnoreCase(c.getEnglish()))
-					throw new DatabaseException("The category name '" + english + "' is already in use.");
-				if (hebrew.equalsIgnoreCase(c.getHebrew()))
-					throw new DatabaseException("The category name '" + hebrew + "' is already in use.");
-
-			}
-		}
-
-		return false;
-	}
+//	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)
+//			throws DatabaseException {
+//
+//		// names should be compared only after trimming, as spaces do not change the
+//		// word inherently
+//		english = english.toLowerCase().trim();
+//		hebrew = hebrew.trim();
+//
+//		for (Category c : categories) {
+//			if (c.getId() != id) { // do this check only if checked category is not the one in question
+//
+//				if (english.equalsIgnoreCase(c.getEnglish()))
+//					throw new DatabaseException("The category name '" + english + "' is already in use.");
+//				if (hebrew.equalsIgnoreCase(c.getHebrew()))
+//					throw new DatabaseException("The category name '" + hebrew + "' is already in use.");
+//
+//			}
+//		}
+//
+//		return false;
+//	}
 
 	public List<Category> getAllCategories() {
 		return categoryRepository.findAllOrderById();

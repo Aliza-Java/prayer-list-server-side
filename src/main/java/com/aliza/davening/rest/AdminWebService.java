@@ -33,7 +33,6 @@ import com.aliza.davening.services.SubmitterService;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Password;
 import com.aliza.davening.util_classes.Weekly;
-import com.itextpdf.text.DocumentException;
 
 @RestController
 @RequestMapping("admin")
@@ -111,20 +110,20 @@ public class AdminWebService {
 
 	@PostMapping(path = "activate/{davenerEmail}")
 	public List<Davener> activateDavener(@PathVariable String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
+			throws EmailException, DatabaseException, IOException, ObjectNotFoundException, EmptyInformationException, MessagingException {
 		return adminService.activateDavener(davenerEmail);
 	}
 
 	@PostMapping(path = "weekly")
 	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
-			MessagingException, EmailException, DocumentException, DatabaseException, ObjectNotFoundException {
+			MessagingException, EmailException, DatabaseException, ObjectNotFoundException {
 		emailSender.sendOutWeekly(weeklyInfo);
 		return true;
 	}
 
 	@PostMapping(path = "preview", produces = "text/plain")
 	public String previewWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
-			MessagingException, EmailException, DocumentException, DatabaseException, ObjectNotFoundException {
+			MessagingException, EmailException, DatabaseException, ObjectNotFoundException, IOException {
 		return adminService.previewWeekly(weeklyInfo);
 	}
 
@@ -132,7 +131,7 @@ public class AdminWebService {
 	// through Admin's email link)
 	@RequestMapping(path = "weeklylist")
 	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException, MessagingException,
-			EmailException, DocumentException, ObjectNotFoundException, DatabaseException {
+			EmailException, ObjectNotFoundException, DatabaseException {
 		emailSender.sendSimplifiedWeekly();
 		return true;
 	}

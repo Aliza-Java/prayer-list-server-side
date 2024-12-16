@@ -3,15 +3,13 @@ package com.aliza.davening.entities;
 import java.util.List;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,19 +30,8 @@ import lombok.Setter;
 @Entity
 public class Category {
 
-	// A constructor for initializing the database.
-	public Category(long id, String english, String hebrew, boolean current, int updateRate, int catOrder) {
-		this.id = id;
-		this.english = english;
-		this.hebrew = hebrew;
-		this.isCurrent = current;
-		this.updateRate = updateRate;
-		this.catOrder = catOrder;
-	}
-
-	public Category(String english, String hebrew, boolean current, int updateRate, int catOrder) {
-		this.english = english;
-		this.hebrew = hebrew;
+	public Category(CategoryType cname, boolean current, int updateRate, int catOrder) {
+		this.cname = cname;
 		this.isCurrent = current;
 		this.updateRate = updateRate;
 		this.catOrder = catOrder;
@@ -54,17 +41,21 @@ public class Category {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@Column(unique = true)
-	@NotNull(message = "Category's English name cannot be null. ")
-	@NotBlank(message = "Category's English name cannot be blank. ")
-	@Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "Category's English name must contain only English letters and spaces. ")
-	private String english;
+	//TODO: when allow admin to add more categories, enable validations somehow
+//	@Column(unique = true)
+//	@NotNull(message = "Category's English name cannot be null. ")
+//	@NotBlank(message = "Category's English name cannot be blank. ")
+//	@Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "Category's English name must contain only English letters and spaces. ")
+//	private String english;
+//
+//	@NotNull(message = "Category's Hebrew name cannot be null. ")
+//	@NotBlank(message = "Category's Hebrew name cannot be blank. ")
+//	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Category's Hebrew name must contain only Hebrew letters and spaces. ")
+//	private String hebrew;
 
-	@NotNull(message = "Category's Hebrew name cannot be null. ")
-	@NotBlank(message = "Category's Hebrew name cannot be blank. ")
-	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Category's Hebrew name must contain only Hebrew letters and spaces. ")
-	private String hebrew;
-
+    @Enumerated(EnumType.STRING)
+	private CategoryType cname;
+	
 	// Is this the current category being sent out?
 	private boolean isCurrent;
 
@@ -84,8 +75,7 @@ public class Category {
 	// davenfors omitted as it causes recursive output.
 	@Override
 	public String toString() {
-		return "Category [id=" + id + ", english=" + english + ", hebrew=" + hebrew + ", isCurrent=" + isCurrent
+		return "Category [id=" + id + ", english=" + cname + ", hebrew=" + cname.getHebName() + ", isCurrent=" + isCurrent
 				+ ", updateRate=" + updateRate + ", catOrder=" + catOrder + "]";
 	}
-
 }

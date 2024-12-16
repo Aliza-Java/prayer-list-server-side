@@ -72,7 +72,7 @@ public class SubmitterWebService {
 	}
 
 	@RequestMapping(path = "categories")
-	public List<Category> findAllCategories() {
+	public List<Category> findAllCategories() throws ObjectNotFoundException {
 		return submitterService.getAllCategories();
 	}
 

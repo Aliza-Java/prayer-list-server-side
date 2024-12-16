@@ -15,10 +15,10 @@ import javax.imageio.ImageIO;
 import javax.swing.JEditorPane;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.aliza.davening.entities.Category;
+import com.aliza.davening.entities.CategoryType;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.DatabaseException;
@@ -152,7 +152,7 @@ public class Utilities {
 
 		// building the email message with the button area as a table at the bottom
 		String message = String.format("We've been davening for %s for %s.", davenfor.getNameEnglish(),
-				davenfor.getCategory().getEnglish())
+				davenfor.getCategory().getCname())
 				+ "  In order to keep our lists relevant, please confirm that the davening is still relevant. "
 				+ "<br><br>  If the davening is no longer relevant for this list either simply ignore this email or click the big red remove button."
 				+ buttonArea;
@@ -179,14 +179,14 @@ public class Utilities {
 		stringBuilder.append(weekName);
 
 		stringBuilder
-				.append(String.format(EmailScheme.getBilingualHeader(), category.getEnglish(), category.getHebrew()));
+				.append(String.format(EmailScheme.getBilingualHeader(), category.getCname(), category.getCname().getHebName()));
 		stringBuilder.append(EmailScheme.getTableStart());
 
 		// Running through names, adding them in columns - English and Hebrew
 
 		// banim category prints nusach first, and includes name and spouse name in one
 		// box
-		if (category.getEnglish().equalsIgnoreCase(SchemeValues.banimName)) {
+		if (CategoryType.BANIM.equals(category.getCname())) {
 			stringBuilder.append(String.format(EmailScheme.getHtmlNameRowInList(), EmailScheme.getBanimLineEnglish(),
 					EmailScheme.getBanimLineHebrew()));
 
@@ -213,7 +213,7 @@ public class Utilities {
 		// Adding line about next week's category
 		Category nextCategory = getNextCategory(category);
 		stringBuilder.append(
-				String.format(EmailScheme.getNextWeekCategory(), nextCategory.getEnglish(), nextCategory.getHebrew()));
+				String.format(EmailScheme.getNextWeekCategory(), nextCategory.getCname(), nextCategory.getCname().getHebName()));
 
 		// Adding line to email with name and good news.
 		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), adminEmail));
