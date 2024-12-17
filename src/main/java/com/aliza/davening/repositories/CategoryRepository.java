@@ -1,7 +1,6 @@
 package com.aliza.davening.repositories;
 
 import java.util.List;
-
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -10,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.aliza.davening.entities.Category;
+import com.aliza.davening.entities.CategoryType;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
@@ -31,6 +31,6 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 	public List<Category> findAllOrderById();
 	
 	@Query
-	public Category findByCname(String name);
+	public Category findByCname(CategoryType category);
 	
 }

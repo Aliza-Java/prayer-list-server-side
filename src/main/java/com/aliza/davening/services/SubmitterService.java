@@ -96,7 +96,6 @@ public class SubmitterService {
 			} else {
 				davenfor.setNameEnglishSpouse(davenfor.getNameEnglishSpouse().trim());
 				davenfor.setNameHebrewSpouse(davenfor.getNameHebrewSpouse().trim());
-
 			}
 		}
 
@@ -120,7 +119,6 @@ public class SubmitterService {
 		//}
 
 		return davenfor;
-
 	}
 
 	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail, boolean isAdmin)
