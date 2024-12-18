@@ -21,7 +21,6 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 
 @Entity
 public class Davenfor {
@@ -84,5 +83,14 @@ public class Davenfor {
 	private LocalDate updatedAt;
 
 	private String note;
+
+	@Override
+	public String toString() {
+		return "Davenfor [" + submitterEmail + ", " + category + ", "
+				+ nameHebrew + ", " + nameEnglish + ", createdAt=" + createdAt
+				+ "]";
+	}
+	
+	
 
 }

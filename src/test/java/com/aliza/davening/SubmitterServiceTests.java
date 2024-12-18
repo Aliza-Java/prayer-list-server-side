@@ -93,9 +93,11 @@ public class SubmitterServiceTests {
 			// trims names
 			assertEquals(readyDf.getNameEnglish().length(), 17);
 			assertEquals(readyDf.getNameHebrew().length(), 12);
+			System.out.println(readyDf);
 
 			// throws exception if spouse has null name
 			dfBanim.setNameEnglishSpouse(null);
+			System.out.println(dfBanim);
 
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
 				submitterService.addDavenfor(dfBanim, submitterEmail);
@@ -107,9 +109,10 @@ public class SubmitterServiceTests {
 			readyDf = submitterService.addDavenfor(dfRefua, submitterEmail);
 			assertNotNull(readyDf.getCreatedAt());
 			assertTrue(readyDf.getCreatedAt().isBefore(readyDf.getExpireAt()));
+			System.out.println(readyDf);
 
 		} catch (Exception e) {
-			System.out.println("@Test addDavenFor failed");
+			System.out.println("@Submitter service test unexpected Exception " + e.getMessage());
 		}
 	}
 

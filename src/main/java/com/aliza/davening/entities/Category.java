@@ -76,7 +76,7 @@ public class Category {
 	// davenfors omitted as it causes recursive output.
 	@Override
 	public String toString() {
-		return "Category [id=" + id + ", english=" + cname + ", hebrew=" + cname.getHebName() + ", isCurrent=" + isCurrent
-				+ ", updateRate=" + updateRate + ", catOrder=" + catOrder + "]";
+		return "Category [" + cname + "/" + cname.getHebName() + ", isCurrent=" + isCurrent
+				+ "]";
 	}
 }
