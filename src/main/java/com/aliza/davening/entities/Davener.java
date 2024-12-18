@@ -4,8 +4,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -26,14 +24,15 @@ public class Davener {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@NotBlank(message = "Davener must have a country. ")
+	//TODO: fix annotations
+	//@NotBlank(message = "Davener must have a country. ")
 	private String country = "Israel";
 
-	@NotBlank(message = "Davener must have an associated email. ")
-	@Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Davener email seems to be invalid.")
+	//@NotBlank(message = "Davener must have an associated email. ")
+	//@Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Davener email seems to be invalid.")
 	private String email;
 
-	@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
+	//@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
 	private String whatsapp;
 
 	// Does davener want to accept weekly davening list and alerts?

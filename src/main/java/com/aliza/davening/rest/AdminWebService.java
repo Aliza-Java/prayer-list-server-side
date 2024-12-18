@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.mail.MessagingException;
-import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -143,7 +142,8 @@ public class AdminWebService {
 	}
 	
 	@PutMapping(path = "updatename/{email}")
-	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
+	//TODO: why does @Valid not work anymore?
+	public Davenfor updateDavenfor(@RequestBody /*@Valid*/ Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}

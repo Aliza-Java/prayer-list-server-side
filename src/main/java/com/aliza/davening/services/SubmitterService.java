@@ -246,7 +246,7 @@ public class SubmitterService {
 
 		// If submitter has never submitted a name, need to create a new one in
 		// database.
-		if (validSubmitter == null) {
+		if (validSubmitter == null) {//TODO - readd this function
 			validSubmitter = submitterRepository.save(new Submitter(submitterEmail));
 		}
 		return submitterEmail;

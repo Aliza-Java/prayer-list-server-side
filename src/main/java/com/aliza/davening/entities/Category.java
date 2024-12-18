@@ -10,7 +10,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -60,11 +59,13 @@ public class Category {
 	private boolean isCurrent;
 
 	// How many days a name of this category adds on when extending expiration date
-	@Positive(message = "The update rate of a category must be a positive number. ")
+	//TODO: what is the equivalent for @positive?  fix
+	//@Positive(message = "The update rate of a category must be a positive number. ")
 	private int updateRate;
 
 	// The order in which the categories get sent out.
-	@Positive(message = "The category order must be represented by a positive number. ")
+	//TODO: what is the equivalent for @positive?  fix
+	//@Positive(message = "The category order must be represented by a positive number. ")
 	private int catOrder;
 
 	@OneToMany(cascade = { CascadeType.REMOVE }, mappedBy = "category")
