@@ -15,6 +15,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import com.aliza.davening.entities.CategoryType;
+import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -22,6 +24,8 @@ import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.exceptions.ReorderCategoriesException;
+import com.aliza.davening.repositories.CategoryRepository;
+import com.aliza.davening.services.SubmitterService;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 @SpringBootApplication
@@ -47,7 +51,7 @@ public class DaveningApplication {
 		builder.headless(false);
 		ConfigurableApplicationContext context = builder.run(args);
 		
-
+		
 		// For testing:
 
 		// SubmitterService submitterService = context.getBean(SubmitterService.class);

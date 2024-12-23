@@ -29,42 +29,46 @@ public class Davenfor {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	//TODO: fix annotations
-	//@NotNull(message = "No submitter associated with this name. ")
+	// TODO: fix annotations
+	// @NotNull(message = "No submitter associated with this name. ")
 	private String submitterEmail;
 
-	// Which type of cause does this person need to be davened for.
 	@ManyToOne(fetch = FetchType.EAGER)
 	// added jsonIgnoreProperties when fetching categoryname of Davenfor. if works
 	// anyway (in SubmitterService.addDavenfor), remove this line.
 	// @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-	//@NotNull(message = "The name must belong to some category. ")
+	// @NotNull(message = "The name must belong to some category. ")
 	private Category category;
 
-	//@NotBlank(message = "Hebrew name is blank. ") // Regex pattern is made to accept blank, so that a blank input will
-													// // give only this specific message
-	//@NotNull(message = "Missing Hebrew name. ") // This field is a must
+	// @NotBlank(message = "Hebrew name is blank. ") // Regex pattern is made to
+	// accept blank, so that a blank input will
+	// // give only this specific message
+	// @NotNull(message = "Missing Hebrew name. ") // This field is a must
 	// Allowing only Hebrew characters, no numbers
-	//@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Hebrew name must contain only Hebrew letters. ")
+	// @Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Hebrew name must
+	// contain only Hebrew letters. ")
 	private String nameHebrew;
 
 	// Regex pattern is made to accept blank, so that a blank input will give only
 	// this specific message
-	//@NotBlank(message = "English name is blank. ")
-	//@NotNull(message = "Missing English name. ") // This field is a must
+	// @NotBlank(message = "English name is blank. ")
+	// @NotNull(message = "Missing English name. ") // This field is a must
 	// Allowing only English characters, no numbers
-	//@Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "English name must contain only English letters. ")
+	// @Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "English name must contain
+	// only English letters. ")
 	private String nameEnglish;
 
 	// If category is shidduch, need also spouse's name.
 
 	// Allowing only Hebrew characters, no numbers
-	//@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Spouse's Hebrew name must contain only Hebrew letters. ")
+	// @Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Spouse's Hebrew
+	// name must contain only Hebrew letters. ")
 	private String nameHebrewSpouse;
 
 	// If category is shidduch, need also spouse's name.
 	// Allowing only English characters, no numbers
-	//@Pattern(regexp = "^[a-zA-Z '\\-]*$", message = "Spouse's English name must contain only English letters. ")
+	// @Pattern(regexp = "^[a-zA-Z '\\-]*$", message = "Spouse's English name must
+	// contain only English letters. ")
 	private String nameEnglishSpouse;
 
 	// Will submitter (if is a davener) receive this name on list?
@@ -72,11 +76,11 @@ public class Davenfor {
 
 	private LocalDate lastConfirmedAt = LocalDate.now();
 
-	//@NotNull(message = "The name does not have an expiration date. ")
+	// @NotNull(message = "The name does not have an expiration date. ")
 	private LocalDate expireAt;
 
 	// Unix timestamp when the record was created
-	//@NotNull(message = "The name does not have a creation date. ")
+	// @NotNull(message = "The name does not have a creation date. ")
 	private LocalDate createdAt = LocalDate.now();
 
 	// When this database record was last updated (if at all)
@@ -86,11 +90,14 @@ public class Davenfor {
 
 	@Override
 	public String toString() {
-		return "Davenfor [" + submitterEmail + ", " + category + ", "
-				+ nameHebrew + ", " + nameEnglish + ", createdAt=" + createdAt
-				+ "]";
+		return "Davenfor [" + submitterEmail + ", " + category + ", " + nameHebrew + ", " + nameEnglish + ", createdAt="
+				+ createdAt + "]";
 	}
-	
-	
+
+	public boolean noSpouseInfo() {
+		return this.nameEnglishSpouse == null || this.nameEnglishSpouse.trim().length() == 0
+				|| this.nameHebrewSpouse == null || this.nameHebrewSpouse.trim().length() == 0;
+
+	}
 
 }

@@ -46,9 +46,9 @@ public class SubmitterService {
 	// his email matches davenfor.getSubmitter().getEmail()
 
 //	@Value("${admin.id}")
-	public long adminId=1;
-	
-	//TODO: In future, make option to add more groups and run each individually
+	public long adminId = 1;
+
+	// TODO: In future, make option to add more groups and run each individually
 //	private Admin getMyGroupSettings(long adminId) throws ObjectNotFoundException {
 //
 //		Optional<Admin> groupSettings = adminRepository.findById(adminId);
@@ -60,6 +60,7 @@ public class SubmitterService {
 //	}
 
 	// According to email address submitter can see all names he submitted.
+	// tested
 	public List<Davenfor> getAllSubmitterDavenfors(String email) throws ObjectNotFoundException {
 
 		// differentiating between non-existing email (this if) and empty list (which
@@ -70,13 +71,14 @@ public class SubmitterService {
 		return davenforRepository.findAllDavenforBySubmitterEmail(email);
 	}
 
+	// tested
 	public Davenfor addDavenfor(Davenfor davenfor, String submitterEmail)
 			throws EmptyInformationException, ObjectNotFoundException, EmailException, MessagingException {
 
 		/*
 		 * Ensuring there is a real category and associating it with the davenfor.
 		 */
-		//TODO - fix so that checks correctly that its a normal category.
+		// TODO - fix so that checks correctly that its a normal category.
 //		Optional<Category> optionalCategory = categoryRepository.findById(davenfor.getCategory().getId());
 //		if (!optionalCategory.isPresent()) {
 //			throw new EmptyInformationException("No existing category chosen. ");
@@ -90,7 +92,7 @@ public class SubmitterService {
 		// is in too, and if indeed exist - trim them.
 
 		if (CategoryType.BANIM.equals(davenfor.getCategory().getCname())) {
-			if (davenfor.getNameEnglishSpouse() == null || davenfor.getNameHebrewSpouse() == null) {
+			if (davenfor.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
 			} else {
@@ -109,20 +111,24 @@ public class SubmitterService {
 
 		davenforRepository.save(davenfor);
 
-		//TODO: in future - allow email if admin wants. If admin's setting defines that admin should get an email upon new name being
+		// TODO: in future - allow email if admin wants. If admin's setting defines that
+		// admin should get an email upon new name being
 		// added:
-		//if (getMyGroupSettings(adminId).isNewNamePrompt()) {
-			String subject = EmailScheme.getInformAdminOfNewNameSubject();
-			String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), davenfor.getCategory().getCname(), submitterEmail);
-			emailSender.informAdmin(subject, message);
-		//}
+		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
+		String subject = EmailScheme.getInformAdminOfNewNameSubject();
+		String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
+				davenfor.getNameHebrew(), davenfor.getCategory().getCname(), submitterEmail);
+		// TODO: when works, enable and adjust matching test includes
+		// emailSender.informAdmin(subject, message);
+		// }
 
 		return davenfor;
 	}
 
+	// tested
 	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail, boolean isAdmin)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException {
+			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException,
+			MessagingException {
 
 		if (davenforToUpdate == null) {
 			throw new EmptyInformationException("No information submitted regarding the name you wish to update. ");
@@ -136,7 +142,7 @@ public class SubmitterService {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
 
-		if(!isAdmin) {
+		if (!isAdmin) {
 			// Comparing email with davenfor-submitter from Database, since the davenfor
 			// coming in may have empty email and lead to null pointer exception.
 			if (!optionalDavenfor.get().getSubmitterEmail().equalsIgnoreCase(submitterEmail)) {
@@ -151,9 +157,9 @@ public class SubmitterService {
 
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
-		//TODO - change this banim condition to 'isBanim' across the board
+		// TODO - change this banim condition to 'isBanim' across the board
 		if (CategoryType.BANIM.equals(davenforToUpdate.getCategory().getCname())) {
-			if (davenforToUpdate.getNameEnglishSpouse() == null || davenforToUpdate.getNameHebrewSpouse() == null) {
+			if (davenforToUpdate.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
 			} else {
@@ -162,7 +168,7 @@ public class SubmitterService {
 			}
 		}
 
-		if(!isAdmin) {
+		if (!isAdmin) {
 			davenforToUpdate.setSubmitterEmail(existingOrNewSubmitter(submitterEmail));
 		}
 		davenforToUpdate.setUpdatedAt(LocalDate.now());
@@ -173,18 +179,19 @@ public class SubmitterService {
 
 		davenforRepository.save(davenforToUpdate);
 
-	//	if (getMyGroupSettings(adminId).isNewNamePrompt()) {
-			String subject = EmailScheme.getInformAdminOfUpdateSubject();
-			String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
-					davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
-					davenforToUpdate.getCategory().getCname());
-			emailSender.informAdmin(subject, message);
-	//	}
+		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
+		String subject = EmailScheme.getInformAdminOfUpdateSubject();
+		String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
+				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
+				davenforToUpdate.getCategory().getCname());
+		// TODO: when email works, enable and add test
+		// emailSender.informAdmin(subject, message);
+		// }
 
 		return davenforToUpdate;
-
 	}
 
+	// tested
 	public boolean extendDavenfor(long davenforId, String submitterEmail)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 
@@ -206,22 +213,19 @@ public class SubmitterService {
 
 		// Extending the davenfor's expiration date according to the defined length in
 		// its category.
-		//LocalDate extendedDate = LocalDate.now().plusDays(categoryRepository.findByName(davenforToExtend.getCatType().toString()).getUpdateRate());
-		//todo! - how to extend date correctly?  Gives error.
-		LocalDate extendedDate = LocalDate.now().plusDays(30);
-		davenforToExtend.setUpdatedAt(LocalDate.now());
-		davenforToExtend.setLastConfirmedAt(LocalDate.now());
+		LocalDate extendedDate = LocalDate.now().plusDays(davenforToExtend.getCategory().getUpdateRate());
 		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());
-
 		return true;
 	}
 
+	// tested
 	public List<Davenfor> deleteDavenfor(long davenforId, String submitterEmail)
 			throws ObjectNotFoundException, PermissionException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
 		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
+
 		Davenfor davenforToDelete = optionalDavenfor.get();
 		String email = submitterEmail.trim();
 		if (davenforToDelete.getSubmitterEmail().equalsIgnoreCase(email)) {
@@ -230,28 +234,32 @@ public class SubmitterService {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
+		
 		return davenforRepository.findAllDavenforBySubmitterEmail(submitterEmail);
 	}
 
+	// tested
 	public List<Category> getAllCategories() throws ObjectNotFoundException {
 		List<Category> categories = categoryRepository.findAllOrderById();
-		if (categories.size()<1)
+		if (categories.size() < 1)
 			throw new ObjectNotFoundException("System categories");
 		return categories;
 	}
 
 	// Private helper method for Finding submitter according to email
+	//tested
 	public String existingOrNewSubmitter(String submitterEmail) {
 		Submitter validSubmitter = submitterRepository.findByEmail(submitterEmail);
 
 		// If submitter has never submitted a name, need to create a new one in
 		// database.
-		if (validSubmitter == null) {//TODO - readd this function
+		if (validSubmitter == null) {// TODO - re-add this function
 			validSubmitter = submitterRepository.save(new Submitter(submitterEmail));
 		}
 		return submitterEmail;
 	}
 
+	//tested
 	public Category getCategory(long id) throws ObjectNotFoundException {
 		Optional<Category> optionalCategory = categoryRepository.findById(id);
 

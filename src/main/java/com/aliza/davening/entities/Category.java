@@ -3,6 +3,7 @@ package com.aliza.davening.entities;
 import java.util.List;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -52,7 +53,9 @@ public class Category {
 //	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Category's Hebrew name must contain only Hebrew letters and spaces. ")
 //	private String hebrew;
 
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false, unique = true)
 	private CategoryType cname;
 	
 	// Is this the current category being sent out?
