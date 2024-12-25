@@ -67,10 +67,12 @@ public class SubmitterServiceTests {
 
 	static String submitterEmail = "sub.email@gmail.com";
 
-	protected static Category catRefua = new Category(REFUA, true, 180, 1);
-	protected static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
-	protected static Category catBanim = new Category(BANIM, false, 50, 3);
-
+	public static Category catRefua = new Category(REFUA, true, 180, 1);
+	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
+	public static Category catBanim = new Category(BANIM, false, 50, 3);
+	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
+	public static Category catYeshuah = new Category(YESHUAH, false, 180, 5);
+	
 	private final static String UNEXPECTED_E = "   ************* Attention: @Submitter service test unexpected Exception: ";
 
 	@BeforeAll
@@ -90,12 +92,6 @@ public class SubmitterServiceTests {
 		} catch (MessagingException | EmailException e) {
 			// do nothing
 		}
-
-		Category catRefua = new Category(REFUA, true, 180, 1);
-		Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
-		Category catBanim = new Category(BANIM, false, 50, 3);
-		Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-		Category catYeshuah = new Category(YESHUAH, false, 180, 5);
 
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(catShidduchim);
 		when(categoryRep.findByCname(BANIM)).thenReturn(catBanim);

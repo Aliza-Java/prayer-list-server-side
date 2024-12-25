@@ -41,7 +41,7 @@ import com.aliza.davening.util_classes.Weekly;
 @Service("adminService")
 @EnableTransactionManagement
 public class AdminService {
-	
+
 	@Autowired
 	DavenerRepository davenerRepository;
 
@@ -70,15 +70,16 @@ public class AdminService {
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 
 	public Admin thisAdmin = null;
-	
+
 	@Value("${admin.id}")
 	long adminId;
 
-	
 	/*
 	 * This method is used on initial start (when admin.id=Non_Exist, will send a
 	 * newly created Admin).
 	 */
+
+	// tested
 	public boolean setAdmin(LoginRequest credentials) throws DatabaseException {
 
 		/*
@@ -88,22 +89,21 @@ public class AdminService {
 		if (isThisAdminEmailInUse(SchemeValues.NON_EXIST, credentials.getUsername())) {
 			throw new DatabaseException("This admin email address is already in use.");
 		}
-		
+
 		Admin admin = new Admin();
-		
+
 		admin.setId(SchemeValues.NON_EXIST);// Ensuring the DB will enter a new row.
 		admin.setEmail(credentials.getUsername());
 		admin.setPassword(bCryptPasswordEncoder.encode(credentials.getPassword()));
 		admin.setWaitBeforeDeletion(SchemeValues.waitBeforeDeletion);
 		admin.setNewNamePrompt(SchemeValues.adminNewNamePrompt);
-		
-		System.out.println(admin);
 
 		adminRepository.save(admin);
 		return true;
 	}
 
-	public Admin findAdminByEmail(String email) throws ObjectNotFoundException{
+	// tested
+	public Admin findAdminByEmail(String email) throws ObjectNotFoundException {
 		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
 		if (!optionalAdmin.isPresent()) {
 			throw new ObjectNotFoundException("Admin with email " + email);
@@ -111,6 +111,7 @@ public class AdminService {
 		return optionalAdmin.get();
 	}
 
+	// tested
 	public boolean updateAdmin(AdminSettings settings) throws ObjectNotFoundException, DatabaseException {
 
 		Optional<Admin> optionalAdmin = adminRepository.findById(adminId);
@@ -123,27 +124,32 @@ public class AdminService {
 			throw new DatabaseException("This admin email address is already in use.");
 		}
 
-		adminRepository.updateSettings(adminId, settings.getEmail(), settings.isNewNamePrompt(), settings.getWaitBeforeDeletion());
+		adminRepository.updateSettings(adminId, settings.getEmail(), settings.isNewNamePrompt(),
+				settings.getWaitBeforeDeletion());
 		return true;
 	}
-	
+
+	// tested
 	public boolean checkPassword(String password, String email) throws ObjectNotFoundException {
 		Optional<Admin> optionalAdmin = adminRepository.getAdminByEmail(email);
 		if (!optionalAdmin.isPresent()) {
 			throw new ObjectNotFoundException("Admin with email " + email);
 		}
-		
-		return bCryptPasswordEncoder.matches(password,optionalAdmin.get().getPassword());
+
+		return bCryptPasswordEncoder.matches(password, optionalAdmin.get().getPassword());
 	}
-	
+
+	// tested
 	public int getWaitBeforeDeletion(long id) {
 		return adminRepository.getWaitBeforeDeletion(id);
 	}
 
+	// tested
 	public List<Davener> getAllDaveners() {
 		return davenerRepository.findAll();
 	}
 
+	// tested
 	public List<Davener> addDavener(Davener davener) throws NoRelatedEmailException {
 
 		// saving davener's email, as it may be used multiple times in this method.
@@ -174,11 +180,10 @@ public class AdminService {
 		return davenerRepository.findAll();
 	}
 
+	// tested
 	public Davener getDavener(long id) throws ObjectNotFoundException {
 		Optional<Davener> optionalDavener = davenerRepository.findById(id);
 
-		// We are not sure he will be found by id. If not found, will throw an
-		// exception.
 		if (!optionalDavener.isPresent()) {
 			throw new ObjectNotFoundException("Davener with id " + id);
 		}
@@ -186,6 +191,7 @@ public class AdminService {
 		return optionalDavener.get();
 	}
 
+	// tested
 	public List<Davener> updateDavener(Davener davener) throws ObjectNotFoundException, EmptyInformationException {
 
 		// Checking that davener exists so that it won't create a new one through
@@ -200,23 +206,30 @@ public class AdminService {
 		return davenerRepository.findAll();
 	}
 
-	public void deleteDavener(long id) throws ObjectNotFoundException {
+	// tested
+	public boolean deleteDavener(long id) throws ObjectNotFoundException {
 		try {
 			davenerRepository.deleteById(id);
 			// If not found, will throw an unchecked exception which we must catch.
 		} catch (EmptyResultDataAccessException e) {
 			throw new ObjectNotFoundException("Davener with id " + id);
 		}
+
+		return true;
 	}
 
+	// tested
 	public List<Submitter> getAllSubmitters() {
 		return submitterRepository.findAll();
 	}
 
+	// tested
 	public List<Davenfor> getAllDavenfors() {
 		return davenforRepository.findAll();
 	}
 
+	// TODO: deleteDavener() should really be like this
+	// tested
 	public List<Davenfor> deleteDavenfor(long id) throws ObjectNotFoundException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
 		if (!optionalDavenfor.isPresent()) {
@@ -226,6 +239,7 @@ public class AdminService {
 		return davenforRepository.findAll();
 	}
 
+	// not tested, for future
 	// A helper method set up primarily for changeCategoryOrder()
 	private Category getCategory(long id) throws ObjectNotFoundException {
 		Optional<Category> optionalCategory = categoryRepository.findById(id);
@@ -235,6 +249,7 @@ public class AdminService {
 		return optionalCategory.get();
 	}
 
+	// TODO: when works, test
 	@Transactional(rollbackFor = ReorderCategoriesException.class)
 	public List<Category> changeCategoryOrder(List<Category> sortedCategories)
 			throws ReorderCategoriesException, ObjectNotFoundException {
@@ -269,105 +284,100 @@ public class AdminService {
 		return sortedCategories;
 	}
 
-	//todo - when ready, implement
+	// TODO: when ready, implement
 	/*
-	public Category addCategory(Category category) throws DatabaseException, EmptyInformationException {
+	 * public Category addCategory(Category category) throws DatabaseException,
+	 * EmptyInformationException {
+	 * 
+	 * // Checking if added category is null if (category == null) { throw new
+	 * EmptyInformationException("Could not add category.  No information was sent."
+	 * ); }
+	 * 
+	 * // Removing any leading and trailing spaces from name. String
+	 * englishCategoryName = category.getEnglish().trim(); String hebrewCategoryName
+	 * = category.getHebrew().trim();
+	 * 
+	 * // Checking if category name is unique, English and Hebrew
+	 * checkIfThisCategoryNameIsInUse(englishCategoryName, hebrewCategoryName,
+	 * getAllCategories(), SchemeValues.NON_EXIST);
+	 * 
+	 * // The trimmed name must be also saved in the entity to be persisted.
+	 * category.setEnglish(englishCategoryName);
+	 * category.setHebrew(hebrewCategoryName);
+	 * 
+	 * categoryRepository.save(category);
+	 * 
+	 * return category; }
+	 * 
+	 * public Category updateCategory(long categoryId, Category categoryToUpdate)
+	 * throws ObjectNotFoundException, EmptyInformationException, DatabaseException
+	 * {
+	 * 
+	 * // Checking that category sent in is not null if (categoryToUpdate == null) {
+	 * throw new
+	 * EmptyInformationException("Could not update category.  No information was sent. "
+	 * ); }
+	 * 
+	 * // Checking that this is an existing category so that won't create a new one
+	 * // through save(). Optional<Category> optionalCategory =
+	 * categoryRepository.findById(categoryId); if (!optionalCategory.isPresent()) {
+	 * throw new ObjectNotFoundException("Category with id " + categoryId); }
+	 * 
+	 * /* Once we verified that the category to update is an existing valid one
+	 * (judging also by the id), we can use the verified ID in case the external
+	 * categoryId is different than the id sent with the category object
+	 * 
+	 * categoryToUpdate.setId(categoryId);
+	 * 
+	 * // Trim incoming names before comparing them. String
+	 * suggestedCategoryNameEnglish = categoryToUpdate.getEnglish().trim(); String
+	 * suggestedCategoryNameHebrew = categoryToUpdate.getHebrew().trim();
+	 * 
+	 * /* checking if name is being updated, and if so that it is not already in
+	 * use. No need to exclude comparing with name itself because sent only if not
+	 * matching.
+	 * 
+	 * boolean englishNameHasBeenChanged = !optionalCategory.get().getEnglish()
+	 * .equalsIgnoreCase(suggestedCategoryNameEnglish); boolean
+	 * hebrewNameHasBeenChanged = !optionalCategory.get().getHebrew()
+	 * .equalsIgnoreCase(suggestedCategoryNameHebrew); if (englishNameHasBeenChanged
+	 * || hebrewNameHasBeenChanged) {
+	 * checkIfThisCategoryNameIsInUse(suggestedCategoryNameEnglish,
+	 * suggestedCategoryNameHebrew, getAllCategories(), categoryId);
+	 * 
+	 * }
+	 * 
+	 * // Setting names in Category object in any case (even if name is the same, //
+	 * spaces may have changed).
+	 * categoryToUpdate.setEnglish(suggestedCategoryNameEnglish);
+	 * categoryToUpdate.setHebrew(suggestedCategoryNameHebrew);
+	 * 
+	 * categoryRepository.save(categoryToUpdate); return categoryToUpdate; }
+	 * 
+	 * public void deleteCategory(long id) throws ObjectNotFoundException { try {
+	 * categoryRepository.deleteById(id); // If not found, will throw an unchecked
+	 * exception which we must catch. } catch (EmptyResultDataAccessException e) {
+	 * throw new ObjectNotFoundException("Category with id " + id); } }
+	 */
 
-		// Checking if added category is null
-		if (category == null) {
-			throw new EmptyInformationException("Could not add category.  No information was sent.");
-		}
-
-		// Removing any leading and trailing spaces from name.
-		String englishCategoryName = category.getEnglish().trim();
-		String hebrewCategoryName = category.getHebrew().trim();
-
-		// Checking if category name is unique, English and Hebrew
-		checkIfThisCategoryNameIsInUse(englishCategoryName, hebrewCategoryName, getAllCategories(),
-				SchemeValues.NON_EXIST);
-
-		// The trimmed name must be also saved in the entity to be persisted.
-		category.setEnglish(englishCategoryName);
-		category.setHebrew(hebrewCategoryName);
-
-		categoryRepository.save(category);
-
-		return category;
-	}
-
-	public Category updateCategory(long categoryId, Category categoryToUpdate)
-			throws ObjectNotFoundException, EmptyInformationException, DatabaseException {
-
-		// Checking that category sent in is not null
-		if (categoryToUpdate == null) {
-			throw new EmptyInformationException("Could not update category.  No information was sent. ");
-		}
-
-		// Checking that this is an existing category so that won't create a new one
-		// through save().
-		Optional<Category> optionalCategory = categoryRepository.findById(categoryId);
-		if (!optionalCategory.isPresent()) {
-			throw new ObjectNotFoundException("Category with id " + categoryId);
-		}
-
-		/*
-		 * Once we verified that the category to update is an existing valid one
-		 * (judging also by the id), we can use the verified ID in case the external
-		 * categoryId is different than the id sent with the category object
-	
-		categoryToUpdate.setId(categoryId);
-
-		// Trim incoming names before comparing them.
-		String suggestedCategoryNameEnglish = categoryToUpdate.getEnglish().trim();
-		String suggestedCategoryNameHebrew = categoryToUpdate.getHebrew().trim();
-
-		/*
-		 * checking if name is being updated, and if so that it is not already in use.
-		 * No need to exclude comparing with name itself because sent only if not
-		 * matching.
-		
-		boolean englishNameHasBeenChanged = !optionalCategory.get().getEnglish()
-				.equalsIgnoreCase(suggestedCategoryNameEnglish);
-		boolean hebrewNameHasBeenChanged = !optionalCategory.get().getHebrew()
-				.equalsIgnoreCase(suggestedCategoryNameHebrew);
-		if (englishNameHasBeenChanged || hebrewNameHasBeenChanged) {
-			checkIfThisCategoryNameIsInUse(suggestedCategoryNameEnglish, suggestedCategoryNameHebrew,
-					getAllCategories(), categoryId);
-
-		}
-
-		// Setting names in Category object in any case (even if name is the same,
-		// spaces may have changed).
-		categoryToUpdate.setEnglish(suggestedCategoryNameEnglish);
-		categoryToUpdate.setHebrew(suggestedCategoryNameHebrew);
-
-		categoryRepository.save(categoryToUpdate);
-		return categoryToUpdate;
-	}
-
-	public void deleteCategory(long id) throws ObjectNotFoundException {
-		try {
-			categoryRepository.deleteById(id);
-			// If not found, will throw an unchecked exception which we must catch.
-		} catch (EmptyResultDataAccessException e) {
-			throw new ObjectNotFoundException("Category with id " + id);
-		}
-	}*/
-
-	public List<Davener> disactivateDavener(String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
+	// tested
+	public List<Davener> disactivateDavener(String davenerEmail) throws EmailException, DatabaseException,
+			ObjectNotFoundException, EmptyInformationException, MessagingException {
 
 		List<Davener> davenerList = null;
-		Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
-		if (davenerToDisactivate.isActive() == false) { // Just to log/notify, and continue business as usual, returning
-														// most recent daveners list.
-			System.out.println(String.format(
-					"The email %s has already been disactivated from receiving the davening lists. ", davenerEmail));
-		}
-
 		try {
-			davenerRepository.disactivateDavener(davenerEmail);
-			emailSender.notifyDisactivatedDavener(davenerEmail);
+			Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
+			if (!davenerToDisactivate.isActive()) { // Just to log/notify, and continue business as usual, returning
+													// most recent daveners list.
+				System.out.println(
+						String.format("The email %s has already been disactivated from receiving the davening lists. ",
+								davenerEmail));
+			}
+
+			else {
+				davenerRepository.disactivateDavener(davenerEmail);
+				emailSender.notifyDisactivatedDavener(davenerEmail);
+			}
 		} finally { // in case there were previous errors (such as in emailSender), return
 					// davenerList anyway.
 			davenerList = davenerRepository.findAll();
@@ -376,20 +386,24 @@ public class AdminService {
 
 	}
 
-	public List<Davener> activateDavener(String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
+	// tested
+	public List<Davener> activateDavener(String davenerEmail) throws EmailException, DatabaseException,
+			ObjectNotFoundException, EmptyInformationException, MessagingException {
 
 		List<Davener> davenerList = null;
 
-		Davener davenerToActivate = davenerRepository.findByEmail(davenerEmail);
-		if (davenerToActivate.isActive() == true) { // Just to log/notify, and continue business as usual, returning
-													// most recent daveners list.
-			System.out.println(String.format("The email %s is already receiving the davening lists. ", davenerEmail));
-		}
-
 		try {
-			davenerRepository.activateDavener(davenerEmail);
-			emailSender.notifyActivatedDavener(davenerEmail);
+			Davener davenerToActivate = davenerRepository.findByEmail(davenerEmail);
+			if (davenerToActivate.isActive() == true) { // Just to log/notify, and continue business as usual, returning
+														// most recent daveners list.
+				System.out
+						.println(String.format("The email %s is already receiving the davening lists. ", davenerEmail));
+			}
+
+			else {
+				davenerRepository.activateDavener(davenerEmail);
+				emailSender.notifyActivatedDavener(davenerEmail);
+			}
 		} finally {// in case there were previous errors (such as in emailSender), return
 			// davenerList anyway.
 			davenerList = davenerRepository.findAll();
@@ -397,43 +411,24 @@ public class AdminService {
 		return davenerList;
 	}
 
+	//tested
 	public void updateCurrentCategory() {
 		// Checking which is the next category in line. Changing it's isCurrent to true,
 		// while the previous one to false.
-		Category nextCategory = utilities.getNextCategory(categoryRepository.getCurrent());
-		categoryRepository.updateCategoryCurrent(false, categoryRepository.getCurrent().getId());
+		Category currentCategory = categoryRepository.getCurrent();
+		Category nextCategory = utilities.getNextCategory(currentCategory);
+		categoryRepository.updateCategoryCurrent(false, currentCategory.getId());
 		categoryRepository.updateCategoryCurrent(true, nextCategory.getId());
 	}
 
-//	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)
-//			throws DatabaseException {
-//
-//		// names should be compared only after trimming, as spaces do not change the
-//		// word inherently
-//		english = english.toLowerCase().trim();
-//		hebrew = hebrew.trim();
-//
-//		for (Category c : categories) {
-//			if (c.getId() != id) { // do this check only if checked category is not the one in question
-//
-//				if (english.equalsIgnoreCase(c.getEnglish()))
-//					throw new DatabaseException("The category name '" + english + "' is already in use.");
-//				if (hebrew.equalsIgnoreCase(c.getHebrew()))
-//					throw new DatabaseException("The category name '" + hebrew + "' is already in use.");
-//
-//			}
-//		}
-//
-//		return false;
-//	}
-
+	//tested
 	public List<Category> getAllCategories() {
 		return categoryRepository.findAllOrderById();
 	}
 
-	// A local method to check if an admin email exists (other than this one, of
+	//tested indirectly. A local method to check if an admin email exists (other than this one, of
 	// course).
-	public boolean isThisAdminEmailInUse(long id, String email) {
+	private boolean isThisAdminEmailInUse(long id, String email) {
 		List<Admin> allAdmins = adminRepository.findAll();
 		for (Admin a : allAdmins) {
 			if (a.getEmail().equalsIgnoreCase(email) && a.getId() != id) {
@@ -443,18 +438,22 @@ public class AdminService {
 		return false;
 	}
 
+	//tested
 	public List<Parasha> getAllParashot() {
 		return this.parashaRepository.findAll();
 	}
 
+	//tested
 	public Parasha findCurrentParasha() {
 		return this.parashaRepository.findCurrent();
 	}
 
+	//tested
 	public Category findCurrentCategory() {
 		return this.categoryRepository.getCurrent();
 	}
 
+	//tested
 	public String previewWeekly(Weekly info)
 			throws ObjectNotFoundException, IOException, DatabaseException, EmptyInformationException {
 
@@ -467,8 +466,32 @@ public class AdminService {
 		return utilities.createWeeklyHtml(category, info.parashaName);
 	}
 
+	//tested
 	public AdminSettings getAdminSettings(String email) throws ObjectNotFoundException {
 		Admin admin = findAdminByEmail(email);
 		return new AdminSettings(admin.getEmail(), admin.isNewNamePrompt(), admin.getWaitBeforeDeletion());
 	}
+
+//	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)
+//	throws DatabaseException {
+//
+//// names should be compared only after trimming, as spaces do not change the
+//// word inherently
+//english = english.toLowerCase().trim();
+//hebrew = hebrew.trim();
+//
+//for (Category c : categories) {
+//	if (c.getId() != id) { // do this check only if checked category is not the one in question
+//
+//		if (english.equalsIgnoreCase(c.getEnglish()))
+//			throw new DatabaseException("The category name '" + english + "' is already in use.");
+//		if (hebrew.equalsIgnoreCase(c.getHebrew()))
+//			throw new DatabaseException("The category name '" + hebrew + "' is already in use.");
+//
+//	}
+//}
+//
+//return false;
+//}
+
 }
