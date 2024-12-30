@@ -3,8 +3,6 @@ package com.aliza.davening.rest;
 import java.io.IOException;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -32,6 +30,8 @@ import com.aliza.davening.services.SubmitterService;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Password;
 import com.aliza.davening.util_classes.Weekly;
+
+import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("admin")

@@ -4,8 +4,6 @@ package com.aliza.davening;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -16,6 +14,8 @@ import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
+
+import jakarta.mail.MessagingException;
 
 @Component
 public class MaintainList {

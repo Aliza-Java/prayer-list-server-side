@@ -5,8 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.mail.MessagingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +21,8 @@ import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
+
+import jakarta.mail.MessagingException;
 
 @Service("submitterService")
 public class SubmitterService {
@@ -234,7 +234,7 @@ public class SubmitterService {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
-		
+
 		return davenforRepository.findAllDavenforBySubmitterEmail(submitterEmail);
 	}
 
@@ -247,7 +247,7 @@ public class SubmitterService {
 	}
 
 	// Private helper method for Finding submitter according to email
-	//tested
+	// tested
 	public String existingOrNewSubmitter(String submitterEmail) {
 		Submitter validSubmitter = submitterRepository.findByEmail(submitterEmail);
 
@@ -259,7 +259,7 @@ public class SubmitterService {
 		return submitterEmail;
 	}
 
-	//tested
+	// tested
 	public Category getCategory(long id) throws ObjectNotFoundException {
 		Optional<Category> optionalCategory = categoryRepository.findById(id);
 

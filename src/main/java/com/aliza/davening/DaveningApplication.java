@@ -3,8 +3,7 @@ package com.aliza.davening;
 
 import java.io.IOException;
 
-import javax.mail.MessagingException;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
@@ -25,8 +24,12 @@ import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.exceptions.ReorderCategoriesException;
 import com.aliza.davening.repositories.CategoryRepository;
+import com.aliza.davening.services.AdminService;
+import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.SubmitterService;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
+
+import jakarta.mail.MessagingException;
 
 @SpringBootApplication
 @EnableAutoConfiguration
@@ -37,8 +40,7 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 
 public class DaveningApplication {
 
-//	@Autowired
-//	EmailSender emailSender;
+
 
 	public static void main(String[] args) throws ObjectNotFoundException, EmptyInformationException, DatabaseException,
 			IOException, MessagingException, EmailException, NoRelatedEmailException, ReorderCategoriesException,
@@ -53,9 +55,12 @@ public class DaveningApplication {
 		
 		
 		// For testing:
-
+		
+		AdminService adminService = context.getBean(AdminService.class);
+		adminService.activateDavener("aliza.shanet@gmail.com");
 		// SubmitterService submitterService = context.getBean(SubmitterService.class);
-		// emailSender.sendOutWeekly(Utilities.findParasha(9), "specific text");
+		EmailSender emailSender = context.getBean(EmailSender.class);
+		 emailSender.sendEmailFromAdmin("aliza.shanet@gmail.com", "test");
 	}
 
 	// For encoding user passwords - rest of application needs this (leave it!)

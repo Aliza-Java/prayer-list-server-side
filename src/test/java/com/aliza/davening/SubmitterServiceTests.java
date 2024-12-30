@@ -10,13 +10,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import javax.mail.MessagingException;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,7 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import static org.mockito.Mockito.*;
 
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
@@ -39,8 +42,9 @@ import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
-import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.SubmitterService;
+
+import jakarta.mail.MessagingException;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -62,8 +66,8 @@ public class SubmitterServiceTests {
 	@MockBean
 	private AdminRepository adminRep;
 
-	@MockBean
-	private EmailSender emailSender;
+	//@Autowired
+	//private EmailSender emailSender;
 
 	static String submitterEmail = "sub.email@gmail.com";
 
@@ -79,20 +83,7 @@ public class SubmitterServiceTests {
 	private void baseTest() {
 		when(submitterRep.findByEmail(submitterEmail)).thenReturn(new Submitter(submitterEmail));
 
-		// TODO: when email works enable real emailing through here (or through email
-		// service tests)
-		try {
-			when(emailSender.sendEmail(anyString(), // subject
-					anyString(), // text
-					anyString(), // to,
-					any(), // bcc,
-					any(), // attachment,
-					anyString())) // attachmentName
-							.thenReturn(true);
-		} catch (MessagingException | EmailException e) {
-			// do nothing
-		}
-
+		
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(catShidduchim);
 		when(categoryRep.findByCname(BANIM)).thenReturn(catBanim);
 		when(categoryRep.findByCname(REFUA)).thenReturn(catRefua);

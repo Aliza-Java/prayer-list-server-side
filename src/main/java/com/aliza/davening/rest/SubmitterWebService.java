@@ -2,8 +2,6 @@ package com.aliza.davening.rest;
 
 import java.util.List;
 
-import javax.mail.MessagingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,7 +20,10 @@ import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.services.EmailSender;
+import com.aliza.davening.services.ProdEmailSessionConfig;
 import com.aliza.davening.services.SubmitterService;
+
+import jakarta.mail.MessagingException;
 
 @RestController
 @RequestMapping("sub")
@@ -40,11 +41,12 @@ public class SubmitterWebService {
 		return submitterService.getAllSubmitterDavenfors(email);
 	}
 	
-	//TODO: REMOVE IF UNNECESSARY, CONFIGURING EMAIL
-	@PostMapping("testemail")
-	public boolean sendTestEmail() throws MessagingException, EmailException {
-		return emailSender.sendEmail("custom subject", "hopefully this will go through", "aliza.shanet@gmail.com", null, null, null);
-	}
+//	//TODO: REMOVE IF UNNECESSARY, CONFIGURING EMAIL
+//	@PostMapping("testemail")
+//	public boolean sendTestEmail() throws MessagingException, EmailException {
+//		ProdEmailConfig emailConfig = new ProdEmailConfig();
+//		return emailSender.sendEmail(EmailSender.createMimeMessage("custom subject", "hopefully this will go through", "aliza.shanet@gmail.com", null, null, null));
+//	}
 
 	@PostMapping(path = "{email}")
 	public Davenfor addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)

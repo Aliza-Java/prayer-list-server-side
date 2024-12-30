@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-import javax.mail.MessagingException;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -37,6 +35,8 @@ import com.aliza.davening.repositories.SubmitterRepository;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
+
+import jakarta.mail.MessagingException;
 
 @Service("adminService")
 @EnableTransactionManagement
@@ -367,6 +367,11 @@ public class AdminService {
 		List<Davener> davenerList = null;
 		try {
 			Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
+			if (davenerToDisactivate == null) { // TODO - add test that davener not found
+				System.out.println(
+						String.format("The email %s cannot be disactivated because it is not found.  Please check the email address. ", davenerEmail));
+				return davenerRepository.findAll();
+			}
 			if (!davenerToDisactivate.isActive()) { // Just to log/notify, and continue business as usual, returning
 													// most recent daveners list.
 				System.out.println(
@@ -394,6 +399,11 @@ public class AdminService {
 
 		try {
 			Davener davenerToActivate = davenerRepository.findByEmail(davenerEmail);
+			if (davenerToActivate == null) { // TODO - add test that davener not found
+				System.out.println(
+						String.format("The email %s cannot be activated because it is not found.  Please check the email address. ", davenerEmail));
+				return davenerRepository.findAll();
+			}
 			if (davenerToActivate.isActive() == true) { // Just to log/notify, and continue business as usual, returning
 														// most recent daveners list.
 				System.out
@@ -411,7 +421,7 @@ public class AdminService {
 		return davenerList;
 	}
 
-	//tested
+	// tested
 	public void updateCurrentCategory() {
 		// Checking which is the next category in line. Changing it's isCurrent to true,
 		// while the previous one to false.
@@ -421,12 +431,13 @@ public class AdminService {
 		categoryRepository.updateCategoryCurrent(true, nextCategory.getId());
 	}
 
-	//tested
+	// tested
 	public List<Category> getAllCategories() {
 		return categoryRepository.findAllOrderById();
 	}
 
-	//tested indirectly. A local method to check if an admin email exists (other than this one, of
+	// tested indirectly. A local method to check if an admin email exists (other
+	// than this one, of
 	// course).
 	private boolean isThisAdminEmailInUse(long id, String email) {
 		List<Admin> allAdmins = adminRepository.findAll();
@@ -438,22 +449,22 @@ public class AdminService {
 		return false;
 	}
 
-	//tested
+	// tested
 	public List<Parasha> getAllParashot() {
 		return this.parashaRepository.findAll();
 	}
 
-	//tested
+	// tested
 	public Parasha findCurrentParasha() {
 		return this.parashaRepository.findCurrent();
 	}
 
-	//tested
+	// tested
 	public Category findCurrentCategory() {
 		return this.categoryRepository.getCurrent();
 	}
 
-	//tested
+	// tested
 	public String previewWeekly(Weekly info)
 			throws ObjectNotFoundException, IOException, DatabaseException, EmptyInformationException {
 
@@ -466,7 +477,7 @@ public class AdminService {
 		return utilities.createWeeklyHtml(category, info.parashaName);
 	}
 
-	//tested
+	// tested
 	public AdminSettings getAdminSettings(String email) throws ObjectNotFoundException {
 		Admin admin = findAdminByEmail(email);
 		return new AdminSettings(admin.getEmail(), admin.isNewNamePrompt(), admin.getWaitBeforeDeletion());

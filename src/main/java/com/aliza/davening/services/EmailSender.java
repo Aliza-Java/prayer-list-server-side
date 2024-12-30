@@ -7,20 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Properties;
-
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.aliza.davening.EmailScheme;
@@ -38,15 +30,19 @@ import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.util_classes.Weekly;
-import com.sun.mail.smtp.SMTPTransport;
+
+import jakarta.mail.Message;
+import jakarta.mail.MessagingException;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.MimeMessage;
 
 @Service
-public class EmailSender {
+public class EmailSender implements EmailService {
 
-//	@Autowired
-//	private JavaMailSender javaMailSender;
-
-
+	@Autowired
+    private EmailSessionProvider sessionProvider;
+	
 	@Autowired
 	private DavenforRepository davenforRepository;
 
@@ -62,85 +58,67 @@ public class EmailSender {
 	@Autowired
 	private Utilities utilities;
 
-	// @Value("${admin.email}")
-	String adminEmail = "davening.list@gmail.com";
+	@Value("${admin.email}")
+	String adminEmail;
 
 	// @Value("${admin.id}")
 	long adminId = 1;
 
-	@Value("${mailgun.smtp.login}")
-	String emailUsername;
-	@Value("${mailgun.smtp.password}")
-	String emailPassword;
-	@Value("${mailgun.smtp.port}")
-	int emailPort;
-	@Value("${mailgun.smtps.host}")
-	String emailHost;
-	@Value("${mailgun.domain}")
-	String domain;
-	@Value("${mailgun.api.key}")
-	String apiKey;
+	public static MimeMessage createMimeMessage(Session session, String subject, String text, String to, String[] bcc,
+			File attachment, String attachmentName) {
 
-	public boolean sendEmail(String subject, String text, String to, String[] bcc, File attachment,
-			String attachmentName) throws MessagingException, EmailException {
+		// Create the email message
+		MimeMessage message = new MimeMessage(session);
+		try {
+			message.setRecipients(Message.RecipientType.TO, to);
+			message.setSubject(subject);
+			message.setText(text);
+		} catch (MessagingException e) {
+			throw new RuntimeException("Failed to create MIME message", e);
+		}
+
+		return message;
+	}
+
+	// general method
+	@Override
+	public boolean sendEmail(MimeMessage message) throws MessagingException, EmailException {
 		// TODO: allow attachment, make all methods use this, services and controllers
 		// to direct to EmailSender correctly.
 
-		Properties props = System.getProperties();
-		props.put("mail.smtps.host", emailHost);
-		props.put("mail.smtps.auth", "true");
-
 		try {
-			Session session = Session.getInstance(props, null);
-			
-			MimeMessage msg = new MimeMessage(session);
-			MimeMessageHelper helper = new MimeMessageHelper(msg, true, "utf-8");
-
-			// MimeMessage msg = javaMailSender.createMimeMessage();
-			helper.setFrom(new InternetAddress(adminEmail));
-
-			InternetAddress[] addrs = InternetAddress.parse(to, false);
-			helper.setTo(addrs);
-			helper.setSubject(subject);
-			
-			//msg.setSubject(subject, "utf-8");
-			
-			helper.setText(text, true);
-			//charset=UTF-8";
-			helper.setSentDate(new Date());
-
-			
-
-			if (attachment != null) {
-				helper.addAttachment(attachmentName, attachment);
-			}
-
-			SMTPTransport t = (SMTPTransport) session.getTransport("smtps");
-			// host and port are hardcoded, otherwise doesn't work, maybe they need to be
-			// static (but static doesn't work for other purposes).
-			t.connect("smtp.mailgun.org", emailUsername, emailPassword);
-			t.sendMessage(msg, msg.getAllRecipients());
-
-			t.close();
-		} catch (Exception e) {
-			throw new EmailException("Something went wrong with sending the email.  " + e);
+			// Send the email
+			Transport.send(message);
+			System.out.println("Email sent successfully!");
+		} catch (MessagingException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Failed to send email");
 		}
+
+		// TODO - where to put the encoding utf-8?
+		// TODO - mimeMessageHelper for attachment and more
+
 		return true;
 	}
 
 	// A general method allowing Admin to send messages to system users public
-	void sendEmailFromAdmin(String recipient, String message)
+	public void sendEmailFromAdmin(String recipient, String text)
 			throws EmailException, EmptyInformationException, MessagingException {
 
 		if (recipient == null) {
 			throw new EmptyInformationException("Recipient email address missing.");
 		}
 
-		sendEmail(EmailScheme.getAdminMessageSubject(), message, recipient, makeAdminTheBcc(), null, null);
+		Session session = sessionProvider.getSession();
+		
+		MimeMessage mimeMessage = createMimeMessage(session, EmailScheme.getAdminMessageSubject(), text, recipient,
+				makeAdminTheBcc(), null, null);
+
+		sendEmail(mimeMessage);
 	}
 
-	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException,
-			ObjectNotFoundException, DatabaseException, EmptyInformationException {
+	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException, ObjectNotFoundException,
+			DatabaseException, EmptyInformationException {
 		Weekly simplified = new Weekly();
 		simplified.parashaName = parashaRepository.findCurrent().getEnglishName();
 		simplified.fullWeekName = parashaRepository.findCurrent().getEnglishName() + " - "
@@ -150,7 +128,8 @@ public class EmailSender {
 		sendOutWeekly(simplified);
 	}
 
-	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
+	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException,
+			ObjectNotFoundException, DatabaseException, EmptyInformationException {
 
 		Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
 		if (!optionalCategory.isPresent()) {
@@ -182,8 +161,8 @@ public class EmailSender {
 		// 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		// therefore including admin's email.
 
-		sendEmail(subject, emailText, adminEmail, davenersArray,
-				utilities.buildListImage(category, info.parashaName, info.fullWeekName), fileName);
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, adminEmail, davenersArray,
+				utilities.buildListImage(category, info.parashaName, info.fullWeekName), fileName));
 	}
 
 	public void sendUrgentEmail(Davenfor davenfor)
@@ -228,12 +207,12 @@ public class EmailSender {
 		// 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		// therefore including admin's email.
 
-		sendEmail(subject, urgentMessage, adminEmail, davenersArray, null, null);
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, adminEmail, davenersArray, null, null));
 	}
 
 	public void informAdmin(String subject, String message) throws EmailException, MessagingException {
 
-		sendEmail(subject, message, adminEmail, makeAdminTheBcc(), null, null);
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, adminEmail, makeAdminTheBcc(), null, null));
 
 	}
 
@@ -265,7 +244,8 @@ public class EmailSender {
 		String to = confirmedDavenfor.getSubmitterEmail();
 
 		try {
-			sendEmail(subject, personalizedEmailText, to, makeAdminTheBcc(), null, null);
+			sendEmail(
+					createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, to, makeAdminTheBcc(), null, null));
 		} catch (Exception e) {
 			throw new EmailException(
 
@@ -299,7 +279,7 @@ public class EmailSender {
 		String recipient = davenfor.getSubmitterEmail();
 
 		try {
-			sendEmail(subject, message, recipient, makeAdminTheBcc(), null, null);
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, makeAdminTheBcc(), null, null));
 		} catch (EmailException e) {
 			String.format("Unable to send an email to %s offering to extend or delete the name %s.", recipient,
 					davenfor.getNameEnglish());

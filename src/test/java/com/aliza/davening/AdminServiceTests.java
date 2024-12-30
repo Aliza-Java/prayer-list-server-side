@@ -11,21 +11,19 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import javax.mail.MessagingException;
-
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -37,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.aliza.davening.entities.Admin;
@@ -62,15 +61,18 @@ import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
 
+import jakarta.mail.MessagingException;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
+@ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AdminServiceTests {
 
 	@Autowired
 	private AdminService adminService;
-
+	
 	@MockBean
 	private DavenforRepository davenforRep;
 
@@ -91,9 +93,6 @@ public class AdminServiceTests {
 
 	@MockBean
 	private EmailSender emailSender;
-
-	@Autowired
-	private Utilities utilities;
 
 	static BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -138,25 +137,14 @@ public class AdminServiceTests {
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @Admin service test unexpected Exception: ";
 
-	// @BeforeAll
+	@BeforeAll
 	private void baseTest() {
 		// when(submitterRep.findByEmail(submitterEmail)).thenReturn(new
 		// Submitter(submitterEmail));
 
 		// TODO: when email works enable real emailing through here (or through email
 		// service tests)
-		try {
-			when(emailSender.sendEmail(anyString(), // subject
-					anyString(), // text
-					anyString(), // to,
-					any(), // bcc,
-					any(), // attachment,
-					anyString())) // attachmentName
-							.thenReturn(true);
-		} catch (MessagingException | EmailException e) {
-			System.out.println(UNEXPECTED_E + e.getStackTrace());
-		}
-
+		
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(catShidduchim);
 		when(categoryRep.findByCname(BANIM)).thenReturn(catBanim);
 		when(categoryRep.findByCname(REFUA)).thenReturn(catRefua);
