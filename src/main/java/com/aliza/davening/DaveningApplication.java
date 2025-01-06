@@ -2,6 +2,7 @@
 package com.aliza.davening;
 
 import java.io.IOException;
+import java.time.LocalDate;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -26,6 +27,8 @@ import com.aliza.davening.exceptions.ReorderCategoriesException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
+import com.aliza.davening.services.EmailSessionProvider;
+import com.aliza.davening.services.ProdEmailSessionProvider;
 import com.aliza.davening.services.SubmitterService;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
@@ -39,9 +42,6 @@ import jakarta.mail.MessagingException;
 @ServletComponentScan
 
 public class DaveningApplication {
-
-
-
 	public static void main(String[] args) throws ObjectNotFoundException, EmptyInformationException, DatabaseException,
 			IOException, MessagingException, EmailException, NoRelatedEmailException, ReorderCategoriesException,
 			PermissionException {
@@ -51,16 +51,17 @@ public class DaveningApplication {
 		//Need headless configuration for building the image.
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
 		builder.headless(false);
-		ConfigurableApplicationContext context = builder.run(args);
-		
+		ConfigurableApplicationContext context = builder.run(args);	
 		
 		// For testing:
 		
-		AdminService adminService = context.getBean(AdminService.class);
-		adminService.activateDavener("aliza.shanet@gmail.com");
+		//AdminService adminService = context.getBean(AdminService.class);
+		//adminService.activateDavener("aliza.shanet@gmail.com");
 		// SubmitterService submitterService = context.getBean(SubmitterService.class);
-		EmailSender emailSender = context.getBean(EmailSender.class);
-		 emailSender.sendEmailFromAdmin("aliza.shanet@gmail.com", "test");
+		//CategoryRepository categoryRep = context.getBean(CategoryRepository.class);
+		//EmailSender es = context.getBean(EmailSender.class);
+		
+		 //es.offerExtensionOrDelete(new Davenfor(5, "aliza.shanet@gmail.com", categoryRep.getOne(1L), "nameHebrew", "nameEnglish", null, null, true, LocalDate.now(),  LocalDate.now(),LocalDate.now(),LocalDate.now(),"test note" ));
 	}
 
 	// For encoding user passwords - rest of application needs this (leave it!)

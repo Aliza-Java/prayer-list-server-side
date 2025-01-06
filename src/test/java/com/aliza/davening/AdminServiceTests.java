@@ -452,7 +452,7 @@ public class AdminServiceTests {
 	@Test
 	@Order(16)
 	public void updateCurrentCategoryTest() {
-		when(categoryRep.getCurrent()).thenReturn(catRefua);
+		when(categoryRep.getCurrent()).thenReturn(Optional.of(catRefua));
 		when(categoryRep.findAll()).thenReturn(categories);
 
 		adminService.updateCurrentCategory();
@@ -484,7 +484,7 @@ public class AdminServiceTests {
 	@Test
 	@Order(19)
 	public void findCurrentParashaTest() {
-		when(parashaRep.findCurrent()).thenReturn(parasha1);
+		when(parashaRep.findCurrent()).thenReturn(Optional.of(parasha1));
 		assertEquals(parasha1, adminService.findCurrentParasha());
 
 		verify(parashaRep, times(1)).findCurrent();
@@ -493,7 +493,7 @@ public class AdminServiceTests {
 	@Test
 	@Order(20)
 	public void findCurrentCategoryTest() {
-		when(categoryRep.getCurrent()).thenReturn(catYeshuah);
+		when(categoryRep.getCurrent()).thenReturn(Optional.of(catYeshuah));
 		assertEquals(catYeshuah, adminService.findCurrentCategory());
 
 		verify(categoryRep, times(1)).getCurrent();
@@ -511,17 +511,17 @@ public class AdminServiceTests {
 		when(davenforRep.findAllDavenforByCategory(eq(catYeshuah))).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.previewWeekly(new Weekly("Vayera", "full weekly name", 3L, "message"));
+			adminService.previewWeekly(new Weekly("Vayera", 3L, catBanim, "message"));
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
 		try {
 			exception = assertThrows(EmptyInformationException.class, () -> {
-				adminService.previewWeekly(new Weekly("Vayera", "full weekly name", 2L, "message"));
+				adminService.previewWeekly(new Weekly("Vayera", 2L, catShidduchim, "message"));
 			});
 			assertTrue(exception.getMessage().contains("no names"));
 
-			String html = adminService.previewWeekly(new Weekly("Vayechi", "full weekly name 2", 5L, "message 2"));
+			String html = adminService.previewWeekly(new Weekly("Vayechi", 5L, catYeshuah, "message 2"));
 
 			assertTrue(html.contains("Vayechi"));
 			assertTrue(html.contains("YESHUAH"));

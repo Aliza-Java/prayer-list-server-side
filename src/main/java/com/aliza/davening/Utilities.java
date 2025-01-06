@@ -6,6 +6,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
@@ -42,10 +43,10 @@ public class Utilities {
 	@Autowired
 	AdminService adminService;
 
-	//@Value("${admin.email}")
-	private String adminEmail="davening.list@gmail.com";
+	// @Value("${admin.email}")
+	private String adminEmail = "davening.list@gmail.com";
 
-	public File buildListImage(Category category, String weekName, String fullWeekName)
+	public File buildListImage(Category category, String weekName)
 			throws IOException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
 
 		int imageWidth = EmailScheme.getImageWidth();
@@ -53,22 +54,36 @@ public class Utilities {
 
 		String weeklyHtml = createWeeklyHtml(category, weekName);
 
-		BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
-				.getDefaultConfiguration().createCompatibleImage(imageWidth, imageHeight);
-
-		Graphics graphics = image.createGraphics();
-
-		JEditorPane jep = new JEditorPane("text/html", weeklyHtml);
-		jep.setSize(imageWidth, imageHeight);
-		jep.print(graphics);
-
 		String fileName = "builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png";
-
 		Path filePath = Paths.get("builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png");
+		
+		if (!GraphicsEnvironment.isHeadless()) {
+			BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+					.getDefaultConfiguration().createCompatibleImage(imageWidth, imageHeight);
 
-		// png seems to be better than jpeg, writes without a blotch behind the text
-		ImageIO.write(image, "png", new File(fileName));
+			Graphics graphics = image.createGraphics();
 
+			JEditorPane jep = new JEditorPane("text/html", weeklyHtml);
+			jep.setSize(imageWidth, imageHeight);
+			jep.print(graphics);
+
+			// png seems to be better than jpeg, writes without a blotch behind the text
+			ImageIO.write(image, "png", new File(fileName));
+		}
+		else
+		{
+			System.out.println("File name: " + fileName);
+			System.out.println("File path: " + filePath);
+
+	        try {
+	            Files.write(filePath, weeklyHtml.getBytes());
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+			
+			return filePath.toFile();
+			
+		}
 		return filePath.toFile();
 	}
 
@@ -178,8 +193,8 @@ public class Utilities {
 		stringBuilder.append(String.format(EmailScheme.getSimpleHeader(), EmailScheme.getInMemoryEnglish()));
 		stringBuilder.append(weekName);
 
-		stringBuilder
-				.append(String.format(EmailScheme.getBilingualHeader(), category.getCname(), category.getCname().getHebName()));
+		stringBuilder.append(
+				String.format(EmailScheme.getBilingualHeader(), category.getCname(), category.getCname().getHebName()));
 		stringBuilder.append(EmailScheme.getTableStart());
 
 		// Running through names, adding them in columns - English and Hebrew
@@ -212,8 +227,8 @@ public class Utilities {
 
 		// Adding line about next week's category
 		Category nextCategory = getNextCategory(category);
-		stringBuilder.append(
-				String.format(EmailScheme.getNextWeekCategory(), nextCategory.getCname(), nextCategory.getCname().getHebName()));
+		stringBuilder.append(String.format(EmailScheme.getNextWeekCategory(), nextCategory.getCname(),
+				nextCategory.getCname().getHebName()));
 
 		// Adding line to email with name and good news.
 		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), adminEmail));

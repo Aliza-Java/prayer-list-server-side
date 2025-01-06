@@ -425,7 +425,7 @@ public class AdminService {
 	public void updateCurrentCategory() {
 		// Checking which is the next category in line. Changing it's isCurrent to true,
 		// while the previous one to false.
-		Category currentCategory = categoryRepository.getCurrent();
+		Category currentCategory = categoryRepository.getCurrent().get();
 		Category nextCategory = utilities.getNextCategory(currentCategory);
 		categoryRepository.updateCategoryCurrent(false, currentCategory.getId());
 		categoryRepository.updateCategoryCurrent(true, nextCategory.getId());
@@ -456,12 +456,12 @@ public class AdminService {
 
 	// tested
 	public Parasha findCurrentParasha() {
-		return this.parashaRepository.findCurrent();
+		return this.parashaRepository.findCurrent().get();
 	}
 
 	// tested
 	public Category findCurrentCategory() {
-		return this.categoryRepository.getCurrent();
+		return this.categoryRepository.getCurrent().get();
 	}
 
 	// tested

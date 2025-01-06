@@ -50,6 +50,7 @@ public class EmailScheme {
 
 	private static String htmlBodyEnd = "</body></html>";
 
+	//TODO - make a real unsubscribe link
 	private static String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='http://www.google.com'>HERE</a>";
 
 	// Subject includes the category
@@ -60,11 +61,11 @@ public class EmailScheme {
 
 	private static String davenerDisactivated = "We are confirming that your participation on the davening list has been disactivated. <br><br> You will no longer receive emails regarding the davening list.  You may resubscribe at any time.  <br><br>If you think you did not disactivate your participation on the list, please contact your list admin immediately. ";
 
-	private static String davenerActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receive emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
+	private static String davenerActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
 
 	// Text appearing in Admin's email requesting to daven urgently (can be Banim or
 	// any category)
-	private static String urgentDavenforEmailBanim = "Please daven for <b>%s - %s</b> and <b>%s - %s</b>, for: <b>%s</b>. <br>";
+	private static String urgentDavenforEmailBanim = "Please daven now for <b>%s - %s</b> and <b>%s - %s</b>, for: <b>%s</b>. <br>";
 
 	private static String urgentDavenforEmailText = "Please daven now for <b>%s - %s</b>, for: <b>%s<b/>. <br>";
 
@@ -73,7 +74,7 @@ public class EmailScheme {
 
 	private static String informAdminOfUpdateSubject = "A name has been updated on your davening list. ";
 
-	private static String weeklyFileName = "Davening List Parashat %s";
+	private static String weeklyFileName = "Davening List %s";
 
 	// putting one message first, in bold, with new line before other text.
 	private static String boldFirstMessage = "<h4>%s</h4>%s";

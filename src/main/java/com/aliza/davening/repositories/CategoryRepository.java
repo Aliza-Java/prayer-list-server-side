@@ -1,6 +1,8 @@
 package com.aliza.davening.repositories;
 
 import java.util.List;
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,7 +22,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 	public void updateCategoryOrder(int newOrder, long categoryId);
 
 	@Query("select c from Category c where c.isCurrent=true")
-	public Category getCurrent();
+	public Optional<Category> getCurrent();
 	
 	@Modifying
 	@Transactional
