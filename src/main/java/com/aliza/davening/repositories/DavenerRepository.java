@@ -1,8 +1,9 @@
 package com.aliza.davening.repositories;
 
 import java.util.List;
+import java.util.Optional;
 
-import javax.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -27,8 +28,7 @@ public interface DavenerRepository extends JpaRepository<Davener, Long> {
 	 @Query("update Davener d set d.active=true where email=?1")
 	 public void activateDavener(String email);
 	 
-	 Davener findByEmail(String email);
+	 Optional<Davener> findByEmail(String email);
 	 
 	 List<Davener> findAll();
-
 }

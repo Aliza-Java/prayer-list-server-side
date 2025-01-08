@@ -168,10 +168,10 @@ public class AdminService {
 		 * add him to the database. If new - will create new. If old - will receive the
 		 * old id and save in the same row.
 		 */
-		Davener existingDavener = davenerRepository.findByEmail(davenersEmail);
+		Optional<Davener> existingDavener = davenerRepository.findByEmail(davenersEmail);
 
-		if (existingDavener != null) {
-			davener = existingDavener; // giving davener the existing id
+		if (existingDavener.isPresent()) {
+			davener = existingDavener.get(); // giving davener the existing id
 			davener.setActive(true);
 		} else { // new davener - save full incoming data
 			davenerRepository.save(davener);
@@ -366,13 +366,13 @@ public class AdminService {
 
 		List<Davener> davenerList = null;
 		try {
-			Davener davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
-			if (davenerToDisactivate == null) { // TODO - add test that davener not found
+			Optional<Davener> davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
+			if (davenerToDisactivate.isEmpty()) { // TODO - add test that davener not found
 				System.out.println(
 						String.format("The email %s cannot be disactivated because it is not found.  Please check the email address. ", davenerEmail));
 				return davenerRepository.findAll();
 			}
-			if (!davenerToDisactivate.isActive()) { // Just to log/notify, and continue business as usual, returning
+			if (!davenerToDisactivate.get().isActive()) { // Just to log/notify, and continue business as usual, returning
 													// most recent daveners list.
 				System.out.println(
 						String.format("The email %s has already been disactivated from receiving the davening lists. ",
@@ -398,13 +398,13 @@ public class AdminService {
 		List<Davener> davenerList = null;
 
 		try {
-			Davener davenerToActivate = davenerRepository.findByEmail(davenerEmail);
-			if (davenerToActivate == null) { // TODO - add test that davener not found
+			Optional<Davener> davenerToActivate = davenerRepository.findByEmail(davenerEmail);
+			if (davenerToActivate.isEmpty()) { // TODO - add test that davener not found
 				System.out.println(
 						String.format("The email %s cannot be activated because it is not found.  Please check the email address. ", davenerEmail));
 				return davenerRepository.findAll();
 			}
-			if (davenerToActivate.isActive() == true) { // Just to log/notify, and continue business as usual, returning
+			if (davenerToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual, returning
 														// most recent daveners list.
 				System.out
 						.println(String.format("The email %s is already receiving the davening lists. ", davenerEmail));

@@ -5,8 +5,8 @@ import static com.aliza.davening.entities.CategoryType.REFUA;
 import static com.aliza.davening.entities.CategoryType.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryType.SOLDIERS;
 import static com.aliza.davening.entities.CategoryType.YESHUAH;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -54,7 +54,7 @@ import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
 import com.aliza.davening.services.EmailSender;
-import com.aliza.davening.services.EmailSessionProvider;
+import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.GreenMailUtil;
@@ -74,9 +74,8 @@ import jakarta.mail.internet.MimeMultipart;
 @SpringBootTest
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class EmailSenderTests {
+public class ServiceEmailSenderTests {
 
 	@Autowired
 	private EmailSessionProvider sessionProvider;
@@ -150,11 +149,11 @@ public class EmailSenderTests {
 
 		System.setProperty("java.awt.headless", "true");
 
-		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(catShidduchim);
-		when(categoryRep.findByCname(BANIM)).thenReturn(catBanim);
-		when(categoryRep.findByCname(REFUA)).thenReturn(catRefua);
-		when(categoryRep.findByCname(YESHUAH)).thenReturn(catYeshuah);
-		when(categoryRep.findByCname(SOLDIERS)).thenReturn(catSoldiers);
+		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
+		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
+		when(categoryRep.findByCname(REFUA)).thenReturn(Optional.of(catRefua));
+		when(categoryRep.findByCname(YESHUAH)).thenReturn(Optional.of(catYeshuah));
+		when(categoryRep.findByCname(SOLDIERS)).thenReturn(Optional.of(catSoldiers));
 	}
 
 	@Test
@@ -245,7 +244,7 @@ public class EmailSenderTests {
 		greenMail.start();
 
 		try {
-			when(davenforRep.findAllDavenforByCategory(catYeshuah)).thenReturn(Collections.emptyList());
+			when(davenforRep.findAllDavenforByCategory(YESHUAH)).thenReturn(Collections.emptyList());
 
 			exception = assertThrows(EmptyInformationException.class, () -> {
 				emailSender.sendOutWeekly(info);
@@ -316,7 +315,7 @@ public class EmailSenderTests {
 		when(davenerRep.getAllDavenersEmails())
 				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
-		when(davenforRep.findAllDavenforByCategory(catYeshuah)).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+		when(davenforRep.findAllDavenforByCategory(YESHUAH)).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Weekly info = new Weekly(null, 5L, catYeshuah, "special information");
 
@@ -397,8 +396,8 @@ public class EmailSenderTests {
 		greenMail.start();
 
 		try {
-			when(davenforRep.findAllDavenforByCategory(catRefua)).thenReturn(Arrays.asList(dfRefua));
-			when(davenforRep.findAllDavenforByCategory(catYeshuah)).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+			when(davenforRep.findAllDavenforByCategory(REFUA)).thenReturn(Arrays.asList(dfRefua));
+			when(davenforRep.findAllDavenforByCategory(YESHUAH)).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 			emailSender.sendSimplifiedWeekly();
 
 			// Verify that the email was sent
@@ -535,7 +534,7 @@ public class EmailSenderTests {
 				emailSender.notifyDisactivatedDavener(null);
 			});
 			assertTrue(exception.getMessage().contains("email address missing"));
-			
+
 			emailSender.notifyDisactivatedDavener("test@tmail.com");
 
 			greenMail.waitForIncomingEmail(5000, 2);
@@ -553,7 +552,7 @@ public class EmailSenderTests {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
 	@Order(9)
 	public void notifyActivatedDavenerTest() {
@@ -565,13 +564,13 @@ public class EmailSenderTests {
 				emailSender.notifyActivatedDavener("");
 			});
 			assertTrue(exception.getMessage().contains("email address missing"));
-			
+
 			emailSender.notifyActivatedDavener("test@tmail.com");
 
 			greenMail.waitForIncomingEmail(5000, 2);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
-			//one for recipient, one for admin as Bcc
+			// one for recipient, one for admin as Bcc
 			assertEquals(2, receivedMessages.length);
 			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
 			assertEquals("Message from davening list admin", receivedMessages[1].getSubject());
@@ -584,11 +583,10 @@ public class EmailSenderTests {
 			e.printStackTrace();
 		}
 	}
-	
+
 	@Test
 	@Order(10)
-	public void offerExtensionOrDelete()
-	{
+	public void offerExtensionOrDelete() {
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
 
@@ -598,9 +596,10 @@ public class EmailSenderTests {
 			greenMail.waitForIncomingEmail(5000, 2);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
-			//one for recipient, one for admin as Bcc
+			// one for recipient, one for admin as Bcc
 			assertEquals(2, receivedMessages.length);
-			assertEquals("sub1@gmail.com", (receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());				
+			assertEquals("sub1@gmail.com",
+					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertEquals("Davening List Confirmation", receivedMessages[0].getSubject());
 			assertEquals("Davening List Confirmation", receivedMessages[1].getSubject());
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]).toString());
@@ -613,7 +612,7 @@ public class EmailSenderTests {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
+
 	}
 
 }

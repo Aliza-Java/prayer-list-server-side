@@ -249,12 +249,12 @@ public class SubmitterService {
 	// Private helper method for Finding submitter according to email
 	// tested
 	public String existingOrNewSubmitter(String submitterEmail) {
-		Submitter validSubmitter = submitterRepository.findByEmail(submitterEmail);
+		Optional<Submitter> validSubmitter = submitterRepository.findByEmail(submitterEmail);
 
 		// If submitter has never submitted a name, need to create a new one in
 		// database.
-		if (validSubmitter == null) {// TODO - re-add this function
-			validSubmitter = submitterRepository.save(new Submitter(submitterEmail));
+		if (validSubmitter.isEmpty()) {// TODO - re-add this function
+			submitterRepository.save(new Submitter(submitterEmail));
 		}
 		return submitterEmail;
 	}

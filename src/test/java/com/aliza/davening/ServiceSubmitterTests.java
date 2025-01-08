@@ -23,12 +23,15 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.aliza.davening.entities.Category;
@@ -48,8 +51,10 @@ import jakarta.mail.MessagingException;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
+@ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public class SubmitterServiceTests {
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+public class ServiceSubmitterTests {
 
 	@Autowired
 	private SubmitterService submitterService;
@@ -66,8 +71,8 @@ public class SubmitterServiceTests {
 	@MockBean
 	private AdminRepository adminRep;
 
-	//@Autowired
-	//private EmailSender emailSender;
+	// @Autowired
+	// private EmailSender emailSender;
 
 	static String submitterEmail = "sub.email@gmail.com";
 
@@ -76,19 +81,18 @@ public class SubmitterServiceTests {
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
 	public static Category catYeshuah = new Category(YESHUAH, false, 180, 5);
-	
+
 	private final static String UNEXPECTED_E = "   ************* Attention: @Submitter service test unexpected Exception: ";
 
 	@BeforeAll
 	private void baseTest() {
-		when(submitterRep.findByEmail(submitterEmail)).thenReturn(new Submitter(submitterEmail));
+		when(submitterRep.findByEmail(submitterEmail)).thenReturn(Optional.of(new Submitter(submitterEmail)));
 
-		
-		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(catShidduchim);
-		when(categoryRep.findByCname(BANIM)).thenReturn(catBanim);
-		when(categoryRep.findByCname(REFUA)).thenReturn(catRefua);
-		when(categoryRep.findByCname(YESHUAH)).thenReturn(catYeshuah);
-		when(categoryRep.findByCname(SOLDIERS)).thenReturn(catSoldiers);
+		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
+		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
+		when(categoryRep.findByCname(REFUA)).thenReturn(Optional.of(catRefua));
+		when(categoryRep.findByCname(YESHUAH)).thenReturn(Optional.of(catYeshuah));
+		when(categoryRep.findByCname(SOLDIERS)).thenReturn(Optional.of(catSoldiers));
 	}
 
 	@Test
@@ -302,13 +306,13 @@ public class SubmitterServiceTests {
 	@Test
 	public void existingOrNewSubmitterTest() {
 		// once new
-		when(submitterRep.findByEmail(submitterEmail)).thenReturn(null);
+		when(submitterRep.findByEmail(submitterEmail)).thenReturn(Optional.empty());
 		assertEquals(submitterEmail, submitterService.existingOrNewSubmitter(submitterEmail));
 
 		// once existing
 		Submitter existingSub = new Submitter();
 		existingSub.setEmail(submitterEmail);
-		when(submitterRep.findByEmail(submitterEmail)).thenReturn(existingSub);
+		when(submitterRep.findByEmail(submitterEmail)).thenReturn(Optional.of(existingSub));
 		assertEquals(submitterEmail, submitterService.existingOrNewSubmitter(submitterEmail));
 
 		// save called only once

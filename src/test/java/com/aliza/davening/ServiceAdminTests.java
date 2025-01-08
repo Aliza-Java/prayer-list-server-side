@@ -68,7 +68,7 @@ import jakarta.mail.MessagingException;
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class AdminServiceTests {
+public class ServiceAdminTests {
 
 	@Autowired
 	private AdminService adminService;
@@ -139,17 +139,21 @@ public class AdminServiceTests {
 
 	@BeforeAll
 	private void baseTest() {
+		
+		//TODO: 
+		//in service tests - fix base test, make generals.commit all. (maybe later)
+
 		// when(submitterRep.findByEmail(submitterEmail)).thenReturn(new
 		// Submitter(submitterEmail));
 
 		// TODO: when email works enable real emailing through here (or through email
 		// service tests)
 		
-		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(catShidduchim);
-		when(categoryRep.findByCname(BANIM)).thenReturn(catBanim);
-		when(categoryRep.findByCname(REFUA)).thenReturn(catRefua);
-		when(categoryRep.findByCname(YESHUAH)).thenReturn(catYeshuah);
-		when(categoryRep.findByCname(SOLDIERS)).thenReturn(catSoldiers);
+		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
+		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
+		when(categoryRep.findByCname(REFUA)).thenReturn(Optional.of(catRefua));
+		when(categoryRep.findByCname(YESHUAH)).thenReturn(Optional.of(catYeshuah));
+		when(categoryRep.findByCname(SOLDIERS)).thenReturn(Optional.of(catSoldiers));
 	}
 
 	@Test
@@ -269,7 +273,7 @@ public class AdminServiceTests {
 		});
 		assertTrue(exception.getMessage().contains("No email"));
 
-		when(davenerRep.findByEmail("davener2@gmail.com")).thenReturn(davener2);
+		when(davenerRep.findByEmail("davener2@gmail.com")).thenReturn(Optional.of(davener2));
 		when(davenerRep.findAll()).thenReturn(daveners);
 		davener2.setActive(false);
 		try {
@@ -401,8 +405,8 @@ public class AdminServiceTests {
 	@Test
 	@Order(14)
 	public void disactivateDavenerTest() {
-		when(davenerRep.findByEmail(davener2.getEmail())).thenReturn(davener2);
-		when(davenerRep.findByEmail(davener3.getEmail())).thenReturn(davener3);
+		when(davenerRep.findByEmail(davener2.getEmail())).thenReturn(Optional.of(davener2));
+		when(davenerRep.findByEmail(davener3.getEmail())).thenReturn(Optional.of(davener3));
 		when(davenerRep.findAll()).thenReturn(daveners);
 
 		assertFalse(davener2.isActive());
@@ -427,8 +431,8 @@ public class AdminServiceTests {
 	@Test
 	@Order(15)
 	public void activateDavenerTest() {
-		when(davenerRep.findByEmail(davener2.getEmail())).thenReturn(davener2);
-		when(davenerRep.findByEmail(davener3.getEmail())).thenReturn(davener3);
+		when(davenerRep.findByEmail(davener2.getEmail())).thenReturn(Optional.of(davener2));
+		when(davenerRep.findByEmail(davener3.getEmail())).thenReturn(Optional.of(davener3));
 		when(davenerRep.findAll()).thenReturn(daveners);
 
 		assertFalse(davener2.isActive());
@@ -507,8 +511,8 @@ public class AdminServiceTests {
 		when(categoryRep.findById(5L)).thenReturn(Optional.of(catYeshuah));
 		when(categoryRep.findAll()).thenReturn(categories);
 
-		when(davenforRep.findAllDavenforByCategory(eq(catShidduchim))).thenReturn(Collections.emptyList());
-		when(davenforRep.findAllDavenforByCategory(eq(catYeshuah))).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+		when(davenforRep.findAllDavenforByCategory(eq(SHIDDUCHIM))).thenReturn(Collections.emptyList());
+		when(davenforRep.findAllDavenforByCategory(eq(YESHUAH))).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
 			adminService.previewWeekly(new Weekly("Vayera", 3L, catBanim, "message"));

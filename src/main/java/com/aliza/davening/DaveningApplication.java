@@ -27,9 +27,9 @@ import com.aliza.davening.exceptions.ReorderCategoriesException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
-import com.aliza.davening.services.EmailSessionProvider;
-import com.aliza.davening.services.ProdEmailSessionProvider;
 import com.aliza.davening.services.SubmitterService;
+import com.aliza.davening.services.session.EmailSessionProvider;
+import com.aliza.davening.services.session.ProdEmailSessionProvider;
 import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties;
 
 import jakarta.mail.MessagingException;

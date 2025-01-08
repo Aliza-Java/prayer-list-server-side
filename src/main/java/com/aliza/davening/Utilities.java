@@ -178,7 +178,7 @@ public class Utilities {
 	public String createWeeklyHtml(Category category, String weekName) throws EmptyInformationException {
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category);
+		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category.getCname());
 
 		if (categoryDavenfors.isEmpty()) {
 			throw new EmptyInformationException("There are no names to daven for in this category. ");

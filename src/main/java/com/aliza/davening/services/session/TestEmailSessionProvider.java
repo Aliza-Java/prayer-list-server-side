@@ -1,4 +1,4 @@
-package com.aliza.davening.services;
+package com.aliza.davening.services.session;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;

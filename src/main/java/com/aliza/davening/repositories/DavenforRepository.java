@@ -3,14 +3,13 @@ package com.aliza.davening.repositories;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.aliza.davening.entities.Category;
+import com.aliza.davening.entities.CategoryType;
 import com.aliza.davening.entities.Davenfor;
 
 @Repository
@@ -37,6 +36,6 @@ public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 
 	public List<Davenfor> findAllDavenforBySubmitterEmail(String email);
 
-	public List<Davenfor> findAllDavenforByCategory(Category category);
-
+	@Query("SELECT d FROM Davenfor d WHERE d.category.cname = :type")
+	List<Davenfor> findAllDavenforByCategory(CategoryType type);
 }

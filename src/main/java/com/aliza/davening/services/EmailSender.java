@@ -28,6 +28,7 @@ import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.ParashaRepository;
+import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
 
 import jakarta.mail.Message;
@@ -41,7 +42,7 @@ import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 
 @Service
-public class EmailSender implements EmailService {
+public class EmailSender {
 
 	@Autowired
 	private EmailSessionProvider sessionProvider;
@@ -113,7 +114,6 @@ public class EmailSender implements EmailService {
 
 	// general method
 	// tested
-	@Override
 	public boolean sendEmail(MimeMessage message) throws MessagingException, EmailException {
 		// TODO: allow attachment, make all methods use this, services and controllers
 		// to direct to EmailSender correctly.

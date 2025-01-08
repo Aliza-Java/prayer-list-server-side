@@ -1,4 +1,4 @@
-package com.aliza.davening.services;
+package com.aliza.davening.services.session;
 
 import jakarta.mail.Session;
 
