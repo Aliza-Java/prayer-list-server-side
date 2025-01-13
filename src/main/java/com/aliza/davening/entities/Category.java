@@ -12,8 +12,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,7 +44,7 @@ public class Category {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	//TODO: when allow admin to add more categories, enable validations somehow
+	// TODO: when allow admin to add more categories, enable validations somehow
 //	@Column(unique = true)
 //	@NotNull(message = "Category's English name cannot be null. ")
 //	@NotBlank(message = "Category's English name cannot be blank. ")
@@ -53,22 +56,23 @@ public class Category {
 //	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Category's Hebrew name must contain only Hebrew letters and spaces. ")
 //	private String hebrew;
 
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, unique = true)
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false, unique = true)
 	private CategoryType cname;
-	
+
 	// Is this the current category being sent out?
 	private boolean isCurrent;
 
 	// How many days a name of this category adds on when extending expiration date
-	//TODO: what is the equivalent for @positive?  fix
-	//@Positive(message = "The update rate of a category must be a positive number. ")
+	// TODO: what is the equivalent for @positive? fix
+	// @Positive(message = "The update rate of a category must be a positive number.
+	// ")
 	private int updateRate;
 
 	// The order in which the categories get sent out.
-	//TODO: what is the equivalent for @positive?  fix
-	//@Positive(message = "The category order must be represented by a positive number. ")
+	// TODO: what is the equivalent for @positive? fix
+	// @Positive(message = "The category order must be represented by a positive
+	// number. ")
 	private int catOrder;
 
 	@OneToMany(cascade = { CascadeType.REMOVE }, mappedBy = "category")
@@ -79,7 +83,16 @@ public class Category {
 	// davenfors omitted as it causes recursive output.
 	@Override
 	public String toString() {
-		return "Category [" + cname + "/" + cname.getHebName() + ", isCurrent=" + isCurrent
-				+ "]";
+		return "Category [" + cname + "/" + cname.getHebName() + ", isCurrent=" + isCurrent + "]";
+	}
+
+	@JsonCreator
+    public Category(@JsonProperty("cname") String cname) {
+        this.cname = CategoryType.valueOf(cname.toUpperCase());
+    }
+
+	@JsonValue
+	public String toJson() {
+		return cname.toString().toLowerCase();
 	}
 }

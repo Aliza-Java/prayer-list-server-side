@@ -37,7 +37,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
@@ -46,8 +45,6 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
 import com.aliza.davening.services.SubmitterService;
-
-import jakarta.mail.MessagingException;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -97,24 +94,18 @@ public class ServiceSubmitterTests {
 
 	@Test
 	public void getAllSubmitterDavenforsTest() {
-		try {
+		// service returns davenfors fetched from repository
+		when(davenforRep.findAllDavenforBySubmitterEmail(submitterEmail)).thenReturn(getDfList());
+		List<Davenfor> dfs = (submitterService.getAllSubmitterDavenfors(submitterEmail));
+		assertTrue(dfs.size() == 3);
 
-			// service returns davenfors fetched from repository
-			when(davenforRep.findAllDavenforBySubmitterEmail(submitterEmail)).thenReturn(getDfList());
-			List<Davenfor> dfs = (submitterService.getAllSubmitterDavenfors(submitterEmail));
-			assertTrue(dfs.size() == 3);
+		// if no davenfors for email, service returns empty List
+		when(submitterRep.findByEmail(any())).thenReturn(null);
+		dfs = (submitterService.getAllSubmitterDavenfors(submitterEmail));
+		assertTrue(dfs.size() == 0);
 
-			// if no davenfors for email, service returns empty List
-			when(submitterRep.findByEmail(any())).thenReturn(null);
-			dfs = (submitterService.getAllSubmitterDavenfors(submitterEmail));
-			assertTrue(dfs.size() == 0);
-
-			verify(submitterRep, times(2)).findByEmail(any());
-			verify(davenforRep, times(1)).findAllDavenforBySubmitterEmail(any());
-
-		} catch (ObjectNotFoundException e) {
-			System.out.println(UNEXPECTED_E + e.getStackTrace());
-		}
+		verify(submitterRep, times(2)).findByEmail(any());
+		verify(davenforRep, times(1)).findAllDavenforBySubmitterEmail(any());
 
 	}
 
@@ -206,8 +197,7 @@ public class ServiceSubmitterTests {
 			verify(davenforRep, times(4)).findById(anyLong());
 			verify(davenforRep, times(1)).save(any());
 
-		} catch (EmptyInformationException | ObjectNotFoundException | EmailException | PermissionException
-				| MessagingException e) {
+		} catch (EmptyInformationException | ObjectNotFoundException | PermissionException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 	}

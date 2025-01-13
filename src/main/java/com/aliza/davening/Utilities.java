@@ -22,9 +22,7 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.CategoryType;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmptyInformationException;
-import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.services.AdminService;
@@ -46,8 +44,7 @@ public class Utilities {
 	// @Value("${admin.email}")
 	private String adminEmail = "davening.list@gmail.com";
 
-	public File buildListImage(Category category, String weekName)
-			throws IOException, ObjectNotFoundException, DatabaseException, EmptyInformationException {
+	public File buildListImage(Category category, String weekName) throws IOException, EmptyInformationException {
 
 		int imageWidth = EmailScheme.getImageWidth();
 		int imageHeight = EmailScheme.getImageHeight();
@@ -56,7 +53,7 @@ public class Utilities {
 
 		String fileName = "builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png";
 		Path filePath = Paths.get("builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png");
-		
+
 		if (!GraphicsEnvironment.isHeadless()) {
 			BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
 					.getDefaultConfiguration().createCompatibleImage(imageWidth, imageHeight);
@@ -69,20 +66,18 @@ public class Utilities {
 
 			// png seems to be better than jpeg, writes without a blotch behind the text
 			ImageIO.write(image, "png", new File(fileName));
-		}
-		else
-		{
+		} else {
 			System.out.println("File name: " + fileName);
 			System.out.println("File path: " + filePath);
 
-	        try {
-	            Files.write(filePath, weeklyHtml.getBytes());
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
-			
+			try {
+				Files.write(filePath, weeklyHtml.getBytes());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
 			return filePath.toFile();
-			
+
 		}
 		return filePath.toFile();
 	}

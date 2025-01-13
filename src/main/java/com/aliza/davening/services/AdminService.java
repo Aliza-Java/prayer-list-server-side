@@ -1,6 +1,5 @@
 package com.aliza.davening.services;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,7 +20,6 @@ import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.exceptions.DatabaseException;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
@@ -35,8 +33,6 @@ import com.aliza.davening.repositories.SubmitterRepository;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
-
-import jakarta.mail.MessagingException;
 
 @Service("adminService")
 @EnableTransactionManagement
@@ -192,7 +188,7 @@ public class AdminService {
 	}
 
 	// tested
-	public List<Davener> updateDavener(Davener davener) throws ObjectNotFoundException, EmptyInformationException {
+	public List<Davener> updateDavener(Davener davener) throws ObjectNotFoundException {
 
 		// Checking that davener exists so that it won't create a new one through
 		// save().
@@ -361,19 +357,20 @@ public class AdminService {
 	 */
 
 	// tested
-	public List<Davener> disactivateDavener(String davenerEmail) throws EmailException, DatabaseException,
-			ObjectNotFoundException, EmptyInformationException, MessagingException {
+	public List<Davener> disactivateDavener(String davenerEmail) throws EmptyInformationException {
 
 		List<Davener> davenerList = null;
 		try {
 			Optional<Davener> davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
 			if (davenerToDisactivate.isEmpty()) { // TODO - add test that davener not found
-				System.out.println(
-						String.format("The email %s cannot be disactivated because it is not found.  Please check the email address. ", davenerEmail));
+				System.out.println(String.format(
+						"The email %s cannot be disactivated because it is not found.  Please check the email address. ",
+						davenerEmail));
 				return davenerRepository.findAll();
 			}
-			if (!davenerToDisactivate.get().isActive()) { // Just to log/notify, and continue business as usual, returning
-													// most recent daveners list.
+			if (!davenerToDisactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
+															// returning
+				// most recent daveners list.
 				System.out.println(
 						String.format("The email %s has already been disactivated from receiving the davening lists. ",
 								davenerEmail));
@@ -392,20 +389,21 @@ public class AdminService {
 	}
 
 	// tested
-	public List<Davener> activateDavener(String davenerEmail) throws EmailException, DatabaseException,
-			ObjectNotFoundException, EmptyInformationException, MessagingException {
+	public List<Davener> activateDavener(String davenerEmail) throws EmptyInformationException {
 
 		List<Davener> davenerList = null;
 
 		try {
 			Optional<Davener> davenerToActivate = davenerRepository.findByEmail(davenerEmail);
 			if (davenerToActivate.isEmpty()) { // TODO - add test that davener not found
-				System.out.println(
-						String.format("The email %s cannot be activated because it is not found.  Please check the email address. ", davenerEmail));
+				System.out.println(String.format(
+						"The email %s cannot be activated because it is not found.  Please check the email address. ",
+						davenerEmail));
 				return davenerRepository.findAll();
 			}
-			if (davenerToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual, returning
-														// most recent daveners list.
+			if (davenerToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual,
+																// returning
+				// most recent daveners list.
 				System.out
 						.println(String.format("The email %s is already receiving the davening lists. ", davenerEmail));
 			}
@@ -465,8 +463,7 @@ public class AdminService {
 	}
 
 	// tested
-	public String previewWeekly(Weekly info)
-			throws ObjectNotFoundException, IOException, DatabaseException, EmptyInformationException {
+	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
 
 		Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
 		if (!optionalCategory.isPresent()) {

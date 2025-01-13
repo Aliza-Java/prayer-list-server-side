@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aliza.davening.exceptions.DatabaseException;
-import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.services.AdminService;
 
 @CrossOrigin(origins = ("${client.origin}"), maxAge = 3600, allowCredentials = "true")
@@ -29,10 +28,11 @@ public class AuthController {
 	@Autowired
 	JwtUtils jwtUtils;
 
-	@PostMapping("/signin") 
-	//TODO: why does @Valid not work anymore?
-	//public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		public ResponseEntity<?> authenticateUser( @RequestBody LoginRequest loginRequest) {
+	@PostMapping("/signin")
+	// TODO: why does @Valid not work anymore?
+	// public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest
+	// loginRequest) {
+	public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -46,8 +46,7 @@ public class AuthController {
 	}
 
 	@PostMapping(path = "/signup")
-	public ResponseEntity<?> setAdmin(@RequestBody LoginRequest credentials)
-			throws DatabaseException, EmptyInformationException {
+	public ResponseEntity<?> setAdmin(@RequestBody LoginRequest credentials) throws DatabaseException {
 		if (adminService.setAdmin(credentials)) {
 			return ResponseEntity.ok("New admin registered successfully!");
 		}

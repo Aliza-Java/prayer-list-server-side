@@ -21,8 +21,6 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.CategoryType;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.exceptions.DatabaseException;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.CategoryRepository;
@@ -114,7 +112,7 @@ public class EmailSender {
 
 	// general method
 	// tested
-	public boolean sendEmail(MimeMessage message) throws MessagingException, EmailException {
+	public boolean sendEmail(MimeMessage message) {
 		// TODO: allow attachment, make all methods use this, services and controllers
 		// to direct to EmailSender correctly.
 
@@ -134,8 +132,7 @@ public class EmailSender {
 
 	// A general method allowing Admin to send messages to system users public
 	// tested
-	public void sendEmailFromAdmin(String recipient, String text)
-			throws EmailException, EmptyInformationException, MessagingException {
+	public void sendEmailFromAdmin(String recipient, String text) throws EmptyInformationException {
 
 		if (recipient == null || recipient.length() == 0) {
 			throw new EmptyInformationException("Recipient email address missing.");
@@ -148,9 +145,8 @@ public class EmailSender {
 		sendEmail(mimeMessage);
 	}
 
-	//tested
-	public void sendSimplifiedWeekly() throws IOException, MessagingException, EmailException, ObjectNotFoundException,
-			DatabaseException, EmptyInformationException {
+	// tested
+	public void sendSimplifiedWeekly() throws IOException, ObjectNotFoundException, EmptyInformationException {
 		Weekly simplified = new Weekly();
 
 		Parasha parasha = parashaRepository.findCurrent()
@@ -164,8 +160,7 @@ public class EmailSender {
 	}
 
 	// tested
-	public void sendOutWeekly(Weekly info) throws IOException, MessagingException, EmailException,
-			ObjectNotFoundException, DatabaseException, EmptyInformationException {
+	public void sendOutWeekly(Weekly info) throws IOException, ObjectNotFoundException, EmptyInformationException {
 
 		Category category;
 		if (info.category != null)
@@ -173,7 +168,7 @@ public class EmailSender {
 		else
 			category = categoryRepository.findById(info.categoryId)
 					.orElseThrow(() -> new ObjectNotFoundException("category"));
-		
+
 		LocalDate date = LocalDate.now();
 		String todaysDate = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(date);
 		String parashaName = (info.parashaName != null && info.parashaName.length() > 0)
@@ -198,9 +193,8 @@ public class EmailSender {
 				utilities.buildListImage(category, info.parashaName), fileName));
 	}
 
-	//tested
-	public void sendUrgentEmail(Davenfor davenfor)
-			throws EmailException, EmptyInformationException, MessagingException {
+	// tested
+	public void sendUrgentEmail(Davenfor davenfor) throws EmptyInformationException {
 
 		if (davenfor == null) {
 			throw new EmptyInformationException("The name you submitted for davening is incomplete.  ");
@@ -236,89 +230,71 @@ public class EmailSender {
 				null, null));
 	}
 
-	//TODO: how to implement the html style? it gets sent as plain text
-	//tested
-	public void informAdmin(String subject, String message) throws EmailException, MessagingException {
-		sendEmail(
-				createMimeMessage(sessionProvider.getSession(), subject, message, adminEmail, null, null, null));
+	// TODO: how to implement the html style? it gets sent as plain text
+	// tested
+	public void informAdmin(String subject, String message) {
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, adminEmail, null, null, null));
 	}
 
-	//TODO - when ready, make someone call this method
+	// TODO - when ready, make someone call this method
 	// The controller will use this method to send out a confirmation email to
 	// submitter when sending in a new name. public boolean
 	/*
-	boolean sendConfirmationEmail(long davenforId) //TODO - make someone call this, if want.  Or delete. 
-			throws EmailException, IOException, EmptyInformationException, ObjectNotFoundException {
+	 * boolean sendConfirmationEmail(long davenforId) //TODO - make someone call
+	 * this, if want. Or delete. throws EmailException, IOException,
+	 * EmptyInformationException, ObjectNotFoundException {
+	 * 
+	 * Optional<Davenfor> optionalDavenfor =
+	 * davenforRepository.findById(davenforId); if (!optionalDavenfor.isPresent()) {
+	 * throw new ObjectNotFoundException("Name with id: " + davenforId); }
+	 * 
+	 * Davenfor confirmedDavenfor = optionalDavenfor.get(); String subject =
+	 * EmailScheme.getConfirmationEmailSubject();
+	 * 
+	 * 
+	 * Retrieving standard confirmation email text, and personalizing it
+	 * respectively. Code gets email text from file saved in src/resources (path
+	 * defined in SchemeValues), replaces values with specific davenfor values and
+	 * sets it as the email body.
+	 * 
+	 * 
+	 * String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.
+	 * getConfirmationEmailTextLocation())), StandardCharsets.UTF_8); String
+	 * personalizedEmailText = String.format(emailText,
+	 * confirmedDavenfor.getNameEnglish(),
+	 * confirmedDavenfor.getCategory().getCname(), confirmedDavenfor.getId());
+	 * 
+	 * String to = confirmedDavenfor.getSubmitterEmail();
+	 * 
+	 * try { sendEmail(createMimeMessage(sessionProvider.getSession(), subject,
+	 * personalizedEmailText, to, adminAsList, null, null)); } catch (Exception e) {
+	 * throw new EmailException(
+	 * 
+	 * String.format("Could not send confirmation email to %s",
+	 * confirmedDavenfor.getSubmitterEmail())); } return true;
+	 * 
+	 * }
+	 */
 
-		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
-		if (!optionalDavenfor.isPresent()) {
-			throw new ObjectNotFoundException("Name with id: " + davenforId);
-		}
-
-		Davenfor confirmedDavenfor = optionalDavenfor.get();
-		String subject = EmailScheme.getConfirmationEmailSubject();
-
-		
-		 * Retrieving standard confirmation email text, and personalizing it
-		 * respectively. Code gets email text from file saved in src/resources (path
-		 * defined in SchemeValues), replaces values with specific davenfor values and
-		 * sets it as the email body.
-		
-
-		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.getConfirmationEmailTextLocation())),
-				StandardCharsets.UTF_8);
-		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
-				confirmedDavenfor.getCategory().getCname(), confirmedDavenfor.getId());
-
-		String to = confirmedDavenfor.getSubmitterEmail();
-
-		try {
-			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, to, adminAsList,
-					null, null));
-		} catch (Exception e) {
-			throw new EmailException(
-
-					String.format("Could not send confirmation email to %s", confirmedDavenfor.getSubmitterEmail()));
-		}
-		return true;
-
-	}
-*/
-
-	//tested
-	public void notifyDisactivatedDavener(String email) throws EmptyInformationException, MessagingException {
-
-		try {
-			sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
-		} catch (EmailException e) { // for now just notify in log. TODO - make more extensive
-			System.out.println("There was a problem sending the email.");
-		}
-	}
-	
-	//tested
-	public void notifyActivatedDavener(String email) throws EmptyInformationException, MessagingException {
-		try {
-			sendEmailFromAdmin(email, EmailScheme.getDavenerActivated());
-		} catch (EmailException e) { // for now just notify in log. TODO - make more extensive
-			System.out.println("There was a problem sending the email.");
-		}
+	// tested
+	public void notifyDisactivatedDavener(String email) throws EmptyInformationException {
+		sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
 	}
 
-	//tested
-	public void offerExtensionOrDelete(Davenfor davenfor) throws EmailException, MessagingException {
+	// tested
+	public void notifyActivatedDavener(String email) throws EmptyInformationException {
+		sendEmailFromAdmin(email, EmailScheme.getDavenerActivated());
+	}
+
+	// tested
+	public void offerExtensionOrDelete(Davenfor davenfor) {
 
 		String subject = EmailScheme.getExpiringNameSubject();
 		String message = String.format(Utilities.setExpiringNameMessage(davenfor));
 		String recipient = davenfor.getSubmitterEmail();
 
-		try {
-			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, adminAsList, null,
-					null));
-		} catch (EmailException e) {
-			String.format("Unable to send an email to %s offering to extend or delete the name %s.", recipient,
-					davenfor.getNameEnglish());
-			e.printStackTrace();
-		}
+		sendEmail(
+				createMimeMessage(sessionProvider.getSession(), subject, message, recipient, adminAsList, null, null));
 	}
 
 	private String concatAdminMessage(String adminMessage, String emailText) {

@@ -43,8 +43,6 @@ import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.Submitter;
-import com.aliza.davening.exceptions.DatabaseException;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.AdminRepository;
@@ -68,7 +66,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 
-//TODO: make a beforeEach with greenmail start, and aftereach (or after?) with greenmail stop.
+//TODO: make a beforeEach with GreenMail start, and aftereach (or after?) with GreenMail stop.
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -168,11 +166,7 @@ public class ServiceEmailSenderTests {
 		message.setSubject("Test Email");
 		message.setText("This is a test email.");
 
-		try {
-			emailSender.sendEmail(message);
-		} catch (EmailException e) {
-			System.out.println(UNEXPECTED_E + e.getStackTrace());
-		}
+		emailSender.sendEmail(message);
 
 		// Verify that the email was sent
 		greenMail.waitForIncomingEmail(5000, 1);
@@ -215,7 +209,7 @@ public class ServiceEmailSenderTests {
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("test"));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[1]).contains("test"));
-		} catch (EmailException | EmptyInformationException | MessagingException e) {
+		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 		greenMail.stop();
@@ -297,8 +291,7 @@ public class ServiceEmailSenderTests {
 				}
 				assertTrue(attachmentFound);
 			}
-		} catch (EmailException | EmptyInformationException | MessagingException | IOException | ObjectNotFoundException
-				| DatabaseException e) {
+		} catch (EmptyInformationException | MessagingException | IOException | ObjectNotFoundException e) {
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -354,8 +347,7 @@ public class ServiceEmailSenderTests {
 					}
 				}
 			}
-		} catch (EmailException | EmptyInformationException | MessagingException | IOException | ObjectNotFoundException
-				| DatabaseException e) {
+		} catch (EmptyInformationException | MessagingException | IOException | ObjectNotFoundException e) {
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -436,8 +428,7 @@ public class ServiceEmailSenderTests {
 					}
 				}
 			}
-		} catch (EmailException | EmptyInformationException | MessagingException | IOException | ObjectNotFoundException
-				| DatabaseException e) {
+		} catch (EmptyInformationException | MessagingException | IOException | ObjectNotFoundException e) {
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -490,7 +481,7 @@ public class ServiceEmailSenderTests {
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Please daven now for <b>Avraham ben Sara"));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Yehudit bat Miriam"));
-		} catch (EmailException | EmptyInformationException | MessagingException e) {
+		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 		greenMail.stop();
@@ -500,7 +491,7 @@ public class ServiceEmailSenderTests {
 
 	@Test
 	@Order(7)
-	public void informAdminTest() throws ObjectNotFoundException {
+	public void informAdminTest() {
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
 
@@ -517,7 +508,7 @@ public class ServiceEmailSenderTests {
 			assertTrue((GreenMailUtil.getBody(receivedMessages[0]).length()) > "testMessage".length());
 
 			greenMail.stop();
-		} catch (EmailException | MessagingException e) {
+		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -608,7 +599,7 @@ public class ServiceEmailSenderTests {
 			assertTrue(GreenMailUtil.getBody(receivedMessages[1]).contains("Remove this name"));
 
 			greenMail.stop();
-		} catch (MessagingException | EmailException e) {
+		} catch (MessagingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

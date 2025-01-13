@@ -19,7 +19,6 @@ import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.DatabaseException;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
@@ -31,11 +30,9 @@ import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Password;
 import com.aliza.davening.util_classes.Weekly;
 
-import jakarta.mail.MessagingException;
-
 @RestController
 @RequestMapping("admin")
-@CrossOrigin(origins = ("${client.origin}"), allowCredentials="true")
+@CrossOrigin(origins = ("${client.origin}"), allowCredentials = "true")
 public class AdminWebService {
 
 	@Autowired
@@ -43,38 +40,39 @@ public class AdminWebService {
 
 	@Autowired
 	EmailSender emailSender;
-	
+
 	@Autowired
 	SubmitterService submitterService;
-	
+
 	@Value("${admin.id}")
 	long adminId;
 
 	@PutMapping(path = "update")
 	public boolean updateAdminSettings(@RequestBody AdminSettings settings)
-			throws DatabaseException, ObjectNotFoundException, EmptyInformationException {
+			throws DatabaseException, ObjectNotFoundException {
 		adminService.updateAdmin(settings);
 		return true;
 	}
-	
+
 	@RequestMapping("settings/{email}")
 	public AdminSettings getAdminSettings(@PathVariable String email) throws ObjectNotFoundException {
 		return adminService.getAdminSettings(email);
 	}
-	
+
 	@PostMapping("checkpass/{email}")
-	//saved Password as its own object, to allow passing in request body
-	public boolean checkPassword(@RequestBody Password password, @PathVariable String email) throws ObjectNotFoundException {
+	// saved Password as its own object, to allow passing in request body
+	public boolean checkPassword(@RequestBody Password password, @PathVariable String email)
+			throws ObjectNotFoundException {
 		return adminService.checkPassword(password.getPassword(), email);
 	}
 
 	@RequestMapping("davenfors")
- 	public List<Davenfor> findAllDavenfors() {
+	public List<Davenfor> findAllDavenfors() {
 		return adminService.getAllDavenfors();
 	}
 
 	@DeleteMapping("delete/{id}")
-	public List<Davenfor> deleteDavenfor(@PathVariable long id) throws ObjectNotFoundException, PermissionException {
+	public List<Davenfor> deleteDavenfor(@PathVariable long id) throws ObjectNotFoundException {
 		return adminService.deleteDavenfor(id);
 	}
 
@@ -89,8 +87,7 @@ public class AdminWebService {
 	}
 
 	@PutMapping(path = "davener")
-	public List<Davener> updateDavener(@RequestBody Davener davener)
-			throws ObjectNotFoundException, EmptyInformationException {
+	public List<Davener> updateDavener(@RequestBody Davener davener) throws ObjectNotFoundException {
 		return adminService.updateDavener(davener);
 	}
 
@@ -101,55 +98,53 @@ public class AdminWebService {
 	}
 
 	@PostMapping(path = "disactivate/{davenerEmail}")
-	public List<Davener> disactivateDavener(@PathVariable String davenerEmail)
-			throws EmailException, DatabaseException, ObjectNotFoundException, EmptyInformationException, MessagingException {
+	public List<Davener> disactivateDavener(@PathVariable String davenerEmail) throws EmptyInformationException {
 		return adminService.disactivateDavener(davenerEmail);
 
 	}
 
 	@PostMapping(path = "activate/{davenerEmail}")
-	public List<Davener> activateDavener(@PathVariable String davenerEmail)
-			throws EmailException, DatabaseException, IOException, ObjectNotFoundException, EmptyInformationException, MessagingException {
+	public List<Davener> activateDavener(@PathVariable String davenerEmail) throws EmptyInformationException {
 		return adminService.activateDavener(davenerEmail);
 	}
 
 	@PostMapping(path = "weekly")
-	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
-			MessagingException, EmailException, DatabaseException, ObjectNotFoundException {
+	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo)
+			throws EmptyInformationException, IOException, ObjectNotFoundException {
 		emailSender.sendOutWeekly(weeklyInfo);
 		return true;
 	}
 
 	@PostMapping(path = "preview", produces = "text/plain")
-	public String previewWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, IOException,
-			MessagingException, EmailException, DatabaseException, ObjectNotFoundException, IOException {
+	public String previewWeekly(@RequestBody Weekly weeklyInfo)
+			throws EmptyInformationException, ObjectNotFoundException {
 		return adminService.previewWeekly(weeklyInfo);
 	}
 
 	// A simplified sendOutWeekly which takes a GET request (for the one sent
 	// through Admin's email link)
 	@RequestMapping(path = "weeklylist")
-	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException, MessagingException,
-			EmailException, ObjectNotFoundException, DatabaseException {
+	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException, ObjectNotFoundException {
 		emailSender.sendSimplifiedWeekly();
 		return true;
 	}
-	
-	@PutMapping(path="updatedavenfor")
-	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor) throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException{
+
+	@PutMapping(path = "updatedavenfor")
+	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor)
+			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
 		submitterService.updateDavenfor(davenfor, null, true);
 		return adminService.getAllDavenfors();
 	}
-	
+
 	@PutMapping(path = "updatename/{email}")
-	//TODO: why does @Valid not work anymore?
-	public Davenfor updateDavenfor(@RequestBody /*@Valid*/ Davenfor davenfor, @PathVariable String email)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException, MessagingException {
+	// TODO: why does @Valid not work anymore?
+	public Davenfor updateDavenfor(@RequestBody /* @Valid */ Davenfor davenfor, @PathVariable String email)
+			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}
 
 	@PostMapping(path = "urgent")
-	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmailException, EmptyInformationException, MessagingException {
+	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmptyInformationException {
 		emailSender.sendUrgentEmail(davenfor);
 		return true;
 	}

@@ -17,7 +17,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -45,7 +44,6 @@ import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.exceptions.DatabaseException;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
@@ -61,8 +59,6 @@ import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
 
-import jakarta.mail.MessagingException;
-
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @ActiveProfiles("test")
@@ -72,7 +68,7 @@ public class ServiceAdminTests {
 
 	@Autowired
 	private AdminService adminService;
-	
+
 	@MockBean
 	private DavenforRepository davenforRep;
 
@@ -139,16 +135,16 @@ public class ServiceAdminTests {
 
 	@BeforeAll
 	private void baseTest() {
-		
-		//TODO: 
-		//in service tests - fix base test, make generals.commit all. (maybe later)
+
+		// TODO:
+		// in service tests - fix base test, make generals.commit all. (maybe later)
 
 		// when(submitterRep.findByEmail(submitterEmail)).thenReturn(new
 		// Submitter(submitterEmail));
 
 		// TODO: when email works enable real emailing through here (or through email
 		// service tests)
-		
+
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
 		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
 		when(categoryRep.findByCname(REFUA)).thenReturn(Optional.of(catRefua));
@@ -334,7 +330,7 @@ public class ServiceAdminTests {
 
 		try {
 			assertEquals(3, adminService.updateDavener(davener3).size());
-		} catch (ObjectNotFoundException | EmptyInformationException e) {
+		} catch (ObjectNotFoundException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
@@ -422,8 +418,7 @@ public class ServiceAdminTests {
 			verify(davenerRep, times(1)).disactivateDavener(any());
 			verify(emailSender, times(1)).notifyDisactivatedDavener(any());
 			verify(davenerRep, times(2)).findAll();
-		} catch (EmailException | DatabaseException | ObjectNotFoundException | EmptyInformationException
-				| MessagingException e) {
+		} catch (EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 	}
@@ -447,8 +442,7 @@ public class ServiceAdminTests {
 			verify(davenerRep, times(1)).activateDavener(any());
 			verify(emailSender, times(1)).notifyActivatedDavener(any());
 			verify(davenerRep, times(2)).findAll();
-		} catch (EmailException | DatabaseException | ObjectNotFoundException | EmptyInformationException
-				| MessagingException e) {
+		} catch (EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 	}
@@ -535,25 +529,24 @@ public class ServiceAdminTests {
 			verify(categoryRep, times(1)).findAll();
 			verify(davenforRep, times(2)).findAllDavenforByCategory(any());
 
-		} catch (ObjectNotFoundException | IOException | DatabaseException | EmptyInformationException e) {
+		} catch (ObjectNotFoundException | EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 	}
-	
+
 	@Test
 	@Order(22)
-	public void getAdminSettingsTest()
-	{
+	public void getAdminSettingsTest() {
 		when(adminRep.getAdminByEmail(eq(adminEmail))).thenReturn(Optional.of(admin1));
 		try {
 			AdminSettings adminSettings = adminService.getAdminSettings(adminEmail);
 			assertEquals(admin1.getEmail(), adminSettings.getEmail());
 			assertEquals(7, adminSettings.getWaitBeforeDeletion());
 			assertEquals(false, adminSettings.isNewNamePrompt());
-			
+
 			verify(adminRep, times(1)).getAdminByEmail(any());
 		} catch (ObjectNotFoundException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
-		}		
+		}
 	}
 }

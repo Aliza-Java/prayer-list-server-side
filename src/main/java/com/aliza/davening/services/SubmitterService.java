@@ -13,7 +13,6 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.CategoryType;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
@@ -21,8 +20,6 @@ import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.SubmitterRepository;
-
-import jakarta.mail.MessagingException;
 
 @Service("submitterService")
 public class SubmitterService {
@@ -61,7 +58,7 @@ public class SubmitterService {
 
 	// According to email address submitter can see all names he submitted.
 	// tested
-	public List<Davenfor> getAllSubmitterDavenfors(String email) throws ObjectNotFoundException {
+	public List<Davenfor> getAllSubmitterDavenfors(String email) {
 
 		// differentiating between non-existing email (this if) and empty list (which
 		// will return fine and will be discerned)
@@ -72,8 +69,7 @@ public class SubmitterService {
 	}
 
 	// tested
-	public Davenfor addDavenfor(Davenfor davenfor, String submitterEmail)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException, MessagingException {
+	public Davenfor addDavenfor(Davenfor davenfor, String submitterEmail) throws EmptyInformationException {
 
 		/*
 		 * Ensuring there is a real category and associating it with the davenfor.
@@ -127,8 +123,7 @@ public class SubmitterService {
 
 	// tested
 	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail, boolean isAdmin)
-			throws EmptyInformationException, ObjectNotFoundException, EmailException, PermissionException,
-			MessagingException {
+			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
 
 		if (davenforToUpdate == null) {
 			throw new EmptyInformationException("No information submitted regarding the name you wish to update. ");

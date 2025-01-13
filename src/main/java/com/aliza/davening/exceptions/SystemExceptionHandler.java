@@ -68,15 +68,13 @@ public class SystemExceptionHandler {
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 
-	@ExceptionHandler(LoginException.class)
-	public ResponseEntity<Object> handleLoginException(LoginException e) {
+	@ExceptionHandler({LoginException.class, PermissionException.class})
+	public ResponseEntity<Object> handleLoginException(Exception e) {
 		ApiError apiError = new ApiError("LOGIN_ERROR", e.getMessage());
-		if(e.getMessage()==SchemeValues.getNotAdminsEmailMessage()) {
+		if(e.getMessage().equals(SchemeValues.getNotAdminsEmailMessage())) {
 			apiError.setCode("NOT_ADMIN_EMAIL");
 		}
-		ResponseEntity<Object> res = new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.UNAUTHORIZED);
-		System.out.println(res);
-		return res;
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.UNAUTHORIZED);
 	}
 
 }
