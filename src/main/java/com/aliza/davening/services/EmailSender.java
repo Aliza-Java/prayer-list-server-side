@@ -155,7 +155,7 @@ public class EmailSender {
 
 		Category category = categoryRepository.getCurrent()
 		.orElseThrow(() -> new ObjectNotFoundException("current category"));
-		simplified.cName = category.toString();
+		simplified.cName = category.getCname().toString();
 
 		sendOutWeekly(simplified);
 	}

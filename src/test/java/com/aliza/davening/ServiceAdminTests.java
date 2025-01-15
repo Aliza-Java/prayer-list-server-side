@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -66,6 +67,9 @@ import com.aliza.davening.util_classes.Weekly;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ServiceAdminTests {
 
+	@MockBean
+	private AuthenticationManager authenticationManager;
+	
 	@Autowired
 	private AdminService adminService;
 

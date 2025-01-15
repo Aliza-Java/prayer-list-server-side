@@ -33,6 +33,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -75,6 +76,9 @@ import jakarta.mail.internet.MimeMultipart;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class ServiceEmailSenderTests {
 
+	@MockBean
+	private AuthenticationManager authenticationManager;
+	
 	@Autowired
 	private EmailSessionProvider sessionProvider;
 
@@ -225,7 +229,7 @@ public class ServiceEmailSenderTests {
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
 			emailSender.sendOutWeekly(infoNoCategory);
 		});
-		assertTrue(exception.getMessage().contains("category"));
+		assertTrue(exception.getMessage().contains("Category"));
 
 		when(davenerRep.getAllDavenersEmails())
 				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
