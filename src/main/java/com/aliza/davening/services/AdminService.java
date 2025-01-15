@@ -1,7 +1,16 @@
 package com.aliza.davening.services;
 
+import static com.aliza.davening.entities.CategoryName.BANIM;
+import static com.aliza.davening.entities.CategoryName.REFUA;
+import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
+import static com.aliza.davening.entities.CategoryName.SOLDIERS;
+import static com.aliza.davening.entities.CategoryName.YESHUAH;
+
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -69,6 +78,16 @@ public class AdminService {
 
 	@Value("${admin.id}")
 	long adminId;
+
+	@PostConstruct
+	public void initializeCategories() {
+		Category.categories = categoryRepository.findAll();
+		if (Category.categories.size() == 0) {
+			Category.categories = Arrays.asList(new Category(REFUA, true, 180, 1),
+					new Category(SHIDDUCHIM, false, 40, 2), new Category(BANIM, false, 50, 3),
+					new Category(SOLDIERS, false, 180, 4), new Category(YESHUAH, false, 180, 5));
+		}
+	}
 
 	/*
 	 * This method is used on initial start (when admin.id=Non_Exist, will send a
@@ -358,7 +377,7 @@ public class AdminService {
 
 	// tested
 	public List<Davener> disactivateDavener(String davenerEmail) throws EmptyInformationException {
-
+//TODO: fix - need test that davener not found.  and really can't get empty email because "" doesn't go to link
 		List<Davener> davenerList = null;
 		try {
 			Optional<Davener> davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
@@ -387,6 +406,9 @@ public class AdminService {
 		return davenerList;
 
 	}
+
+	// TODO: fix - need test that davener not found. and really can't get empty
+	// email because "" doesn't go to link
 
 	// tested
 	public List<Davener> activateDavener(String davenerEmail) throws EmptyInformationException {

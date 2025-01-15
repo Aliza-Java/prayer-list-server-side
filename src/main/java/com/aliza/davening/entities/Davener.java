@@ -37,5 +37,12 @@ public class Davener {
 
 	// Does davener want to accept weekly davening list and alerts?
 	private boolean active = true;
+	
+	public Davener(Davener current){
+		this.country = current.country;
+		this.email = current.email;
+		this.whatsapp = current.whatsapp;
+		this.active = current.active;
+	}
 
 }

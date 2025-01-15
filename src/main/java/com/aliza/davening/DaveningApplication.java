@@ -29,7 +29,7 @@ public class DaveningApplication {
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
 		builder.headless(false);
 		ConfigurableApplicationContext context = builder.run(args);
-
+		
 		// For testing:
 
 		// AdminService adminService = context.getBean(AdminService.class);

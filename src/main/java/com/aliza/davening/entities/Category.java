@@ -12,10 +12,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
@@ -33,12 +31,17 @@ import lombok.Setter;
 @Entity
 public class Category {
 
-	public Category(CategoryType cname, boolean current, int updateRate, int catOrder) {
+	public Category(CategoryName cname, boolean current, int updateRate, int catOrder) {
 		this.cname = cname;
 		this.isCurrent = current;
 		this.updateRate = updateRate;
 		this.catOrder = catOrder;
 	}
+
+	// populated upon start of program, from DB.
+	// When allow for adding categories - need to change them in this list too (or
+	// fetch all again);
+	public static List<Category> categories;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,7 +61,7 @@ public class Category {
 
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false, unique = true)
-	private CategoryType cname;
+	private CategoryName cname;
 
 	// Is this the current category being sent out?
 	private boolean isCurrent;
@@ -86,10 +89,9 @@ public class Category {
 		return "Category [" + cname + "/" + cname.getHebName() + ", isCurrent=" + isCurrent + "]";
 	}
 
-	@JsonCreator
-    public Category(@JsonProperty("cname") String cname) {
-        this.cname = CategoryType.valueOf(cname.toUpperCase());
-    }
+	public static Category getCategory(String name) {
+		return categories.stream().filter(c -> name.equals(c.cname.toString())).findFirst().get();
+	}
 
 	@JsonValue
 	public String toJson() {

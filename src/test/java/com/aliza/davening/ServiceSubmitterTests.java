@@ -1,10 +1,10 @@
 package com.aliza.davening;
 
-import static com.aliza.davening.entities.CategoryType.BANIM;
-import static com.aliza.davening.entities.CategoryType.REFUA;
-import static com.aliza.davening.entities.CategoryType.SHIDDUCHIM;
-import static com.aliza.davening.entities.CategoryType.SOLDIERS;
-import static com.aliza.davening.entities.CategoryType.YESHUAH;
+import static com.aliza.davening.entities.CategoryName.BANIM;
+import static com.aliza.davening.entities.CategoryName.REFUA;
+import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
+import static com.aliza.davening.entities.CategoryName.SOLDIERS;
+import static com.aliza.davening.entities.CategoryName.YESHUAH;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

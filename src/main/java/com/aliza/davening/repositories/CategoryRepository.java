@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.CategoryType;
+import com.aliza.davening.entities.CategoryName;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
@@ -38,5 +38,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
 	//tested
 	@Query
-	public Optional<Category> findByCname(CategoryType category);
+	public Optional<Category> findByCname(CategoryName category);
 }

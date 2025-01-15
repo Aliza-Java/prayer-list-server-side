@@ -1,10 +1,10 @@
 package com.aliza.davening;
 
-import static com.aliza.davening.entities.CategoryType.BANIM;
-import static com.aliza.davening.entities.CategoryType.REFUA;
-import static com.aliza.davening.entities.CategoryType.SHIDDUCHIM;
-import static com.aliza.davening.entities.CategoryType.SOLDIERS;
-import static com.aliza.davening.entities.CategoryType.YESHUAH;
+import static com.aliza.davening.entities.CategoryName.BANIM;
+import static com.aliza.davening.entities.CategoryName.REFUA;
+import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
+import static com.aliza.davening.entities.CategoryName.SOLDIERS;
+import static com.aliza.davening.entities.CategoryName.YESHUAH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -509,17 +509,17 @@ public class ServiceAdminTests {
 		when(davenforRep.findAllDavenforByCategory(eq(YESHUAH))).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.previewWeekly(new Weekly("Vayera", 3L, catBanim, "message"));
+			adminService.previewWeekly(new Weekly("Vayera", 3L, "banim", "message"));
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
 		try {
 			exception = assertThrows(EmptyInformationException.class, () -> {
-				adminService.previewWeekly(new Weekly("Vayera", 2L, catShidduchim, "message"));
+				adminService.previewWeekly(new Weekly("Vayera", 2L, "shidduchim", "message"));
 			});
 			assertTrue(exception.getMessage().contains("no names"));
 
-			String html = adminService.previewWeekly(new Weekly("Vayechi", 5L, catYeshuah, "message 2"));
+			String html = adminService.previewWeekly(new Weekly("Vayechi", 5L, "yeshuah", "message 2"));
 
 			assertTrue(html.contains("Vayechi"));
 			assertTrue(html.contains("YESHUAH"));

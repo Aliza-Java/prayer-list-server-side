@@ -47,6 +47,7 @@ public class AdminWebService {
 	@Value("${admin.id}")
 	long adminId;
 
+	//tested
 	@PutMapping(path = "update")
 	public boolean updateAdminSettings(@RequestBody AdminSettings settings)
 			throws DatabaseException, ObjectNotFoundException {
@@ -54,11 +55,13 @@ public class AdminWebService {
 		return true;
 	}
 
+	//tested
 	@RequestMapping("settings/{email}")
 	public AdminSettings getAdminSettings(@PathVariable String email) throws ObjectNotFoundException {
 		return adminService.getAdminSettings(email);
 	}
 
+	//tested
 	@PostMapping("checkpass/{email}")
 	// saved Password as its own object, to allow passing in request body
 	public boolean checkPassword(@RequestBody Password password, @PathVariable String email)
@@ -66,48 +69,56 @@ public class AdminWebService {
 		return adminService.checkPassword(password.getPassword(), email);
 	}
 
+	//tested
 	@RequestMapping("davenfors")
 	public List<Davenfor> findAllDavenfors() {
 		return adminService.getAllDavenfors();
 	}
 
+	//tested
 	@DeleteMapping("delete/{id}")
 	public List<Davenfor> deleteDavenfor(@PathVariable long id) throws ObjectNotFoundException {
 		return adminService.deleteDavenfor(id);
 	}
 
+	//tested
 	@RequestMapping(path = "daveners")
 	public List<Davener> findAllDaveners() {
 		return adminService.getAllDaveners();
 	}
 
+	//tested
 	@PostMapping(path = "davener")
 	public List<Davener> createDavener(@RequestBody Davener davener) throws NoRelatedEmailException {
 		return adminService.addDavener(davener);
 	}
 
+	//tested
 	@PutMapping(path = "davener")
 	public List<Davener> updateDavener(@RequestBody Davener davener) throws ObjectNotFoundException {
 		return adminService.updateDavener(davener);
 	}
 
+	//tested
 	@DeleteMapping(path = "davener/{id}")
 	public boolean deleteDavener(@PathVariable long id) throws ObjectNotFoundException {
 		adminService.deleteDavener(id);
 		return true;
 	}
 
+	//tested
 	@PostMapping(path = "disactivate/{davenerEmail}")
 	public List<Davener> disactivateDavener(@PathVariable String davenerEmail) throws EmptyInformationException {
 		return adminService.disactivateDavener(davenerEmail);
-
 	}
 
+	//tested
 	@PostMapping(path = "activate/{davenerEmail}")
 	public List<Davener> activateDavener(@PathVariable String davenerEmail) throws EmptyInformationException {
 		return adminService.activateDavener(davenerEmail);
 	}
 
+	//tested
 	@PostMapping(path = "weekly")
 	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo)
 			throws EmptyInformationException, IOException, ObjectNotFoundException {
@@ -115,12 +126,14 @@ public class AdminWebService {
 		return true;
 	}
 
+	//tested
 	@PostMapping(path = "preview", produces = "text/plain")
 	public String previewWeekly(@RequestBody Weekly weeklyInfo)
 			throws EmptyInformationException, ObjectNotFoundException {
 		return adminService.previewWeekly(weeklyInfo);
 	}
 
+	//tested
 	// A simplified sendOutWeekly which takes a GET request (for the one sent
 	// through Admin's email link)
 	@RequestMapping(path = "weeklylist")
@@ -129,6 +142,7 @@ public class AdminWebService {
 		return true;
 	}
 
+	//tested
 	@PutMapping(path = "updatedavenfor")
 	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
@@ -136,6 +150,7 @@ public class AdminWebService {
 		return adminService.getAllDavenfors();
 	}
 
+	//tested
 	@PutMapping(path = "updatename/{email}")
 	// TODO: why does @Valid not work anymore?
 	public Davenfor updateDavenfor(@RequestBody /* @Valid */ Davenfor davenfor, @PathVariable String email)
@@ -143,29 +158,33 @@ public class AdminWebService {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}
 
+	//tested
 	@PostMapping(path = "urgent")
 	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmptyInformationException {
 		emailSender.sendUrgentEmail(davenfor);
 		return true;
 	}
 
+	//tested
 	@RequestMapping(path = "categories")
 	public List<Category> findAllCategories() {
 		return adminService.getAllCategories();
 	}
 
+	//tested
 	@RequestMapping(path = "parashot")
-	public List<Parasha> findAllParashas() {
+	public List<Parasha> findAllParashot() {
 		return adminService.getAllParashot();
 	}
 
-	@RequestMapping(path = "parasha")
-	public Parasha getCurrentParasha() {
-		return adminService.findCurrentParasha();
-	}
-
-	@RequestMapping(path = "category")
-	public Category getCurrentCategory() {
-		return adminService.findCurrentCategory();
-	}
+	//currently not in use.  No tests
+//	@RequestMapping(path = "parasha")
+//	public Parasha getCurrentParasha() {
+//		return adminService.findCurrentParasha();
+//	}
+//
+//	@RequestMapping(path = "category")
+//	public Category getCurrentCategory() {
+//		return adminService.findCurrentCategory();
+//	}
 }

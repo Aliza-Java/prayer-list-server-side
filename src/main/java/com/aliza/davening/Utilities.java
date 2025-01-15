@@ -19,7 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.CategoryType;
+import com.aliza.davening.entities.CategoryName;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -196,7 +196,7 @@ public class Utilities {
 
 		// banim category prints nusach first, and includes name and spouse name in one
 		// box
-		if (CategoryType.BANIM.equals(category.getCname())) {
+		if (CategoryName.BANIM.equals(category.getCname())) {
 			stringBuilder.append(String.format(EmailScheme.getHtmlNameRowInList(), EmailScheme.getBanimLineEnglish(),
 					EmailScheme.getBanimLineHebrew()));
 

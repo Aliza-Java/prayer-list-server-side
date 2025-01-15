@@ -1,10 +1,10 @@
 package com.aliza.davening;
 
-import static com.aliza.davening.entities.CategoryType.BANIM;
-import static com.aliza.davening.entities.CategoryType.REFUA;
-import static com.aliza.davening.entities.CategoryType.SHIDDUCHIM;
-import static com.aliza.davening.entities.CategoryType.SOLDIERS;
-import static com.aliza.davening.entities.CategoryType.YESHUAH;
+import static com.aliza.davening.entities.CategoryName.BANIM;
+import static com.aliza.davening.entities.CategoryName.REFUA;
+import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
+import static com.aliza.davening.entities.CategoryName.SOLDIERS;
+import static com.aliza.davening.entities.CategoryName.YESHUAH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -232,7 +232,7 @@ public class ServiceEmailSenderTests {
 
 		when(categoryRep.findAll()).thenReturn(categories);
 
-		Weekly info = new Weekly("Vayeshev", 5L, catYeshuah, "special information");
+		Weekly info = new Weekly("Vayeshev", 5L, "yeshuah", "special information");
 
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
@@ -310,7 +310,7 @@ public class ServiceEmailSenderTests {
 		when(categoryRep.findAll()).thenReturn(categories);
 		when(davenforRep.findAllDavenforByCategory(YESHUAH)).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
-		Weekly info = new Weekly(null, 5L, catYeshuah, "special information");
+		Weekly info = new Weekly(null, 5L, "yeshuah", "special information");
 
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();

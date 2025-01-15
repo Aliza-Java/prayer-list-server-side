@@ -20,13 +20,13 @@ public class SystemExceptionHandler {
 	//After project is completed with all forseeable cases taken care of, allow Throwable to make errors nice and readable
 	
 	// Catch-All - if does not fit any of the extended methods to Throwable, will
-	// default to this one. 
-	//@ExceptionHandler(Throwable.class)
-	//public ResponseEntity<Object> handleThrowable(Throwable e) {
-	//	ApiError apiError = new ApiError("SERVER_ERROR",
-	//			"We are sorry, but something wrong happened. Please contact the admin.");
-	//	return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
-	//}
+	 //default to this one. 
+	@ExceptionHandler(Throwable.class)
+	public ResponseEntity<Object> handleThrowable(Throwable e) {
+		ApiError apiError = new ApiError("SERVER_ERROR",
+				"We are sorry, but something wrong happened. Please contact the admin.");
+		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
 
 	@ExceptionHandler({ DaveningSystemException.class, ReorderCategoriesException.class })
 	public ResponseEntity<Object> handleGeneralException(DaveningSystemException e) {

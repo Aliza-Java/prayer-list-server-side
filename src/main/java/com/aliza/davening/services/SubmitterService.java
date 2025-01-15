@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.aliza.davening.EmailScheme;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.CategoryType;
+import com.aliza.davening.entities.CategoryName;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -87,7 +87,7 @@ public class SubmitterService {
 		// If davenfor needs 2 names (e.g. Zera shel Kayama), validate that second name
 		// is in too, and if indeed exist - trim them.
 
-		if (CategoryType.BANIM.equals(davenfor.getCategory().getCname())) {
+		if (CategoryName.BANIM.equals(davenfor.getCategory().getCname())) {
 			if (davenfor.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
@@ -153,7 +153,7 @@ public class SubmitterService {
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
 		// TODO - change this banim condition to 'isBanim' across the board
-		if (CategoryType.BANIM.equals(davenforToUpdate.getCategory().getCname())) {
+		if (CategoryName.BANIM.equals(davenforToUpdate.getCategory().getCname())) {
 			if (davenforToUpdate.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");

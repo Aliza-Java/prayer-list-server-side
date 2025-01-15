@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aliza.davening.entities.CategoryType;
+import com.aliza.davening.entities.CategoryName;
 import com.aliza.davening.entities.Davenfor;
 
 @Repository
@@ -37,5 +37,5 @@ public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 	public List<Davenfor> findAllDavenforBySubmitterEmail(String email);
 
 	@Query("SELECT d FROM Davenfor d WHERE d.category.cname = :type")
-	List<Davenfor> findAllDavenforByCategory(CategoryType type);
+	List<Davenfor> findAllDavenforByCategory(CategoryName type);
 }

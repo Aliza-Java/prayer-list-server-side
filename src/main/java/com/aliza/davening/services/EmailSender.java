@@ -18,7 +18,7 @@ import com.aliza.davening.EmailScheme;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.CategoryType;
+import com.aliza.davening.entities.CategoryName;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -146,28 +146,29 @@ public class EmailSender {
 	}
 
 	// tested
-	public void sendSimplifiedWeekly() throws IOException, ObjectNotFoundException, EmptyInformationException {
+	public void sendSimplifiedWeekly() throws  ObjectNotFoundException, EmptyInformationException, IOException {
 		Weekly simplified = new Weekly();
 
 		Parasha parasha = parashaRepository.findCurrent()
 				.orElseThrow(() -> new ObjectNotFoundException("current Parasha"));
 		simplified.parashaName = parasha.getEnglishName();
 
-		simplified.category = categoryRepository.getCurrent()
-				.orElseThrow(() -> new ObjectNotFoundException("current category"));
+		Category category = categoryRepository.getCurrent()
+		.orElseThrow(() -> new ObjectNotFoundException("current category"));
+		simplified.cName = category.toString();
 
 		sendOutWeekly(simplified);
 	}
 
 	// tested
-	public void sendOutWeekly(Weekly info) throws IOException, ObjectNotFoundException, EmptyInformationException {
+	public void sendOutWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException, IOException {
 
 		Category category;
-		if (info.category != null)
-			category = info.category;
+		if (info.cName != null && info.cName.length()>0)
+			category = Category.getCategory(info.cName);
 		else
 			category = categoryRepository.findById(info.categoryId)
-					.orElseThrow(() -> new ObjectNotFoundException("category"));
+					.orElseThrow(() -> new ObjectNotFoundException("Category"));
 
 		LocalDate date = LocalDate.now();
 		String todaysDate = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(date);
@@ -196,7 +197,7 @@ public class EmailSender {
 	// tested
 	public void sendUrgentEmail(Davenfor davenfor) throws EmptyInformationException {
 
-		if (davenfor == null) {
+		if (davenfor == null || davenfor.getNameEnglish().isEmpty()) { //TODO: maybe put a validity check here
 			throw new EmptyInformationException("The name you submitted for davening is incomplete.  ");
 		}
 
@@ -210,7 +211,7 @@ public class EmailSender {
 
 		// If category is banim, need to list also spouse name (if exists in at least
 		// one language).
-		if (CategoryType.BANIM.equals(davenfor.getCategory().getCname())
+		if (CategoryName.BANIM.equals(davenfor.getCategory().getCname())
 				&& (davenfor.getNameEnglishSpouse() != null || davenfor.getNameHebrewSpouse() != null)) {
 			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailBanim(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
