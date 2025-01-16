@@ -16,7 +16,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-
+//TODO: consider getting rid of davener, leaving submitter.  can add a submitter without him giving names. really same thing.  or other way - davener can submit and opt not to get list. 
 @Entity
 public class Davener {
 

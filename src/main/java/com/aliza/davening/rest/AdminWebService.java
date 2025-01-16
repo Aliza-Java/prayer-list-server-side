@@ -50,7 +50,7 @@ public class AdminWebService {
 	//tested
 	@PutMapping(path = "update")
 	public boolean updateAdminSettings(@RequestBody AdminSettings settings)
-			throws DatabaseException, ObjectNotFoundException {
+			throws ObjectNotFoundException { 
 		adminService.updateAdmin(settings);
 		return true;
 	}

@@ -218,7 +218,7 @@ public class ServiceAdminTests {
 
 		try {
 			assertTrue(adminService.updateAdmin(new AdminSettings("newAdmin@gmail.com", false, 8)));
-		} catch (ObjectNotFoundException | DatabaseException e) {
+		} catch (ObjectNotFoundException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 

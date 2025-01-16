@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,6 +74,9 @@ public class AdminService {
 
 	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
+	
+	@Autowired
+	EntityManager entityManager;
 
 	public Admin thisAdmin = null;
 
@@ -127,20 +131,17 @@ public class AdminService {
 	}
 
 	// tested
-	public boolean updateAdmin(AdminSettings settings) throws ObjectNotFoundException, DatabaseException {
+	public boolean updateAdmin(AdminSettings settings) throws ObjectNotFoundException {
 
-		Optional<Admin> optionalAdmin = adminRepository.findById(adminId);
+		Optional<Admin> optionalAdmin = adminRepository.findByEmail(settings.getEmail());
 		if (!optionalAdmin.isPresent()) {
-			throw new ObjectNotFoundException("Admin with id " + adminId);
+			throw new ObjectNotFoundException("Admin with email " + settings.getEmail());
 		}
 
-		// needs id because will skip the check on current admin
-		if (isThisAdminEmailInUse(adminId, settings.getEmail())) {
-			throw new DatabaseException("This admin email address is already in use.");
-		}
-
-		adminRepository.updateSettings(adminId, settings.getEmail(), settings.isNewNamePrompt(),
+		adminRepository.updateSettings(optionalAdmin.get().getId(), settings.getEmail(), settings.isNewNamePrompt(),
 				settings.getWaitBeforeDeletion());
+		entityManager.flush();
+		entityManager.clear();
 		return true;
 	}
 
@@ -397,6 +398,8 @@ public class AdminService {
 
 			else {
 				davenerRepository.disactivateDavener(davenerEmail);
+				entityManager.flush(); 
+				entityManager.clear();
 				emailSender.notifyDisactivatedDavener(davenerEmail);
 			}
 		} finally { // in case there were previous errors (such as in emailSender), return
@@ -432,6 +435,8 @@ public class AdminService {
 
 			else {
 				davenerRepository.activateDavener(davenerEmail);
+				entityManager.flush(); 
+				entityManager.clear();
 				emailSender.notifyActivatedDavener(davenerEmail);
 			}
 		} finally {// in case there were previous errors (such as in emailSender), return
