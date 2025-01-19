@@ -37,6 +37,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
@@ -61,6 +62,7 @@ import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
 
 @ExtendWith(SpringExtension.class)
+@Transactional // to allow for flush() and clear()
 @SpringBootTest
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -69,7 +71,7 @@ public class ServiceAdminTests {
 
 	@MockBean
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private AdminService adminService;
 
@@ -200,30 +202,22 @@ public class ServiceAdminTests {
 	@Order(3)
 	public void updateAdminTest() {
 		// id not found throws exception
-		when(adminRep.findById(anyLong())).thenReturn(Optional.empty());
+		when(adminRep.findByEmail("newEmail@gmail.com")).thenReturn(Optional.empty());
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.updateAdmin(new AdminSettings());
+			adminService.updateAdmin(new AdminSettings("newEmail@gmail.com", true, 10));
 		});
-		assertTrue(exception.getMessage().contains("id"));
+		assertTrue(exception.getMessage().contains("Admin with email"));
 
-		List<Admin> admins = Arrays.asList(admin1, admin2, admin3);
-
-		when(adminRep.findAll()).thenReturn(admins);
-
-		when(adminRep.findById(1L)).thenReturn(Optional.of(admin1));
-		exception = assertThrows(DatabaseException.class, () -> {
-			adminService.updateAdmin(new AdminSettings("admin2@gmail.com", true, 8));
-		});
-		assertTrue(exception.getMessage().contains("email"));
-
+		when(adminRep.findByEmail("updatedAdmin@gmail.com"))
+				.thenReturn(Optional.of(new Admin(3, "updatedAdmin@gmail.com", "pass", true, 3)));
 		try {
-			assertTrue(adminService.updateAdmin(new AdminSettings("newAdmin@gmail.com", false, 8)));
+			assertTrue(adminService.updateAdmin(new AdminSettings("updatedAdmin@gmail.com", false, 8)));
 		} catch (ObjectNotFoundException e) {
+			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
-		verify(adminRep, times(3)).findById(any());
-		verify(adminRep, times(2)).findAll();
+		verify(adminRep, times(2)).findByEmail(any());
 	}
 
 	@Test

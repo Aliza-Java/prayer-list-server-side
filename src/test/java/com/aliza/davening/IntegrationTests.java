@@ -20,7 +20,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -34,6 +33,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -55,15 +55,18 @@ import com.aliza.davening.services.EmailSender;
 //testing with test-DB
 @TestPropertySource(properties = { "spring.datasource.url=jdbc:h2:mem:testdb",
 		"spring.datasource.driver-class-name=org.h2.Driver", "spring.datasource.username=sa",
-		"spring.datasource.password=password", "spring.jpa.hibernate.ddl-auto=create-drop" })
+		"spring.datasource.password=", "spring.jpa.hibernate.ddl-auto=create-drop" })
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)// annotation to force Spring to create a fresh application context for each test class.
 @Transactional // ensures the actions will be rolled back after every test
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class IntegrationTests {
+	// Integration tests - checking communication with all Repositories, all CRUD
+	// actions, and functioning of both Submitter and Admin services.
 
 	@MockBean
 	private AuthenticationManager authenticationManager;
@@ -152,13 +155,6 @@ public class IntegrationTests {
 				null, true, null, null, null, null, null));
 		davenforRepository.save(new Davenfor(5, "sub2@gmail.com", catBanim, "יוסף בן שירה", "Yosef ben Shira", null,
 				null, true, null, null, null, null, null));
-	}
-
-	@BeforeEach
-	void setup() {
-//		parashaRepository.deleteAll();
-//		davenforRepository.deleteAll();
-//		davenerRepository.deleteAll();
 	}
 
 	@Test
@@ -280,8 +276,8 @@ public class IntegrationTests {
 		try {
 			mockMvc.perform(
 					post("/sub/{email}", "sub3@gmail.com").content(requestBody).contentType(MediaType.APPLICATION_JSON))
-					.andDo(print())
-					.andExpect(status().isOk()).andExpect(jsonPath("$.submitterEmail").value("sub3@gmail.com"))
+					.andDo(print()).andExpect(status().isOk())
+					.andExpect(jsonPath("$.submitterEmail").value("sub3@gmail.com"))
 					.andExpect(jsonPath("$.nameEnglish").value("Yossi ben Sara"));
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());

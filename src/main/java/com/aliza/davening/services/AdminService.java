@@ -46,6 +46,7 @@ import com.aliza.davening.util_classes.Weekly;
 
 @Service("adminService")
 @EnableTransactionManagement
+@Transactional
 public class AdminService {
 
 	@Autowired
