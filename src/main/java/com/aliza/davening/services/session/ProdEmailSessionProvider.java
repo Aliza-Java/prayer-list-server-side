@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import jakarta.mail.Session;
 
 @Service
-@Profile("prod")
+@Profile("!test")
 public class ProdEmailSessionProvider implements EmailSessionProvider {
 
 	private final Session prodSession;

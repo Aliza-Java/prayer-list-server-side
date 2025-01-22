@@ -12,7 +12,7 @@ import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 
 @Configuration
-@Profile("prod")
+@Profile("!test")
 public class ProdEmailSessionConfig {
 	
 	@Value("${spring.mail.username}")
