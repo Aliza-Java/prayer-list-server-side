@@ -86,13 +86,13 @@ public class ContSubmitterTests {
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
 	public static Category catYeshuah = new Category(YESHUAH, false, 180, 5);
 
-	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", catRefua, "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshuah1 = new Davenfor(2, "sub1@gmail.com", catYeshuah, "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfYeshuah1 = new Davenfor(2, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", catBanim, "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", catYeshuah, "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshuah1, dfBanim, dfYeshuah2);
 

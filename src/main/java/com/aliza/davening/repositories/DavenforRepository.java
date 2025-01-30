@@ -36,6 +36,5 @@ public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 
 	public List<Davenfor> findAllDavenforBySubmitterEmail(String email);
 
-	@Query("SELECT d FROM Davenfor d WHERE d.category.cname = :type")
-	List<Davenfor> findAllDavenforByCategory(CategoryName type);
+	List<Davenfor> findAllDavenforByCategory(String category);
 }

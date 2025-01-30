@@ -183,8 +183,8 @@ public class AdminWebService {
 //		return adminService.findCurrentParasha();
 //	}
 //
-//	@RequestMapping(path = "category")
-//	public Category getCurrentCategory() {
-//		return adminService.findCurrentCategory();
-//	}
+	@RequestMapping(path = "category") //TODO: test
+	public Category getCurrentCategory() {
+		return adminService.findCurrentCategory();
+	}
 }

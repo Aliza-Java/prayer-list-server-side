@@ -18,7 +18,6 @@ import com.aliza.davening.EmailScheme;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.CategoryName;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -211,7 +210,7 @@ public class EmailSender {
 
 		// If category is banim, need to list also spouse name (if exists in at least
 		// one language).
-		if (CategoryName.BANIM.equals(davenfor.getCategory().getCname())
+		if (SchemeValues.BANIM.equalsIgnoreCase((davenfor.getCategory()))
 				&& (davenfor.getNameEnglishSpouse() != null || davenfor.getNameHebrewSpouse() != null)) {
 			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailBanim(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
@@ -220,7 +219,7 @@ public class EmailSender {
 
 		else {
 			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailText(), davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), davenfor.getCategory().getCname());
+					davenfor.getNameHebrew(), davenfor.getCategory());
 		}
 
 		if (davenfor.getNote() != null) {

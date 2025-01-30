@@ -32,12 +32,11 @@ public class Davenfor {
 	// @NotNull(message = "No submitter associated with this name. ")
 	private String submitterEmail;
 
-	@ManyToOne(fetch = FetchType.EAGER)
 	// added jsonIgnoreProperties when fetching categoryname of Davenfor. if works
 	// anyway (in SubmitterService.addDavenfor), remove this line.
 	// @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	// @NotNull(message = "The name must belong to some category. ")
-	private Category category;
+	private String category;
 
 	// @NotBlank(message = "Hebrew name is blank. ") // Regex pattern is made to
 	// accept blank, so that a blank input will

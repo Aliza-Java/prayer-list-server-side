@@ -7,6 +7,7 @@ public class SchemeValues {
 
 	// a static field to stand for id's that have not been created.
 	public static final long NON_EXIST = -1;
+	public final static String BANIM = "BANIM"; 
 
 	// The default amount of days to wait after warning a submitter before deleting
 	// a davenfor.

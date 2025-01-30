@@ -78,7 +78,7 @@ public class ServiceEmailSenderTests {
 
 	@MockBean
 	private AuthenticationManager authenticationManager;
-	
+
 	@Autowired
 	private EmailSessionProvider sessionProvider;
 
@@ -134,13 +134,13 @@ public class ServiceEmailSenderTests {
 	public static Parasha parasha3 = new Parasha(3, "Lech Lecha", "לך-לך", false);
 	public static List<Parasha> parashot = Arrays.asList(parasha1, parasha2, parasha3);
 
-	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", catRefua, "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", "Refuah", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshuah1 = new Davenfor(4, "sub1@gmail.com", catYeshuah, "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfYeshuah1 = new Davenfor(4, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", catBanim, "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", catYeshuah, "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshuah1, dfBanim, dfYeshuah2);
 
@@ -242,7 +242,7 @@ public class ServiceEmailSenderTests {
 		greenMail.start();
 
 		try {
-			when(davenforRep.findAllDavenforByCategory(YESHUAH)).thenReturn(Collections.emptyList());
+			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString())).thenReturn(Collections.emptyList());
 
 			exception = assertThrows(EmptyInformationException.class, () -> {
 				emailSender.sendOutWeekly(info);
@@ -312,7 +312,7 @@ public class ServiceEmailSenderTests {
 		when(davenerRep.getAllDavenersEmails())
 				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
-		when(davenforRep.findAllDavenforByCategory(YESHUAH)).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+		when(davenforRep.findAllDavenforByCategory("Yeshuah")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Weekly info = new Weekly(null, 5L, "yeshuah", "special information");
 
@@ -392,8 +392,8 @@ public class ServiceEmailSenderTests {
 		greenMail.start();
 
 		try {
-			when(davenforRep.findAllDavenforByCategory(REFUA)).thenReturn(Arrays.asList(dfRefua));
-			when(davenforRep.findAllDavenforByCategory(YESHUAH)).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+			when(davenforRep.findAllDavenforByCategory("Refua")).thenReturn(Arrays.asList(dfRefua));
+			when(davenforRep.findAllDavenforByCategory("Yeshuah")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 			emailSender.sendSimplifiedWeekly();
 
 			// Verify that the email was sent

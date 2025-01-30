@@ -341,7 +341,7 @@ public class ServiceSubmitterTests {
 	private Davenfor getDf(Category cat) {
 		Davenfor df = new Davenfor();
 		df.setSubmitterEmail(submitterEmail);
-		df.setCategory(cat);
+		df.setCategory(cat.getCname().toString());
 
 		switch (cat.getCname()) {
 			case SHIDDUCHIM:

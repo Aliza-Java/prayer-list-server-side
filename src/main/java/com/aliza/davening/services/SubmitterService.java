@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aliza.davening.EmailScheme;
+import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.CategoryName;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Submitter;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -87,7 +87,7 @@ public class SubmitterService {
 		// If davenfor needs 2 names (e.g. Zera shel Kayama), validate that second name
 		// is in too, and if indeed exist - trim them.
 
-		if (CategoryName.BANIM.equals(davenfor.getCategory().getCname())) {
+		if (SchemeValues.BANIM.equalsIgnoreCase(davenfor.getCategory())) {
 			if (davenfor.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
@@ -103,7 +103,8 @@ public class SubmitterService {
 		davenfor.setLastConfirmedAt(LocalDate.now());
 
 		// Davenfor will expire in future according to its category's settings.
-		davenfor.setExpireAt(LocalDate.now().plusDays(davenfor.getCategory().getUpdateRate()));
+		Category categoryObj = Category.getCategory(davenfor.getCategory());
+		davenfor.setExpireAt(LocalDate.now().plusDays(categoryObj.getUpdateRate()));
 
 		davenforRepository.save(davenfor);
 
@@ -113,7 +114,7 @@ public class SubmitterService {
 		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
 		String subject = EmailScheme.getInformAdminOfNewNameSubject();
 		String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
-				davenfor.getNameHebrew(), davenfor.getCategory().getCname(), submitterEmail);
+				davenfor.getNameHebrew(), davenfor.getCategory(), submitterEmail);
 		// TODO: when works, enable and adjust matching test includes
 		// emailSender.informAdmin(subject, message);
 		// }
@@ -153,7 +154,7 @@ public class SubmitterService {
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
 		// TODO - change this banim condition to 'isBanim' across the board
-		if (CategoryName.BANIM.equals(davenforToUpdate.getCategory().getCname())) {
+		if (SchemeValues.BANIM.equalsIgnoreCase(davenforToUpdate.getCategory())) {
 			if (davenforToUpdate.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
@@ -170,15 +171,15 @@ public class SubmitterService {
 		davenforToUpdate.setLastConfirmedAt(LocalDate.now());
 
 		// Davenfor will expire in future according to it's category's settings.
-		davenforToUpdate.setExpireAt(LocalDate.now().plusDays(davenforToUpdate.getCategory().getUpdateRate()));
+		Category categoryObj = Category.getCategory(davenforToUpdate.getCategory());
+		davenforToUpdate.setExpireAt(LocalDate.now().plusDays(categoryObj.getUpdateRate()));
 
 		davenforRepository.save(davenforToUpdate);
 
 		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
 		String subject = EmailScheme.getInformAdminOfUpdateSubject();
 		String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getSubmitterEmail(),
-				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(),
-				davenforToUpdate.getCategory().getCname());
+				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
 		// TODO: when email works, enable and add test
 		// emailSender.informAdmin(subject, message);
 		// }
@@ -208,7 +209,8 @@ public class SubmitterService {
 
 		// Extending the davenfor's expiration date according to the defined length in
 		// its category.
-		LocalDate extendedDate = LocalDate.now().plusDays(davenforToExtend.getCategory().getUpdateRate());
+		Category categoryObj = Category.getCategory(davenforToExtend.getCategory());
+		LocalDate extendedDate = LocalDate.now().plusDays(categoryObj.getUpdateRate());
 		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());
 		return true;
 	}

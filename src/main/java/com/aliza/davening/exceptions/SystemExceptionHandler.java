@@ -23,6 +23,7 @@ public class SystemExceptionHandler {
 	 //default to this one. 
 	@ExceptionHandler(Throwable.class)
 	public ResponseEntity<Object> handleThrowable(Throwable e) {
+		e.printStackTrace();
 		ApiError apiError = new ApiError("SERVER_ERROR",
 				"We are sorry, but something wrong happened. Please contact the admin.");
 		return new ResponseEntity<Object>(apiError, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);

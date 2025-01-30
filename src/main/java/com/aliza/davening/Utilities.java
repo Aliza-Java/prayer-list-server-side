@@ -162,7 +162,7 @@ public class Utilities {
 
 		// building the email message with the button area as a table at the bottom
 		String message = String.format("We've been davening for %s for %s.", davenfor.getNameEnglish(),
-				davenfor.getCategory().getCname())
+				davenfor.getCategory())
 				+ "  In order to keep our lists relevant, please confirm that the davening is still relevant. "
 				+ "<br><br>  If the davening is no longer relevant for this list either simply ignore this email or click the big red remove button."
 				+ buttonArea;
@@ -173,7 +173,7 @@ public class Utilities {
 	public String createWeeklyHtml(Category category, String weekName) throws EmptyInformationException {
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category.getCname());
+		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category.getCname().toString());
 
 		if (categoryDavenfors.isEmpty()) {
 			throw new EmptyInformationException("There are no names to daven for in this category. ");

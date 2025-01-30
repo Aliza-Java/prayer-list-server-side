@@ -266,40 +266,40 @@ public class AdminService {
 		return optionalCategory.get();
 	}
 
-	// TODO: when works, test
-	@Transactional(rollbackFor = ReorderCategoriesException.class)
-	public List<Category> changeCategoryOrder(List<Category> sortedCategories)
-			throws ReorderCategoriesException, ObjectNotFoundException {
-
-		/*
-		 * as we update the categories, we will cross them off, and check at the end if
-		 * all have been crossed off.
-		 */
-
-		List<Category> crossOffList = categoryRepository.findAll();
-
-		for (Category newCategory : sortedCategories) {
-
-			// checking if new category order is valid.
-			if (newCategory.getCatOrder() < 0) {
-				throw new ReorderCategoriesException("Category order must be a positive number.");
-			}
-
-			Category updatedCategory = getCategory(newCategory.getId());
-			categoryRepository.updateCategoryOrder(newCategory.getCatOrder(), newCategory.getId());
-
-			crossOffList.remove(updatedCategory);
-		}
-
-		// checking in cross-off list if any categories have not been included in the
-		// sort.
-		if (!crossOffList.isEmpty()) {
-			throw new ReorderCategoriesException(
-					"Categories reordered only partially. Could not continue with action. ");
-		}
-
-		return sortedCategories;
-	}
+	// TODO: fix. when works, test
+//	@Transactional(rollbackFor = ReorderCategoriesException.class)
+//	public List<Category> changeCategoryOrder(List<Category> sortedCategories)
+//			throws ReorderCategoriesException, ObjectNotFoundException {
+//
+//		/*
+//		 * as we update the categories, we will cross them off, and check at the end if
+//		 * all have been crossed off.
+//		 */
+//
+//		List<Category> crossOffList = categoryRepository.findAll();
+//
+//		for (Category newCategory : sortedCategories) {
+//
+//			// checking if new category order is valid.
+//			if (newCategory.getCatOrder() < 0) {
+//				throw new ReorderCategoriesException("Category order must be a positive number.");
+//			}
+//
+//			Category updatedCategory = getCategory(newCategory.getId());
+//			categoryRepository.updateCategoryOrder(newCategory.getCatOrder(), newCategory.getId());
+//
+//			crossOffList.remove(updatedCategory);
+//		}
+//
+//		// checking in cross-off list if any categories have not been included in the
+//		// sort.
+//		if (!crossOffList.isEmpty()) {
+//			throw new ReorderCategoriesException(
+//					"Categories reordered only partially. Could not continue with action. ");
+//		}
+//
+//		return sortedCategories;
+//	}
 
 	// TODO: when ready, implement
 	/*
