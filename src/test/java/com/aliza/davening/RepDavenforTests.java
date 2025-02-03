@@ -1,9 +1,5 @@
 package com.aliza.davening;
 
-import static com.aliza.davening.entities.CategoryName.BANIM;
-import static com.aliza.davening.entities.CategoryName.REFUA;
-import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUAH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -24,7 +20,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
@@ -50,10 +45,7 @@ public class RepDavenforTests {
 	@Order(1)
 	public void extendExpiryDateTest() {
 
-		Category refua = new Category(REFUA, true, 180, 1);
-		categoryRep.save(refua);
-
-		Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara", null, null,
+		Davenfor dfRefua = new Davenfor(1L, "sub1@gmail.com", "refua", "אברהם בן שרה", "Avraham ben Sara", null, null,
 				true, null, null, null, null, null);
 		LocalDate today = LocalDate.now();
 		LocalDate fiveDaysAgo = LocalDate.now().minusDays(5);
@@ -78,10 +70,7 @@ public class RepDavenforTests {
 	@Test
 	@Order(2)
 	public void setLastConfirmedAtTest() {
-		Category yeshuah = new Category(YESHUAH, false, 180, 5);
-		categoryRep.save(yeshuah);
-
-		Davenfor dfYeshuah = new Davenfor(2, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null,
+		Davenfor dfYeshuah = new Davenfor(2L, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null,
 				true, null, null, null, null, null);
 		dfYeshuah.setLastConfirmedAt(LocalDate.now().minusDays(3));
 		davenforRep.save(dfYeshuah);
@@ -99,16 +88,12 @@ public class RepDavenforTests {
 	@Test
 	@Order(3)
 	public void findByExpireAtLessThanTest() {
-		Category yeshuah = new Category(YESHUAH, false, 180, 5);
-		Category banim = new Category(BANIM, false, 50, 3);
-		categoryRep.save(yeshuah);
-		categoryRep.save(banim);
 
-		Davenfor df1 = new Davenfor(3, "early@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null, true,
+		Davenfor df1 = new Davenfor(3L, "early@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null, true,
 				null, null, null, null, null);
-		Davenfor df2 = new Davenfor(4, "early@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
+		Davenfor df2 = new Davenfor(4L, "early@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
 				"Yehudit bat Miriam", true, null, null, null, null, null);
-		Davenfor df3 = new Davenfor(5, "late@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null, null, true,
+		Davenfor df3 = new Davenfor(5L, "late@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null, null, true,
 				null, null, null, null, null);
 		df1.setExpireAt(LocalDate.now().minusDays(2));
 		df2.setExpireAt(LocalDate.now().minusDays(4));
@@ -126,16 +111,11 @@ public class RepDavenforTests {
 	@Test
 	@Order(4)
 	public void deleteByExpireAtLessThanTest() {
-		Category yeshuah = new Category(YESHUAH, false, 180, 5);
-		Category banim = new Category(BANIM, false, 50, 3);
-		categoryRep.save(yeshuah);
-		categoryRep.save(banim);
-
-		Davenfor df1 = new Davenfor(6, "early@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null, true,
+		Davenfor df1 = new Davenfor(6L, "early@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null, true,
 				null, null, null, null, null);
-		Davenfor df2 = new Davenfor(7, "early@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
+		Davenfor df2 = new Davenfor(7L, "early@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
 				"Yehudit bat Miriam", true, null, null, null, null, null);
-		Davenfor df3 = new Davenfor(8, "late@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null, null, true,
+		Davenfor df3 = new Davenfor(8L, "late@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null, null, true,
 				null, null, null, null, null);
 		df1.setExpireAt(LocalDate.now().minusDays(2));
 		df2.setExpireAt(LocalDate.now().minusDays(4));
@@ -153,16 +133,13 @@ public class RepDavenforTests {
 	@Test
 	@Order(5)
 	public void findAllDavenforBySubmitterEmailTest() {
-		Category yeshuah = new Category(YESHUAH, false, 180, 5);
-		categoryRep.save(yeshuah);
-
-		Davenfor df1 = new Davenfor(9, "sub1@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", null, null, true,
+		Davenfor df1 = new Davenfor(9L, "sub1@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", null, null, true,
 				null, null, null, null, null);
-		Davenfor df2 = new Davenfor(10, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null, true,
+		Davenfor df2 = new Davenfor(10L, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null, true,
 				null, null, null, null, null);
-		Davenfor df3 = new Davenfor(11, "sub2@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
+		Davenfor df3 = new Davenfor(11L, "sub2@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
 				"Yehudit bat Miriam", true, null, null, null, null, null);
-		Davenfor df4 = new Davenfor(12, "sub1@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null, null, true,
+		Davenfor df4 = new Davenfor(12L, "sub1@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null, null, true,
 				null, null, null, null, null);
 		davenforRep.save(df1);
 		davenforRep.save(df2);
@@ -179,25 +156,20 @@ public class RepDavenforTests {
 	@Test
 	@Order(6)
 	public void findAllDavenforByCategoryTest() {
-		Category yeshuah = new Category(YESHUAH, false, 180, 5);
-		Category soldiers = new Category(SOLDIERS, false, 180, 5);
-		categoryRep.save(yeshuah);
-		categoryRep.save(soldiers);
-
-		Davenfor df1 = new Davenfor(13, "sub1@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", null, null, true,
+		Davenfor df1 = new Davenfor(13L, "sub1@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", null, null, true,
 				null, null, null, null, null);
-		Davenfor df2 = new Davenfor(14, "sub2@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara", null, null, true,
+		Davenfor df2 = new Davenfor(14L, "sub2@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara", null, null, true,
 				null, null, null, null, null);
-		Davenfor df3 = new Davenfor(15, "sub3@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
+		Davenfor df3 = new Davenfor(15L, "sub3@gmail.com", "Yeshuah", "אברהם בן שרה", "Avraham ben Sara", "יהודית בת מרים",
 				"Yehudit bat Miriam", true, null, null, null, null, null);
-		Davenfor df4 = new Davenfor(16, "sub4@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira", null, null, true,
+		Davenfor df4 = new Davenfor(16L, "sub4@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira", null, null, true,
 				null, null, null, null, null);
 		davenforRep.save(df1);
 		davenforRep.save(df2);
 		davenforRep.save(df3);
 		davenforRep.save(df4);
 
-		List<Davenfor> retrieved = davenforRep.findAllDavenforByCategory(SOLDIERS.toString());
+		List<Davenfor> retrieved = davenforRep.findAllDavenforByCategory("Soldiers");
 		assertEquals(2, retrieved.size());
 		assertEquals(df2.getId(), retrieved.get(0).getId());
 		assertEquals(df4.getId(), retrieved.get(1).getId());

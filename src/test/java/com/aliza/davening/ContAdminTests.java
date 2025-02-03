@@ -571,7 +571,7 @@ public class ContAdminTests {
 	@Order(19)
 	public void testUpdateNameByAdmin() {
 
-		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\" : {\"categoryName\": \"yeshuah\"},  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			when(adminService.getAllDavenfors()).thenReturn(davenfors);
@@ -610,7 +610,7 @@ public class ContAdminTests {
 	@Order(20)
 	public void testUpdateDavenfor() {
 
-		String requestBody = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : {\"categoryName\": \"yeshuah\"},  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			when(submitterService.updateDavenfor(any(), eq("sub3@gmail.com"), eq(false))).thenReturn(dfYeshuah1);
@@ -650,8 +650,8 @@ public class ContAdminTests {
 	@Test
 	@Order(21)
 	public void testSendOutUrgent() {
-		String requestBody = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : {\"categoryName\": \"yeshuah\"},  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
-		String incompleteDf = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : {\"categoryName\": \"yeshuah\"},  \"nameEnglish\": \" \", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String incompleteDf = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \" \", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			doNothing().when(emailSender).sendUrgentEmail(any());

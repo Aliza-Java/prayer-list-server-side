@@ -28,6 +28,7 @@ public class DaveningApplication {
 		// Need headless configuration for building the image.
 		SpringApplicationBuilder builder = new SpringApplicationBuilder(DaveningApplication.class);
 		builder.headless(false);
+		@SuppressWarnings("unused")
 		ConfigurableApplicationContext context = builder.run(args);
 		
 		// For testing:

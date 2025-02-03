@@ -18,7 +18,6 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;

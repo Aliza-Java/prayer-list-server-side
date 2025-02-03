@@ -272,7 +272,7 @@ public class IntegrationTests {
 	@Test
 	@Order(9)
 	public void testAddDavenfor() {
-		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\":{\"cname\": \"YESHUAH\"},  \"nameEnglish\": \"Yossi ben Sara\", \"nameHebrew\": \"יוסי בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\": \"YESHUAH\",  \"nameEnglish\": \"Yossi ben Sara\", \"nameHebrew\": \"יוסי בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			mockMvc.perform(

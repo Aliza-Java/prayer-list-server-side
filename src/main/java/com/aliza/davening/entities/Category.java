@@ -78,11 +78,6 @@ public class Category {
 	// number. ")
 	private int catOrder;
 
-	@OneToMany(cascade = { CascadeType.REMOVE }, mappedBy = "category")
-	@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
-	@JsonIgnore
-	private List<Davenfor> davenfors;
-
 	// davenfors omitted as it causes recursive output.
 	@Override
 	public String toString() {

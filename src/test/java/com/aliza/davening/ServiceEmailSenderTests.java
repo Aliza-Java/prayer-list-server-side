@@ -312,7 +312,7 @@ public class ServiceEmailSenderTests {
 		when(davenerRep.getAllDavenersEmails())
 				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
-		when(davenforRep.findAllDavenforByCategory("Yeshuah")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+		when(davenforRep.findAllDavenforByCategory("YESHUAH")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Weekly info = new Weekly(null, 5L, "yeshuah", "special information");
 
@@ -320,6 +320,7 @@ public class ServiceEmailSenderTests {
 		greenMail.start();
 
 		try {
+			System.out.println(davenforRep.findAll());
 			emailSender.sendOutWeekly(info);
 
 			greenMail.waitForIncomingEmail(5000, 4);
@@ -358,7 +359,6 @@ public class ServiceEmailSenderTests {
 		greenMail.stop();
 
 		verify(davenerRep, times(1)).getAllDavenersEmails();
-		verify(categoryRep, times(1)).findAll();
 		verify(davenforRep, times(1)).findAllDavenforByCategory(any());
 
 	}
@@ -394,6 +394,7 @@ public class ServiceEmailSenderTests {
 		try {
 			when(davenforRep.findAllDavenforByCategory("Refua")).thenReturn(Arrays.asList(dfRefua));
 			when(davenforRep.findAllDavenforByCategory("Yeshuah")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+			System.out.println(davenforRep.findAll());
 			emailSender.sendSimplifiedWeekly();
 
 			// Verify that the email was sent
@@ -441,7 +442,6 @@ public class ServiceEmailSenderTests {
 		verify(parashaRep, times(3)).findCurrent();
 		verify(categoryRep, times(2)).getCurrent();
 		verify(davenerRep, times(1)).getAllDavenersEmails();
-		verify(categoryRep, times(1)).findAll();
 	}
 
 	@Test

@@ -123,7 +123,7 @@ public class ContSubmitterTests {
 		when(submitterService.addDavenfor(any(), eq("sub1@gmail.com"))).thenThrow(new EmptyInformationException(
 				"This category requires also a spouse name (English and Hebrew) to be submitted. "));
 
-		String requestBodyPartialBanim = "{ \"email\": \"sub3@gmail.com\", \"category\": {\"cname\": \"BANIM\"}, \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBodyPartialBanim = "{ \"email\": \"sub3@gmail.com\", \"category\": \"BANIM\", \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 		try {
 			mockMvc.perform(post("/sub/{email}", "sub1@gmail.com").content(requestBodyPartialBanim)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent())
@@ -131,7 +131,7 @@ public class ContSubmitterTests {
 					.andExpect(jsonPath("$.messages[0]", containsString("spouse name (English and Hebrew)")));
 
 			when(submitterService.addDavenfor(any(), eq("sub2@gmail.com"))).thenReturn(dfYeshuah2);
-			String requestBodyGood = "{ \"email\": \"sub3@gmail.com\", \"category\":{\"cname\": \"YESHUAH\"},  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+			String requestBodyGood = "{ \"email\": \"sub3@gmail.com\", \"category\": \"YESHUAH\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 			mockMvc.perform(post("/sub/{email}", "sub2@gmail.com").content(requestBodyGood)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
@@ -147,7 +147,7 @@ public class ContSubmitterTests {
 	@Test
 	@Order(3)
 	public void testUpdateDavenfor() {
-		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\":{\"cname\": \"YESHUAH\"},  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\" :\"YESHUAH\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			when(submitterService.updateDavenfor(any(), eq("sub1@gmail.com"), eq(false))).thenReturn(dfRefua);

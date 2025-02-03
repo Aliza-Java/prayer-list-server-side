@@ -2,12 +2,11 @@ package com.aliza.davening.entities;
 
 import java.time.LocalDate;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,6 +35,7 @@ public class Davenfor {
 	// anyway (in SubmitterService.addDavenfor), remove this line.
 	// @JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 	// @NotNull(message = "The name must belong to some category. ")
+	@Column(name = "category")
 	private String category;
 
 	// @NotBlank(message = "Hebrew name is blank. ") // Regex pattern is made to

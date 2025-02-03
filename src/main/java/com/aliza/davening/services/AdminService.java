@@ -33,7 +33,6 @@ import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
-import com.aliza.davening.exceptions.ReorderCategoriesException;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenerRepository;
@@ -256,15 +255,15 @@ public class AdminService {
 		return davenforRepository.findAll();
 	}
 
-	// not tested, for future
+	//TODO: enable in future
 	// A helper method set up primarily for changeCategoryOrder()
-	private Category getCategory(long id) throws ObjectNotFoundException {
-		Optional<Category> optionalCategory = categoryRepository.findById(id);
-		if (!optionalCategory.isPresent()) {
-			throw new ObjectNotFoundException("Category of id " + id);
-		}
-		return optionalCategory.get();
-	}
+//	private Category getCategory(long id) throws ObjectNotFoundException {
+//		Optional<Category> optionalCategory = categoryRepository.findById(id);
+//		if (!optionalCategory.isPresent()) {
+//			throw new ObjectNotFoundException("Category of id " + id);
+//		}
+//		return optionalCategory.get();
+//	}
 
 	// TODO: fix. when works, test
 //	@Transactional(rollbackFor = ReorderCategoriesException.class)
