@@ -2,7 +2,6 @@ package com.aliza.davening.entities;
 
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,10 +9,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import javax.validation.constraints.*;
+
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
@@ -25,11 +23,11 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-//No ToString in order to override and write one without Davenfors (causes recursive Json)
 
 //Different types of davening lists e.g. shidduchim, banim etc.
 @Entity
 public class Category {
+	//TODO*: in future, make repository tests for all validations
 
 	public Category(CategoryName cname, boolean current, int updateRate, int catOrder) {
 		this.cname = cname;
@@ -47,7 +45,7 @@ public class Category {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	// TODO: when allow admin to add more categories, enable validations somehow
+	// TODO*: In future, when allow admin to add more categories, enable validations somehow in cname fields
 //	@Column(unique = true)
 //	@NotNull(message = "Category's English name cannot be null. ")
 //	@NotBlank(message = "Category's English name cannot be blank. ")
@@ -67,21 +65,15 @@ public class Category {
 	private boolean isCurrent;
 
 	// How many days a name of this category adds on when extending expiration date
-	// TODO: what is the equivalent for @positive? fix
-	// @Positive(message = "The update rate of a category must be a positive number.
-	// ")
+    @Positive(message = "The update rate of a category must be a positive number")
 	private int updateRate;
 
-	// The order in which the categories get sent out.
-	// TODO: what is the equivalent for @positive? fix
-	// @Positive(message = "The category order must be represented by a positive
-	// number. ")
+	//The order in which the categories get sent out.
+	@Positive(message = "The category order must be represented by a positive number. ")
 	private int catOrder;
 
-	// davenfors omitted as it causes recursive output.
 	@Override
 	public String toString() {
-		//return "Category [" + cname + "/" + cname.getHebName() + ", isCurrent=" + isCurrent + "]";
 		return "Category[ " + id + " " + cname + " isCurrent: " + isCurrent + "]";
 	}
 

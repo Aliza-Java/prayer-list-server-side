@@ -53,7 +53,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
 			.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
 			.authorizeRequests().antMatchers("/auth/**").permitAll()
-			.antMatchers("/admin/**").permitAll() //TODO - adding temporarily for ng tests to reach.  think how to enable
 			.antMatchers("/sub/**").permitAll()
 			.anyRequest().authenticated();
 

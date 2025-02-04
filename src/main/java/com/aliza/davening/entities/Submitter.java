@@ -1,6 +1,7 @@
 package com.aliza.davening.entities;
 
 import javax.persistence.Entity;
+import javax.validation.constraints.*;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,13 +24,11 @@ public class Submitter {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	//TODO: fix annotations
-	// Allowing only letters and spaces, no leading spaces
-	//@Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "Submitter name must contain only letters and may have spaces in between. ")
+	@Pattern(regexp = "^[a-zA-Z '\\-\\ ]*$", message = "Submitter name must contain only letters and may have spaces in between. ")
 	private String name;
 
-	//@NotBlank(message = "Submitter's email missing. ") // NotBlank includes NotNull option.
-	//@Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Please provide a valid email for submitter. ")
+	@NotBlank(message = "Submitter's email missing. ") // NotBlank includes NotNull option.
+	@Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Please provide a valid email for submitter. ")
 	private String email;
 
 	// Strings are preferable to long in this case as a phone number can reach 19
@@ -37,17 +36,16 @@ public class Submitter {
 	// Also in case I want to allow dashes in the future (would have to omit the
 	// pattern though).
 
-	//@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
+	@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
 	private String whatsapp;
 
-	//@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
+	@Pattern(regexp = "^[0-9]+$", message = "Whatsapp number can contain only numeric digits.")
 	private String phone;
 
-	//TODO - readd, why gives error?
 	// Constructor with only email, for quick creation.
+	@NotBlank(message = "Submitter's email missing. ") 
+	@Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Please provide a valid email for submitter. ") 
 	public Submitter(String email) {
-		//	@NotBlank(message = "Submitter's email missing. ") @Pattern(regexp = "^([_a-zA-Z0-9-]+(\\.[_a-zA-Z0-9-]+)*@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*(\\.[a-zA-Z]{2,5}))?$", message = "Please provide a valid email for submitter. ") String email) {
-		//super(); //todo - we don't need this, Try without.
 		this.email = email;
 	}
 

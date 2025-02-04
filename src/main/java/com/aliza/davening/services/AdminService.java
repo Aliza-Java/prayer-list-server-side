@@ -15,7 +15,6 @@ import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -74,7 +73,7 @@ public class AdminService {
 
 	@Autowired
 	BCryptPasswordEncoder bCryptPasswordEncoder;
-	
+
 	@Autowired
 	EntityManager entityManager;
 
@@ -223,15 +222,13 @@ public class AdminService {
 	}
 
 	// tested
-	public boolean deleteDavener(long id) throws ObjectNotFoundException {
-		try {
-			davenerRepository.deleteById(id);
-			// If not found, will throw an unchecked exception which we must catch.
-		} catch (EmptyResultDataAccessException e) {
-			throw new ObjectNotFoundException("Davener with id " + id);
+	public List<Davener> deleteDavener(long id) throws ObjectNotFoundException {
+		Optional<Davener> optionalDavener = davenerRepository.findById(id);
+		if (!optionalDavener.isPresent()) {
+			throw new ObjectNotFoundException("Davener with id: " + id);
 		}
-
-		return true;
+		davenerRepository.delete(optionalDavener.get());
+		return davenerRepository.findAll();
 	}
 
 	// tested
@@ -244,18 +241,17 @@ public class AdminService {
 		return davenforRepository.findAll();
 	}
 
-	// TODO: deleteDavener() should really be like this
 	// tested
 	public List<Davenfor> deleteDavenfor(long id) throws ObjectNotFoundException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
 		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
-		davenforRepository.deleteById(optionalDavenfor.get().getId());
+		davenforRepository.delete(optionalDavenfor.get());
 		return davenforRepository.findAll();
 	}
 
-	//TODO: enable in future
+	// TODO*: enable in future
 	// A helper method set up primarily for changeCategoryOrder()
 //	private Category getCategory(long id) throws ObjectNotFoundException {
 //		Optional<Category> optionalCategory = categoryRepository.findById(id);
@@ -265,7 +261,7 @@ public class AdminService {
 //		return optionalCategory.get();
 //	}
 
-	// TODO: fix. when works, test
+	// TODO*: fix. when works, test
 //	@Transactional(rollbackFor = ReorderCategoriesException.class)
 //	public List<Category> changeCategoryOrder(List<Category> sortedCategories)
 //			throws ReorderCategoriesException, ObjectNotFoundException {
@@ -300,7 +296,7 @@ public class AdminService {
 //		return sortedCategories;
 //	}
 
-	// TODO: when ready, implement
+	// TODO*: when ready, implement and test
 	/*
 	 * public Category addCategory(Category category) throws DatabaseException,
 	 * EmptyInformationException {
@@ -378,11 +374,11 @@ public class AdminService {
 
 	// tested
 	public List<Davener> disactivateDavener(String davenerEmail) throws EmptyInformationException {
-//TODO: fix - need test that davener not found.  and really can't get empty email because "" doesn't go to link
 		List<Davener> davenerList = null;
 		try {
 			Optional<Davener> davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
-			if (davenerToDisactivate.isEmpty()) { // TODO - add test that davener not found
+			if (davenerToDisactivate.isEmpty()) { // TODO* - add test that davener not found (really can't get empty
+													// email because "" doesn't go to link)
 				System.out.println(String.format(
 						"The email %s cannot be disactivated because it is not found.  Please check the email address. ",
 						davenerEmail));
@@ -398,7 +394,7 @@ public class AdminService {
 
 			else {
 				davenerRepository.disactivateDavener(davenerEmail);
-				entityManager.flush(); 
+				entityManager.flush();
 				entityManager.clear();
 				emailSender.notifyDisactivatedDavener(davenerEmail);
 			}
@@ -410,9 +406,6 @@ public class AdminService {
 
 	}
 
-	// TODO: fix - need test that davener not found. and really can't get empty
-	// email because "" doesn't go to link
-
 	// tested
 	public List<Davener> activateDavener(String davenerEmail) throws EmptyInformationException {
 
@@ -420,7 +413,8 @@ public class AdminService {
 
 		try {
 			Optional<Davener> davenerToActivate = davenerRepository.findByEmail(davenerEmail);
-			if (davenerToActivate.isEmpty()) { // TODO - add test that davener not found
+			if (davenerToActivate.isEmpty()) { // TODO* - add test that davener not found (really can't get empty
+				// email because "" doesn't go to link)
 				System.out.println(String.format(
 						"The email %s cannot be activated because it is not found.  Please check the email address. ",
 						davenerEmail));
@@ -435,7 +429,7 @@ public class AdminService {
 
 			else {
 				davenerRepository.activateDavener(davenerEmail);
-				entityManager.flush(); 
+				entityManager.flush();
 				entityManager.clear();
 				emailSender.notifyActivatedDavener(davenerEmail);
 			}

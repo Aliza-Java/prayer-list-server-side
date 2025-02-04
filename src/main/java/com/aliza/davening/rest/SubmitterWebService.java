@@ -2,6 +2,8 @@ package com.aliza.davening.rest;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,36 +40,36 @@ public class SubmitterWebService {
 		return submitterService.getAllSubmitterDavenfors(email);
 	}
 
-	//tested
+	// tested
 	@PostMapping(path = "{email}")
 	public Davenfor addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException {
 		return submitterService.addDavenfor(davenfor, email);
 	}
 
-	//tested
+	// tested
 	@PutMapping(path = "updatename/{email}")
-	// TODO: why does @Valid not work anymore?
-	public Davenfor updateDavenfor(@RequestBody /* @Valid */ Davenfor davenfor, @PathVariable String email)
+	//TODO*: add test for 'validity' of Davenfor being passed in
+	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}
 
-	//tested
+	// tested
 	@RequestMapping("extend/{davenforId}")
 	public void extendDavenfor(@PathVariable long davenforId, @RequestParam("email") String email)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 		submitterService.extendDavenfor(davenforId, email);
 	}
 
-	//tested
+	// tested
 	@DeleteMapping("delete/{id}/{email}")
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
 		return submitterService.deleteDavenfor(id, email);
 	}
 
-	//tested
+	// tested
 	@RequestMapping(path = "categories")
 	public List<Category> findAllCategories() throws ObjectNotFoundException {
 		return submitterService.getAllCategories();

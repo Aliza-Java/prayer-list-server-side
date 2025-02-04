@@ -513,8 +513,7 @@ public class ServiceEmailSenderTests {
 
 			greenMail.stop();
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 	}
 
@@ -543,8 +542,7 @@ public class ServiceEmailSenderTests {
 
 			greenMail.stop();
 		} catch (MessagingException | EmptyInformationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 	}
 
@@ -574,8 +572,7 @@ public class ServiceEmailSenderTests {
 
 			greenMail.stop();
 		} catch (MessagingException | EmptyInformationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 	}
 
@@ -604,10 +601,7 @@ public class ServiceEmailSenderTests {
 
 			greenMail.stop();
 		} catch (MessagingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-
 	}
-
 }

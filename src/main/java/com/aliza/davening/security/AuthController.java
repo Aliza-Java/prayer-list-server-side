@@ -1,5 +1,7 @@
 package com.aliza.davening.security;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,10 +31,10 @@ public class AuthController {
 	JwtUtils jwtUtils;
 
 	@PostMapping("/signin")
-	// TODO: why does @Valid not work anymore?
-	// public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest
+	// TODO*: test 'validity' of LoginRequest being passed in
+	// public ResponseEntity<?> authenticateUser( @RequestBody LoginRequest
 	// loginRequest) {
-	public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
+	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));

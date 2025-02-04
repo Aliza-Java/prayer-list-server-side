@@ -3,6 +3,8 @@ package com.aliza.davening.rest;
 import java.io.IOException;
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,6 +30,7 @@ import com.aliza.davening.services.SubmitterService;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Password;
 import com.aliza.davening.util_classes.Weekly;
+
 
 @RestController
 @RequestMapping("admin")
@@ -100,9 +103,8 @@ public class AdminWebService {
 
 	//tested
 	@DeleteMapping(path = "davener/{id}")
-	public boolean deleteDavener(@PathVariable long id) throws ObjectNotFoundException {
-		adminService.deleteDavener(id);
-		return true;
+	public List<Davener> deleteDavener(@PathVariable long id) throws ObjectNotFoundException {
+		return adminService.deleteDavener(id);
 	}
 
 	//tested
@@ -151,8 +153,8 @@ public class AdminWebService {
 
 	//tested
 	@PutMapping(path = "updatename/{email}")
-	// TODO: why does @Valid not work anymore?
-	public Davenfor updateDavenfor(@RequestBody /* @Valid */ Davenfor davenfor, @PathVariable String email)
+	//TODO*: add test for 'validity' of Davenfor
+	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
 		return submitterService.updateDavenfor(davenfor, email, false);
 	}
@@ -182,7 +184,7 @@ public class AdminWebService {
 //		return adminService.findCurrentParasha();
 //	}
 //
-	@RequestMapping(path = "category") //TODO: test
+	@RequestMapping(path = "category") //TODO*: test
 	public Category getCurrentCategory() {
 		return adminService.findCurrentCategory();
 	}

@@ -127,7 +127,7 @@ public class ServiceAdminTests {
 	public static Parasha parasha3 = new Parasha(3, "Lech Lecha", "לך-לך", false);
 	public static List<Parasha> parashot = Arrays.asList(parasha1, parasha2, parasha3);
 
-	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1L, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
 	public static Davenfor dfYeshuah1 = new Davenfor(4, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
@@ -142,7 +142,7 @@ public class ServiceAdminTests {
 	@BeforeAll
 	private void baseTest() {
 
-		// TODO:
+		// TODO*:
 		// in service tests - fix base test, make generals.commit all. (maybe later)
 
 		// when(submitterRep.findByEmail(submitterEmail)).thenReturn(new
@@ -340,19 +340,25 @@ public class ServiceAdminTests {
 	@Test
 	@Order(10)
 	public void deleteDavenerTest() {
-		doThrow(EmptyResultDataAccessException.class).when(davenerRep).deleteById(4L);
+		when(davenerRep.findAll()).thenReturn(Arrays.asList(davener1, davener2));
+		when(davenerRep.findById(3L)).thenReturn(Optional.of(davener3));		
+		
+		when(davenerRep.findById(4L)).thenReturn(Optional.empty());
+
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
 			adminService.deleteDavener(4L);
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
 		try {
-			assertTrue(adminService.deleteDavener(3L));
+			List<Davener> davenersLeft = adminService.deleteDavener(3L);
+			assertEquals(2, davenersLeft.size());
 		} catch (ObjectNotFoundException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
-		verify(davenerRep, times(2)).deleteById(anyLong());
+		verify(davenerRep, times(2)).findById(anyLong());
+		verify(davenerRep, times(1)).findAll();
 	}
 
 	@Test
@@ -392,7 +398,6 @@ public class ServiceAdminTests {
 		}
 
 		verify(davenforRep, times(2)).findById(anyLong());
-		verify(davenforRep, times(1)).deleteById(anyLong());
 		verify(davenforRep, times(1)).findAll();
 	}
 

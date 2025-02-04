@@ -375,10 +375,12 @@ public class ContAdminTests {
 	@Order(11)
 	public void testDeleteDavener() {
 		try {
-			when(adminService.deleteDavener(1L)).thenReturn(true);
+			when(adminService.deleteDavener(1L)).thenReturn(Arrays.asList(davener2, davener3));
 
 			mockMvc.perform(delete("/admin/davener/{id}", 1L)).andDo(print()).andExpect(status().isOk())
-					.andExpect(jsonPath("$").value("true"));
+			.andExpect(jsonPath("$.length()").value(2))
+			.andExpect(jsonPath("$[0].email").value("davener2@gmail.com"))
+			.andExpect(jsonPath("$[1].email").value("davener3@gmail.com"));
 
 			when(adminService.deleteDavener(2L)).thenThrow(new ObjectNotFoundException("Name with id: 2"));
 
