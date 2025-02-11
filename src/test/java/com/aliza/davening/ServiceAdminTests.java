@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -41,20 +39,18 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.entities.Submitter;
+import com.aliza.davening.entities.User;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
-import com.aliza.davening.repositories.SubmitterRepository;
+import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
@@ -82,16 +78,13 @@ public class ServiceAdminTests {
 	private CategoryRepository categoryRep;
 
 	@MockBean
-	private SubmitterRepository submitterRep;
-
-	@MockBean
 	private AdminRepository adminRep;
 
 	@MockBean
 	private ParashaRepository parashaRep;
 
 	@MockBean
-	private DavenerRepository davenerRep;
+	private UserRepository userRep;
 
 	@MockBean
 	private EmailSender emailSender;
@@ -113,27 +106,23 @@ public class ServiceAdminTests {
 	public static Admin admin2 = new Admin(2, "admin2@gmail.com", null, false, 7);
 	public static Admin admin3 = new Admin(3, "admin3@gmail.com", null, false, 7);
 
-	public static Davener davener1 = new Davener(1, "Israel", "davener1@gmail.com", null, false);
-	public static Davener davener2 = new Davener(2, "Israel", "davener2@gmail.com", null, false);
-	public static Davener davener3 = new Davener(3, "Israel", "davener3@gmail.com", null, true);
-	public static List<Davener> daveners = Arrays.asList(davener1, davener2, davener3);
-
-	public static Submitter sub1 = new Submitter("sub1@gmail.com");
-	public static Submitter sub2 = new Submitter("sub2@gmail.com");
-	public static List<Submitter> submitters = Arrays.asList(sub1, sub2);
+	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
+	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
+	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+	public static List<User> users = Arrays.asList(user1, user2, user3);
 
 	public static Parasha parasha1 = new Parasha(1, "Bereshit", "בראשית", true);
 	public static Parasha parasha2 = new Parasha(2, "Noach", "נח", false);
 	public static Parasha parasha3 = new Parasha(3, "Lech Lecha", "לך-לך", false);
 	public static List<Parasha> parashot = Arrays.asList(parasha1, parasha2, parasha3);
 
-	public static Davenfor dfRefua = new Davenfor(1L, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1L, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshuah1 = new Davenfor(4, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfYeshuah1 = new Davenfor(4, "user1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfYeshuah2 = new Davenfor(4, "user2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshuah1, dfBanim, dfYeshuah2);
 
@@ -251,123 +240,114 @@ public class ServiceAdminTests {
 
 	@Test
 	@Order(6)
-	public void getAllDavenersTest() {
-		when(davenerRep.findAll()).thenReturn(daveners);
-		assertEquals(3, adminService.getAllDaveners().size());
+	public void getAllUsersTest() {
+		when(userRep.findAll()).thenReturn(users);
+		assertEquals(3, adminService.getAllUsers().size());
 
-		verify(davenerRep, times(1)).findAll();
+		verify(userRep, times(1)).findAll();
 	}
 
 	@Test
 	@Order(7)
-	public void addDavenerTest() {
-		davener1.setEmail(null);
+	public void addUserTest() {
+		user1.setEmail(null);
 		Exception exception = assertThrows(NoRelatedEmailException.class, () -> {
-			adminService.addDavener(davener1);
+			adminService.addUser(user1);
 		});
 		assertTrue(exception.getMessage().contains("No email"));
 
-		when(davenerRep.findByEmail("davener2@gmail.com")).thenReturn(Optional.of(davener2));
-		when(davenerRep.findAll()).thenReturn(daveners);
-		davener2.setActive(false);
+		when(userRep.findByEmail("user2@gmail.com")).thenReturn(Optional.of(user2));
+		when(userRep.findAll()).thenReturn(users);
+		user2.setActive(false);
 		try {
-			assertEquals(3, adminService.addDavener(davener2).size()); // should return 3 daveners
-			assertTrue(davener2.isActive());
+			assertEquals(3, adminService.addUser(user2).size()); // should return 3 users
+			assertTrue(user2.isActive());
 		} catch (NoRelatedEmailException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
-		when(davenerRep.findByEmail("newDavener@gmail.com")).thenReturn(null);
-		davener3.setActive(false);
+		when(userRep.findByEmail("newUser@gmail.com")).thenReturn(null);
+		user3.setActive(false);
 		try {
-			assertEquals(3, adminService.addDavener(davener3).size()); // should return 3 daveners
-			assertFalse(davener3.isActive());
+			assertEquals(3, adminService.addUser(user3).size()); // should return 3 users
+			assertFalse(user3.isActive());
 		} catch (NoRelatedEmailException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
-		verify(davenerRep, times(2)).findByEmail(any());
-		verify(davenerRep, times(2)).findAll();
+		verify(userRep, times(2)).findByEmail(any());
+		verify(userRep, times(2)).findAll();
 
 		// returning to original values
-		davener2.setActive(false);
-		davener3.setActive(true);
+		user2.setActive(false);
+		user3.setActive(true);
 	}
 
 	@Test
 	@Order(8)
-	public void getDavenerTest() {
-		when(davenerRep.findById(4L)).thenReturn(Optional.empty());
-		when(davenerRep.findById(3L)).thenReturn(Optional.of(davener3));
+	public void getUserTest() {
+		when(userRep.findById(4L)).thenReturn(Optional.empty());
+		when(userRep.findById(3L)).thenReturn(Optional.of(user3));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.getDavener(4L);
+			adminService.getUser(4L);
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
 		try {
-			assertEquals(davener3, adminService.getDavener(3L));
+			assertEquals(user3, adminService.getUser(3L));
 		} catch (ObjectNotFoundException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
-		verify(davenerRep, times(2)).findById(anyLong());
+		verify(userRep, times(2)).findById(anyLong());
 	}
 
 	@Test
 	@Order(9)
-	public void updateDavenerTest() {
-		when(davenerRep.findById(1L)).thenReturn(Optional.empty());
-		when(davenerRep.findById(3L)).thenReturn(Optional.of(davener3));
-		when(davenerRep.findAll()).thenReturn(daveners);
+	public void updateUserTest() {
+		when(userRep.findById(1L)).thenReturn(Optional.empty());
+		when(userRep.findById(3L)).thenReturn(Optional.of(user3));
+		when(userRep.findAll()).thenReturn(users);
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.updateDavener(davener1);
+			adminService.updateUser(user1);
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
 		try {
-			assertEquals(3, adminService.updateDavener(davener3).size());
+			assertEquals(3, adminService.updateUser(user3).size());
 		} catch (ObjectNotFoundException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
-		verify(davenerRep, times(2)).findById(anyLong());
-		verify(davenerRep, times(1)).save(any());
-		verify(davenerRep, times(1)).findAll();
+		verify(userRep, times(2)).findById(anyLong());
+		verify(userRep, times(1)).save(any());
+		verify(userRep, times(1)).findAll();
 	}
 
 	@Test
 	@Order(10)
-	public void deleteDavenerTest() {
-		when(davenerRep.findAll()).thenReturn(Arrays.asList(davener1, davener2));
-		when(davenerRep.findById(3L)).thenReturn(Optional.of(davener3));		
-		
-		when(davenerRep.findById(4L)).thenReturn(Optional.empty());
+	public void deleteUserTest() {
+		when(userRep.findAll()).thenReturn(Arrays.asList(user1, user2));
+		when(userRep.findById(3L)).thenReturn(Optional.of(user3));
+
+		when(userRep.findById(4L)).thenReturn(Optional.empty());
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.deleteDavener(4L);
+			adminService.deleteUser(4L);
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
 		try {
-			List<Davener> davenersLeft = adminService.deleteDavener(3L);
-			assertEquals(2, davenersLeft.size());
+			List<User> usersLeft = adminService.deleteUser(3L);
+			assertEquals(2, usersLeft.size());
 		} catch (ObjectNotFoundException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
 
-		verify(davenerRep, times(2)).findById(anyLong());
-		verify(davenerRep, times(1)).findAll();
-	}
-
-	@Test
-	@Order(11)
-	public void getAllSubmittersTest() {
-		when(submitterRep.findAll()).thenReturn(submitters);
-		assertEquals(2, adminService.getAllSubmitters().size());
-
-		verify(submitterRep, times(1)).findAll();
+		verify(userRep, times(2)).findById(anyLong());
+		verify(userRep, times(1)).findAll();
 	}
 
 	@Test
@@ -403,24 +383,23 @@ public class ServiceAdminTests {
 
 	@Test
 	@Order(14)
-	public void disactivateDavenerTest() {
-		when(davenerRep.findByEmail(davener2.getEmail())).thenReturn(Optional.of(davener2));
-		when(davenerRep.findByEmail(davener3.getEmail())).thenReturn(Optional.of(davener3));
-		when(davenerRep.findAll()).thenReturn(daveners);
+	public void disactivateUserTest() {
+		when(userRep.findByEmail(user2.getEmail())).thenReturn(Optional.of(user2));
+		when(userRep.findByEmail(user3.getEmail())).thenReturn(Optional.of(user3));
+		when(userRep.findAll()).thenReturn(users);
 
-		assertFalse(davener2.isActive());
-		assertTrue(davener3.isActive());
+		assertFalse(user2.isActive());
+		assertTrue(user3.isActive());
 
 		try {
-			adminService.disactivateDavener("davener2@gmail.com");
+			adminService.disactivateUser("user2@gmail.com");
 
-			System.out
-					.println("disactivateDavenerTest: should have only printed that davener2 is already disactivated");
-			adminService.disactivateDavener("davener3@gmail.com");
+			System.out.println("disactivateUserTest: should have only printed that user2 is already disactivated");
+			adminService.disactivateUser("user3@gmail.com");
 
-			verify(davenerRep, times(1)).disactivateDavener(any());
-			verify(emailSender, times(1)).notifyDisactivatedDavener(any());
-			verify(davenerRep, times(2)).findAll();
+			verify(userRep, times(1)).disactivateUser(any());
+			verify(emailSender, times(1)).notifyDisactivatedUser(any());
+			verify(userRep, times(2)).findAll();
 		} catch (EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -428,23 +407,23 @@ public class ServiceAdminTests {
 
 	@Test
 	@Order(15)
-	public void activateDavenerTest() {
-		when(davenerRep.findByEmail(davener2.getEmail())).thenReturn(Optional.of(davener2));
-		when(davenerRep.findByEmail(davener3.getEmail())).thenReturn(Optional.of(davener3));
-		when(davenerRep.findAll()).thenReturn(daveners);
+	public void activateUserTest() {
+		when(userRep.findByEmail(user2.getEmail())).thenReturn(Optional.of(user2));
+		when(userRep.findByEmail(user3.getEmail())).thenReturn(Optional.of(user3));
+		when(userRep.findAll()).thenReturn(users);
 
-		assertFalse(davener2.isActive());
-		assertTrue(davener3.isActive());
+		assertFalse(user2.isActive());
+		assertTrue(user3.isActive());
 
 		try {
-			adminService.activateDavener("davener3@gmail.com");
+			adminService.activateUser("user3@gmail.com");
 
-			System.out.println("activateDavenerTest: should have only printed that davener3 is already activated");
-			adminService.activateDavener("davener2@gmail.com");
+			System.out.println("activateUserTest: should have only printed that user3 is already activated");
+			adminService.activateUser("user2@gmail.com");
 
-			verify(davenerRep, times(1)).activateDavener(any());
-			verify(emailSender, times(1)).notifyActivatedDavener(any());
-			verify(davenerRep, times(2)).findAll();
+			verify(userRep, times(1)).activateUser(any());
+			verify(emailSender, times(1)).notifyActivatedUser(any());
+			verify(userRep, times(2)).findAll();
 		} catch (EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -509,7 +488,8 @@ public class ServiceAdminTests {
 		when(categoryRep.findAll()).thenReturn(categories);
 
 		when(davenforRep.findAllDavenforByCategory(eq(SHIDDUCHIM.toString()))).thenReturn(Collections.emptyList());
-		when(davenforRep.findAllDavenforByCategory(eq(YESHUAH.toString()))).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+		when(davenforRep.findAllDavenforByCategory(eq(YESHUAH.toString())))
+				.thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
 			adminService.previewWeekly(new Weekly("Vayera", 3L, "banim", "message"));

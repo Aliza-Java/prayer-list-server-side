@@ -42,12 +42,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
+import com.aliza.davening.entities.User;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenerRepository;
+import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.services.EmailSender;
@@ -82,7 +82,7 @@ public class IntegrationTests {
 	ParashaRepository parashaRepository;
 
 	@Autowired
-	DavenerRepository davenerRepository;
+	UserRepository userRepository;
 
 	@Autowired
 	DavenforRepository davenforRepository;
@@ -102,21 +102,21 @@ public class IntegrationTests {
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
 	public static Category catYeshuah = new Category(YESHUAH, false, 180, 5);
 
-	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshuah1 = new Davenfor(2, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfYeshuah1 = new Davenfor(2, "user1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfYeshuah2 = new Davenfor(4, "user2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshuah1, dfBanim, dfYeshuah2);
 
-	public static Davener davener1 = new Davener(1, "Israel", "davener1@gmail.com", null, false);
-	public static Davener davener2 = new Davener(2, "Israel", "davener2@gmail.com", null, false);
-	public static Davener davener3 = new Davener(3, "Israel", "davener3@gmail.com", null, true);
-	public static List<Davener> daveners = Arrays.asList(davener1, davener2, davener3);
-
+	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
+	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
+	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+	public static List<User> users = Arrays.asList(user1, user2, user3);
+	
 	public static Parasha parasha1 = new Parasha(1, "Bereshit", "בראשית", true);
 	public static Parasha parasha2 = new Parasha(2, "Noach", "נח", false);
 	public static Parasha parasha3 = new Parasha(3, "Lech Lecha", "לך-לך", false);
@@ -142,19 +142,19 @@ public class IntegrationTests {
 		parashaRepository.save(new Parasha(2, "Noach", "נח", false));
 		parashaRepository.save(new Parasha(3, "Lech Lecha", "לך-לך", false));
 
-		davenerRepository.save(new Davener(1, "Israel", "davener1@gmail.com", null, false));
-		davenerRepository.save(new Davener(2, "Israel", "davener2@gmail.com", null, false));
-		davenerRepository.save(new Davener(3, "Israel", "davener3@gmail.com", null, true));
+		userRepository.save(user1);
+		userRepository.save(user2);
+		userRepository.save(user3);
 
-		davenforRepository.save(new Davenfor(1, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara", null,
+		davenforRepository.save(new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara", null,
 				null, true, null, null, null, null, null));
-		davenforRepository.save(new Davenfor(2, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null,
+		davenforRepository.save(new Davenfor(2, "user1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara", null, null,
 				true, null, null, null, null, null));
-		davenforRepository.save(new Davenfor(3, "sub2@gmail.com", "Banim", "יצחק בן שרה", "Yitzchak ben Sara",
+		davenforRepository.save(new Davenfor(3, "user2@gmail.com", "Banim", "יצחק בן שרה", "Yitzchak ben Sara",
 				"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null));
-		davenforRepository.save(new Davenfor(4, "sub2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null,
+		davenforRepository.save(new Davenfor(4, "user2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira", null,
 				null, true, null, null, null, null, null));
-		davenforRepository.save(new Davenfor(5, "sub2@gmail.com", "Banim", "יוסף בן שירה", "Yosef ben Shira", null,
+		davenforRepository.save(new Davenfor(5, "user2@gmail.com", "Banim", "יוסף בן שירה", "Yosef ben Shira", null,
 				null, true, null, null, null, null, null));
 	}
 
@@ -182,14 +182,14 @@ public class IntegrationTests {
 
 	@Test
 	@Order(3)
-	public void testFindAllDaveners() {
+	public void testFindAllusers() {
 		try {
-			mockMvc.perform(get("/admin/daveners")).andDo(print()).andExpect(status().isOk())
+			mockMvc.perform(get("/admin/users")).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.length()").value(3)).andExpect(jsonPath("$[0].active").value("false"))
 					.andExpect(jsonPath("$[2].active").value("true"))
-					.andExpect(jsonPath("$[0].email").value("davener1@gmail.com"))
-					.andExpect(jsonPath("$[1].email").value("davener2@gmail.com"))
-					.andExpect(jsonPath("$[2].email").value("davener3@gmail.com"));
+					.andExpect(jsonPath("$[0].email").value("user1@gmail.com"))
+					.andExpect(jsonPath("$[1].email").value("user2@gmail.com"))
+					.andExpect(jsonPath("$[2].email").value("user3@gmail.com"));
 
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
@@ -200,7 +200,7 @@ public class IntegrationTests {
 	@Order(4)
 	public void testGetSubmitterNames() {
 		try {
-			mockMvc.perform(get("/sub/getmynames/{email}", "sub1@gmail.com")).andDo(print()).andExpect(status().isOk())
+			mockMvc.perform(get("/user/getmynames/{email}", "user1@gmail.com")).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.length()").value(2))
 					.andExpect(jsonPath("$[0].nameEnglish").value("Avraham ben Sara"))
 					.andExpect(jsonPath("$[1].nameEnglish").value("Moshe ben Sara"));
@@ -244,7 +244,7 @@ public class IntegrationTests {
 		List<Davenfor> davenfors = davenforRepository.findAll();
 		System.out.println(davenfors);
 		try {
-			mockMvc.perform(delete("/sub/delete/{id}/{email}", 3L, "sub2@gmail.com")).andDo(print())
+			mockMvc.perform(delete("/user/delete/{id}/{email}", 3L, "user2@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
 					.andExpect(jsonPath("$[0].nameEnglish").value("Amram ben Shira"))
 					.andExpect(jsonPath("$[1].id").value("5"));
@@ -255,13 +255,13 @@ public class IntegrationTests {
 
 	@Test
 	@Order(8)
-	public void testActivateDavener() {
+	public void testActivateuser() {
 		try {
-			doNothing().when(emailSender).notifyActivatedDavener("davener2@gmail.com");
-			assertEquals("davener2@gmail.com", davenerRepository.getOne(2L).getEmail());
-			assertFalse(davenerRepository.getOne(2L).isActive());
+			doNothing().when(emailSender).notifyActivatedUser("user2@gmail.com");
+			assertEquals("user2@gmail.com", userRepository.getOne(2L).getEmail());
+			assertFalse(userRepository.getOne(2L).isActive());
 
-			mockMvc.perform(post("/admin/activate/{davenerEmail}", "davener2@gmail.com")).andDo(print())
+			mockMvc.perform(post("/admin/activate/{userEmail}", "user2@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(3))
 					.andExpect(jsonPath("$[1].active").value("true"));
 		} catch (Exception e) {
@@ -272,13 +272,13 @@ public class IntegrationTests {
 	@Test
 	@Order(9)
 	public void testAddDavenfor() {
-		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\": \"YESHUAH\",  \"nameEnglish\": \"Yossi ben Sara\", \"nameHebrew\": \"יוסי בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\": \"YESHUAH\",  \"nameEnglish\": \"Yossi ben Sara\", \"nameHebrew\": \"יוסי בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			mockMvc.perform(
-					post("/sub/{email}", "sub3@gmail.com").content(requestBody).contentType(MediaType.APPLICATION_JSON))
+					post("/user/{email}", "user3@gmail.com").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isOk())
-					.andExpect(jsonPath("$.submitterEmail").value("sub3@gmail.com"))
+					.andExpect(jsonPath("$.userEmail").value("user3@gmail.com"))
 					.andExpect(jsonPath("$.nameEnglish").value("Yossi ben Sara"));
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());

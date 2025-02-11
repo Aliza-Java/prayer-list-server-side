@@ -21,63 +21,63 @@ import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.services.EmailSender;
-import com.aliza.davening.services.SubmitterService;
+import com.aliza.davening.services.UserService;
 
 @RestController
-@RequestMapping("sub")
+@RequestMapping("user")
 @CrossOrigin(origins = ("${client.origin}"), allowCredentials = "true")
-public class SubmitterWebService {
+public class UserWebService {
 
 	@Autowired
-	SubmitterService submitterService;
+	UserService userService;
 
 	@Autowired
 	EmailSender emailSender;
 
 	// tested
 	@RequestMapping(path = "getmynames/{email}")
-	public List<Davenfor> getSubmitterDavenfors(@PathVariable String email) {
-		return submitterService.getAllSubmitterDavenfors(email);
+	public List<Davenfor> getUserDavenfors(@PathVariable String email) {
+		return userService.getAllUserDavenfors(email);
 	}
 
 	// tested
 	@PostMapping(path = "{email}")
 	public Davenfor addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException {
-		return submitterService.addDavenfor(davenfor, email);
+		return userService.addDavenfor(davenfor, email);
 	}
 
 	// tested
 	@PutMapping(path = "updatename/{email}")
-	//TODO*: add test for 'validity' of Davenfor being passed in
+	// TODO*: add test for 'validity' of Davenfor being passed in
 	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
-		return submitterService.updateDavenfor(davenfor, email, false);
+		return userService.updateDavenfor(davenfor, email, false);
 	}
 
 	// tested
 	@RequestMapping("extend/{davenforId}")
 	public void extendDavenfor(@PathVariable long davenforId, @RequestParam("email") String email)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
-		submitterService.extendDavenfor(davenforId, email);
+		userService.extendDavenfor(davenforId, email);
 	}
 
 	// tested
 	@DeleteMapping("delete/{id}/{email}")
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
-		return submitterService.deleteDavenfor(id, email);
+		return userService.deleteDavenfor(id, email);
 	}
 
 	// tested
 	@RequestMapping(path = "categories")
 	public List<Category> findAllCategories() throws ObjectNotFoundException {
-		return submitterService.getAllCategories();
+		return userService.getAllCategories();
 	}
 
 	@RequestMapping(path = "category/{id}")
 	public Category findCategory(@PathVariable long id) throws ObjectNotFoundException {
-		return submitterService.getCategory(id);
+		return userService.getCategory(id);
 	}
 
 }

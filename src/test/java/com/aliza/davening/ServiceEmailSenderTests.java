@@ -40,18 +40,16 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.entities.Submitter;
+import com.aliza.davening.entities.User;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenerRepository;
+import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
-import com.aliza.davening.repositories.SubmitterRepository;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
@@ -92,16 +90,13 @@ public class ServiceEmailSenderTests {
 	private CategoryRepository categoryRep;
 
 	@MockBean
-	private SubmitterRepository submitterRep;
-
-	@MockBean
 	private AdminRepository adminRep;
 
 	@MockBean
 	private ParashaRepository parashaRep;
 
 	@MockBean
-	private DavenerRepository davenerRep;
+	private UserRepository userRep;
 
 	static BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -120,27 +115,23 @@ public class ServiceEmailSenderTests {
 	public static Admin admin2 = new Admin(2, "admin2@gmail.com", null, false, 7);
 	public static Admin admin3 = new Admin(3, "admin3@gmail.com", null, false, 7);
 
-	public static Davener davener1 = new Davener(1, "Israel", "davener1@gmail.com", null, false);
-	public static Davener davener2 = new Davener(2, "Israel", "davener2@gmail.com", null, false);
-	public static Davener davener3 = new Davener(3, "Israel", "davener3@gmail.com", null, true);
-	public static List<Davener> daveners = Arrays.asList(davener1, davener2, davener3);
-
-	public static Submitter sub1 = new Submitter("sub1@gmail.com");
-	public static Submitter sub2 = new Submitter("sub2@gmail.com");
-	public static List<Submitter> submitters = Arrays.asList(sub1, sub2);
+	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
+	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
+	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+	public static List<User> users = Arrays.asList(user1, user2, user3);
 
 	public static Parasha parasha1 = new Parasha(1, "Bereshit", "בראשית", true);
 	public static Parasha parasha2 = new Parasha(2, "Noach", "נח", false);
 	public static Parasha parasha3 = new Parasha(3, "Lech Lecha", "לך-לך", false);
 	public static List<Parasha> parashot = Arrays.asList(parasha1, parasha2, parasha3);
 
-	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", "Refuah", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refuah", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshuah1 = new Davenfor(4, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfYeshuah1 = new Davenfor(4, "user1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfYeshuah2 = new Davenfor(4, "user2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshuah1, dfBanim, dfYeshuah2);
 
@@ -231,8 +222,8 @@ public class ServiceEmailSenderTests {
 		});
 		assertTrue(exception.getMessage().contains("Category"));
 
-		when(davenerRep.getAllDavenersEmails())
-				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails())
+				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 
 		when(categoryRep.findAll()).thenReturn(categories);
 
@@ -302,15 +293,15 @@ public class ServiceEmailSenderTests {
 		greenMail.stop();
 
 		verify(categoryRep, times(1)).findById(any());
-		verify(davenerRep, times(2)).getAllDavenersEmails();
+		verify(userRep, times(2)).getAllUsersEmails();
 	}
 
 	@Test
 	@Order(4)
 	public void sendOutWeeklyNoParashaTest() {
 
-		when(davenerRep.getAllDavenersEmails())
-				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails())
+				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
 		when(davenforRep.findAllDavenforByCategory("YESHUAH")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
@@ -358,7 +349,7 @@ public class ServiceEmailSenderTests {
 		}
 		greenMail.stop();
 
-		verify(davenerRep, times(1)).getAllDavenersEmails();
+		verify(userRep, times(1)).getAllUsersEmails();
 		verify(davenforRep, times(1)).findAllDavenforByCategory(any());
 
 	}
@@ -384,16 +375,16 @@ public class ServiceEmailSenderTests {
 		assertTrue(exception.getMessage().contains("current category"));
 
 		when(categoryRep.getCurrent()).thenReturn(Optional.of(catRefua));
-		when(davenerRep.getAllDavenersEmails())
-				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails())
+				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
 
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
 
 		try {
-			when(davenforRep.findAllDavenforByCategory("Refua")).thenReturn(Arrays.asList(dfRefua));
-			when(davenforRep.findAllDavenforByCategory("Yeshuah")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+			when(davenforRep.findAllDavenforByCategory(REFUA.toString())).thenReturn(Arrays.asList(dfRefua));
+			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString())).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 			System.out.println(davenforRep.findAll());
 			emailSender.sendSimplifiedWeekly();
 
@@ -441,7 +432,7 @@ public class ServiceEmailSenderTests {
 
 		verify(parashaRep, times(3)).findCurrent();
 		verify(categoryRep, times(2)).getCurrent();
-		verify(davenerRep, times(1)).getAllDavenersEmails();
+		verify(userRep, times(1)).getAllUsersEmails();
 	}
 
 	@Test
@@ -452,8 +443,8 @@ public class ServiceEmailSenderTests {
 		});
 		assertTrue(exception.getMessage().contains("incomplete"));
 
-		when(davenerRep.getAllDavenersEmails())
-				.thenReturn(daveners.stream().map(Davener::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails())
+				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
@@ -490,7 +481,7 @@ public class ServiceEmailSenderTests {
 		}
 		greenMail.stop();
 
-		verify(davenerRep, times(2)).getAllDavenersEmails();
+		verify(userRep, times(2)).getAllUsersEmails();
 	}
 
 	@Test
@@ -519,17 +510,17 @@ public class ServiceEmailSenderTests {
 
 	@Test
 	@Order(8)
-	public void notifyDisactivatedDavenerTest() {
+	public void notifyDisactivatedUserTest() {
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
 
 		try {
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
-				emailSender.notifyDisactivatedDavener(null);
+				emailSender.notifyDisactivatedUser(null);
 			});
 			assertTrue(exception.getMessage().contains("email address missing"));
 
-			emailSender.notifyDisactivatedDavener("test@tmail.com");
+			emailSender.notifyDisactivatedUser("test@tmail.com");
 
 			greenMail.waitForIncomingEmail(5000, 2);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
@@ -548,17 +539,17 @@ public class ServiceEmailSenderTests {
 
 	@Test
 	@Order(9)
-	public void notifyActivatedDavenerTest() {
+	public void notifyActivatedUserTest() {
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
 
 		try {
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
-				emailSender.notifyActivatedDavener("");
+				emailSender.notifyActivatedUser("");
 			});
 			assertTrue(exception.getMessage().contains("email address missing"));
 
-			emailSender.notifyActivatedDavener("test@tmail.com");
+			emailSender.notifyActivatedUser("test@tmail.com");
 
 			greenMail.waitForIncomingEmail(5000, 2);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
@@ -590,7 +581,7 @@ public class ServiceEmailSenderTests {
 
 			// one for recipient, one for admin as Bcc
 			assertEquals(2, receivedMessages.length);
-			assertEquals("sub1@gmail.com",
+			assertEquals("user1@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertEquals("Davening List Confirmation", receivedMessages[0].getSubject());
 			assertEquals("Davening List Confirmation", receivedMessages[1].getSubject());

@@ -23,8 +23,8 @@ import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.ParashaRepository;
+import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
 
@@ -45,7 +45,7 @@ public class EmailSender {
 	private EmailSessionProvider sessionProvider;
 
 	@Autowired
-	private DavenerRepository davenerRepository;
+	private UserRepository userRepository;
 
 	@Autowired
 	private CategoryRepository categoryRepository;
@@ -182,14 +182,14 @@ public class EmailSender {
 			emailText = concatAdminMessage(info.message, emailText);
 		}
 
-		List<String> davenersList = davenerRepository.getAllDavenersEmails();
+		List<String> usersList = userRepository.getAllUsersEmails();
 
 		String fileName = String.format(EmailScheme.getWeeklyFileName(), parashaName);
 
 		// 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		// therefore including admin's email.
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, adminEmail, davenersList,
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, adminEmail, usersList,
 				utilities.buildListImage(category, info.parashaName), fileName));
 	}
 
@@ -200,7 +200,7 @@ public class EmailSender {
 			throw new EmptyInformationException("The name you submitted for davening is incomplete.  ");
 		}
 
-		List<String> davenersList = davenerRepository.getAllDavenersEmails();
+		List<String> davenersList = userRepository.getAllUsersEmails();
 
 		// Specifying the name in order to avoid Gmail from bunching up many urgent
 		// names under a single email thread.
@@ -238,7 +238,7 @@ public class EmailSender {
 
 	// TODO - when ready, make someone call this method
 	// The controller will use this method to send out a confirmation email to
-	// submitter when sending in a new name. public boolean
+	// user when sending in a new name. public boolean
 	/*
 	 * boolean sendConfirmationEmail(long davenforId) //TODO - make someone call
 	 * this, if want. Or delete. throws EmailException, IOException,
@@ -264,26 +264,26 @@ public class EmailSender {
 	 * confirmedDavenfor.getNameEnglish(),
 	 * confirmedDavenfor.getCategory().getCname(), confirmedDavenfor.getId());
 	 * 
-	 * String to = confirmedDavenfor.getSubmitterEmail();
+	 * String to = confirmedDavenfor.getUserEmail();
 	 * 
 	 * try { sendEmail(createMimeMessage(sessionProvider.getSession(), subject,
 	 * personalizedEmailText, to, adminAsList, null, null)); } catch (Exception e) {
 	 * throw new EmailException(
 	 * 
 	 * String.format("Could not send confirmation email to %s",
-	 * confirmedDavenfor.getSubmitterEmail())); } return true;
+	 * confirmedDavenfor.getUserEmail())); } return true;
 	 * 
 	 * }
 	 */
 
 	// tested
-	public void notifyDisactivatedDavener(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.getDavenerDisactivated());
+	public void notifyDisactivatedUser(String email) throws EmptyInformationException {
+		sendEmailFromAdmin(email, EmailScheme.getUserDisactivated());
 	}
 
 	// tested
-	public void notifyActivatedDavener(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.getDavenerActivated());
+	public void notifyActivatedUser(String email) throws EmptyInformationException {
+		sendEmailFromAdmin(email, EmailScheme.getUserActivated());
 	}
 
 	// tested
@@ -291,7 +291,7 @@ public class EmailSender {
 
 		String subject = EmailScheme.getExpiringNameSubject();
 		String message = String.format(Utilities.setExpiringNameMessage(davenfor));
-		String recipient = davenfor.getSubmitterEmail();
+		String recipient = davenfor.getUserEmail();
 
 		sendEmail(
 				createMimeMessage(sessionProvider.getSession(), subject, message, recipient, adminAsList, null, null));

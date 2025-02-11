@@ -78,7 +78,10 @@ public class Category {
 	}
 
 	public static Category getCategory(String name) {
-		return categories.stream().filter(c -> name.equalsIgnoreCase(c.cname.toString())).findFirst().get();
+		return categories.stream()
+			    .filter(c -> name.equalsIgnoreCase(c.cname.toString()))
+			    .findFirst()
+			    .orElse(null); 
 	}
 
 	@JsonValue

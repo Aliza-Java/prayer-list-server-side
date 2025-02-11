@@ -24,20 +24,18 @@ import com.aliza.davening.SchemeValues;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Admin;
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.entities.Submitter;
+import com.aliza.davening.entities.User;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.DavenerRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
-import com.aliza.davening.repositories.SubmitterRepository;
+import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
@@ -48,16 +46,13 @@ import com.aliza.davening.util_classes.Weekly;
 public class AdminService {
 
 	@Autowired
-	DavenerRepository davenerRepository;
+	UserRepository userRepository;
 
 	@Autowired
 	DavenforRepository davenforRepository;
 
 	@Autowired
 	CategoryRepository categoryRepository;
-
-	@Autowired
-	SubmitterRepository submitterRepository;
 
 	@Autowired
 	AdminRepository adminRepository;
@@ -160,20 +155,20 @@ public class AdminService {
 	}
 
 	// tested
-	public List<Davener> getAllDaveners() {
-		return davenerRepository.findAll();
+	public List<User> getAllUsers() {
+		return userRepository.findAll();
 	}
 
 	// tested
-	public List<Davener> addDavener(Davener davener) throws NoRelatedEmailException {
+	public List<User> addUser(User user) throws NoRelatedEmailException {
 
-		// saving davener's email, as it may be used multiple times in this method.
-		String davenersEmail = davener.getEmail();
+		// saving user's email, as it may be used multiple times in this method.
+		String userEmail = user.getEmail();
 
 		// Lack of email needs to be detected before trying to save to DB, since other
 		// actions are performed.
-		if (davenersEmail == null) {
-			throw new NoRelatedEmailException("Cannot enter this davener into the system.  No email associated. ");
+		if (userEmail == null) {
+			throw new NoRelatedEmailException("Cannot enter this user into the system.  No email associated. ");
 		}
 
 		/*
@@ -183,57 +178,57 @@ public class AdminService {
 		 * add him to the database. If new - will create new. If old - will receive the
 		 * old id and save in the same row.
 		 */
-		Optional<Davener> existingDavener = davenerRepository.findByEmail(davenersEmail);
+		Optional<User> existingDavener = userRepository.findByEmail(userEmail);
 
 		if (existingDavener.isPresent()) {
-			davener = existingDavener.get(); // giving davener the existing id
-			davener.setActive(true);
+			user = existingDavener.get(); // giving davener the existing id
+			user.setActive(true);
 		} else { // new davener - save full incoming data
-			davenerRepository.save(davener);
+			userRepository.save(user);
 		}
 
-		return davenerRepository.findAll();
+		return userRepository.findAll();
 	}
 
 	// tested
-	public Davener getDavener(long id) throws ObjectNotFoundException {
-		Optional<Davener> optionalDavener = davenerRepository.findById(id);
+	public User getUser(long id) throws ObjectNotFoundException {
+		Optional<User> optionalUser = userRepository.findById(id);
 
-		if (!optionalDavener.isPresent()) {
-			throw new ObjectNotFoundException("Davener with id " + id);
+		if (!optionalUser.isPresent()) {
+			throw new ObjectNotFoundException("User with id " + id);
 		}
 
-		return optionalDavener.get();
+		return optionalUser.get();
 	}
 
 	// tested
-	public List<Davener> updateDavener(Davener davener) throws ObjectNotFoundException {
+	public List<User> updateUser(User user) throws ObjectNotFoundException {
 
 		// Checking that davener exists so that it won't create a new one through
 		// save().
-		Optional<Davener> optionalDavener = davenerRepository.findById(davener.getId());
-		if (!optionalDavener.isPresent()) {
-			throw new ObjectNotFoundException("Davener with id " + davener.getId());
+		Optional<User> optionalUser = userRepository.findById(user.getId());
+		if (!optionalUser.isPresent()) {
+			throw new ObjectNotFoundException("Davener with id " + user.getId());
 		}
 		// In case the external davenerId is different than the id sent with the davener
 		// object
-		davenerRepository.save(davener);
-		return davenerRepository.findAll();
+		userRepository.save(user);
+		return userRepository.findAll();
 	}
 
 	// tested
-	public List<Davener> deleteDavener(long id) throws ObjectNotFoundException {
-		Optional<Davener> optionalDavener = davenerRepository.findById(id);
-		if (!optionalDavener.isPresent()) {
-			throw new ObjectNotFoundException("Davener with id: " + id);
+	public List<User> deleteUser(long id) throws ObjectNotFoundException {
+		Optional<User> optionalUser = userRepository.findById(id);
+		if (!optionalUser.isPresent()) {
+			throw new ObjectNotFoundException("User with id: " + id);
 		}
-		davenerRepository.delete(optionalDavener.get());
-		return davenerRepository.findAll();
+		userRepository.delete(optionalUser.get());
+		return userRepository.findAll();
 	}
 
 	// tested
-	public List<Submitter> getAllSubmitters() {
-		return submitterRepository.findAll();
+	public List<User> getAllSubmitters() {
+		return userRepository.findAll();
 	}
 
 	// tested
@@ -373,71 +368,68 @@ public class AdminService {
 	 */
 
 	// tested
-	public List<Davener> disactivateDavener(String davenerEmail) throws EmptyInformationException {
-		List<Davener> davenerList = null;
+	public List<User> disactivateUser(String userEmail) throws EmptyInformationException {
+		List<User> davenerList = null;
 		try {
-			Optional<Davener> davenerToDisactivate = davenerRepository.findByEmail(davenerEmail);
-			if (davenerToDisactivate.isEmpty()) { // TODO* - add test that davener not found (really can't get empty
-													// email because "" doesn't go to link)
+			Optional<User> userToDisactivate = userRepository.findByEmail(userEmail);
+			if (userToDisactivate.isEmpty()) { // TODO* - add test that user not found (really can't get empty
+												// email because "" doesn't go to link)
 				System.out.println(String.format(
 						"The email %s cannot be disactivated because it is not found.  Please check the email address. ",
-						davenerEmail));
-				return davenerRepository.findAll();
+						userEmail));
+				return userRepository.findAll();
 			}
-			if (!davenerToDisactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
-															// returning
-				// most recent daveners list.
-				System.out.println(
-						String.format("The email %s has already been disactivated from receiving the davening lists. ",
-								davenerEmail));
+			if (!userToDisactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
+														// returning most recent users list.
+				System.out.println(String.format(
+						"The email %s has already been disactivated from receiving the davening lists. ", userEmail));
 			}
 
 			else {
-				davenerRepository.disactivateDavener(davenerEmail);
+				userRepository.disactivateUser(userEmail);
 				entityManager.flush();
 				entityManager.clear();
-				emailSender.notifyDisactivatedDavener(davenerEmail);
+				emailSender.notifyDisactivatedUser(userEmail);
 			}
 		} finally { // in case there were previous errors (such as in emailSender), return
 					// davenerList anyway.
-			davenerList = davenerRepository.findAll();
+			davenerList = userRepository.findAll();
 		}
 		return davenerList;
 
 	}
 
 	// tested
-	public List<Davener> activateDavener(String davenerEmail) throws EmptyInformationException {
+	public List<User> activateUser(String userEmail) throws EmptyInformationException {
 
-		List<Davener> davenerList = null;
+		List<User> userList = null;
 
 		try {
-			Optional<Davener> davenerToActivate = davenerRepository.findByEmail(davenerEmail);
+			Optional<User> davenerToActivate = userRepository.findByEmail(userEmail);
 			if (davenerToActivate.isEmpty()) { // TODO* - add test that davener not found (really can't get empty
 				// email because "" doesn't go to link)
 				System.out.println(String.format(
 						"The email %s cannot be activated because it is not found.  Please check the email address. ",
-						davenerEmail));
-				return davenerRepository.findAll();
+						userEmail));
+				return userRepository.findAll();
 			}
 			if (davenerToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual,
 																// returning
 				// most recent daveners list.
-				System.out
-						.println(String.format("The email %s is already receiving the davening lists. ", davenerEmail));
+				System.out.println(String.format("The email %s is already receiving the davening lists. ", userEmail));
 			}
 
 			else {
-				davenerRepository.activateDavener(davenerEmail);
+				userRepository.activateUser(userEmail);
 				entityManager.flush();
 				entityManager.clear();
-				emailSender.notifyActivatedDavener(davenerEmail);
+				emailSender.notifyActivatedUser(userEmail);
 			}
 		} finally {// in case there were previous errors (such as in emailSender), return
 			// davenerList anyway.
-			davenerList = davenerRepository.findAll();
+			userList = userRepository.findAll();
 		}
-		return davenerList;
+		return userList;
 	}
 
 	// tested

@@ -59,9 +59,9 @@ public class EmailScheme {
 	// Default subject in emails from admin
 	private static String adminMessageSubject = "Message from davening list admin";
 
-	private static String davenerDisactivated = "We are confirming that your participation on the davening list has been disactivated. <br><br> You will no longer receive emails regarding the davening list.  You may resubscribe at any time.  <br><br>If you think you did not disactivate your participation on the list, please contact your list admin immediately. ";
+	private static String userDisactivated = "We are confirming that your participation on the davening list has been disactivated. <br><br> You will no longer receive emails regarding the davening list.  You may resubscribe at any time.  <br><br>If you think you did not disactivate your participation on the list, please contact your list admin immediately. ";
 
-	private static String davenerActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
+	private static String userActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
 
 	// Text appearing in Admin's email requesting to daven urgently (can be Banim or
 	// any category)
@@ -177,12 +177,12 @@ public class EmailScheme {
 		return adminMessageSubject;
 	}
 
-	public static String getDavenerDisactivated() {
-		return davenerDisactivated;
+	public static String getUserDisactivated() {
+		return userDisactivated;
 	}
 
-	public static String getDavenerActivated() {
-		return davenerActivated;
+	public static String getUserActivated() {
+		return userActivated;
 	}
 
 	public static String getUrgentDavenforEmailBanim() {

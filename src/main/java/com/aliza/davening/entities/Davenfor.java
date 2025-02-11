@@ -29,8 +29,8 @@ public class Davenfor {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	@NotNull(message = "No submitter associated with this name. ")
-	private String submitterEmail;
+	@NotNull(message = "No user associated with this name. ")
+	private String userEmail;
 
 	private String category;
 
@@ -56,7 +56,7 @@ public class Davenfor {
 	@Pattern(regexp = "^[a-zA-Z '\\-]*$", message = "Spouse's English name must contain only English letters. ")
 	private String nameEnglishSpouse;
 
-	// Will submitter (if is a davener) receive this name on list?
+	// Will user himself receive this name on his list?
 	private boolean submitterToReceive = true;
 
 	private LocalDate lastConfirmedAt = LocalDate.now();
@@ -74,7 +74,7 @@ public class Davenfor {
 
 	@Override
 	public String toString() {
-		return "Davenfor [" + submitterEmail + ", " + category + ", " + nameHebrew + ", " + nameEnglish + ", createdAt="
+		return "Davenfor [" + userEmail + ", " + category + ", " + nameHebrew + ", " + nameEnglish + ", createdAt="
 				+ createdAt + "]";
 	}
 

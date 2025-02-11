@@ -148,9 +148,9 @@ public class Utilities {
 
 		// Building links that the buttons will refer to
 		String personalizedExtendLink = String.format(SchemeValues.getLinkToExtend(), davenfor.getId(),
-				davenfor.getSubmitterEmail());
+				davenfor.getUserEmail());
 		String personalizedDeleteLink = String.format(SchemeValues.getLinkToDelete(), davenfor.getId(),
-				davenfor.getSubmitterEmail());
+				davenfor.getUserEmail());
 
 		// Creating the button 'components' as html tds
 		String button1 = createButton(personalizedExtendLink, "#32a842", "Keep the name on the list");

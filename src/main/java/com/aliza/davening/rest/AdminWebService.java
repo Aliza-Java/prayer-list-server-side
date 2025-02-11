@@ -17,20 +17,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.Davener;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
+import com.aliza.davening.entities.User;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
-import com.aliza.davening.services.SubmitterService;
+import com.aliza.davening.services.UserService;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Password;
 import com.aliza.davening.util_classes.Weekly;
-
 
 @RestController
 @RequestMapping("admin")
@@ -44,26 +43,25 @@ public class AdminWebService {
 	EmailSender emailSender;
 
 	@Autowired
-	SubmitterService submitterService;
+	UserService userService;
 
 	@Value("${admin.id}")
 	long adminId;
 
-	//tested
+	// tested
 	@PutMapping(path = "update")
-	public boolean updateAdminSettings(@RequestBody AdminSettings settings)
-			throws ObjectNotFoundException { 
+	public boolean updateAdminSettings(@RequestBody AdminSettings settings) throws ObjectNotFoundException {
 		adminService.updateAdmin(settings);
 		return true;
 	}
 
-	//tested
+	// tested
 	@RequestMapping("settings/{email}")
 	public AdminSettings getAdminSettings(@PathVariable String email) throws ObjectNotFoundException {
 		return adminService.getAdminSettings(email);
 	}
 
-	//tested
+	// tested
 	@PostMapping("checkpass/{email}")
 	// saved Password as its own object, to allow passing in request body
 	public boolean checkPassword(@RequestBody Password password, @PathVariable String email)
@@ -71,55 +69,55 @@ public class AdminWebService {
 		return adminService.checkPassword(password.getPassword(), email);
 	}
 
-	//tested
+	// tested
 	@RequestMapping("davenfors")
 	public List<Davenfor> findAllDavenfors() {
 		return adminService.getAllDavenfors();
 	}
 
-	//tested
+	// tested
 	@DeleteMapping("delete/{id}")
 	public List<Davenfor> deleteDavenfor(@PathVariable long id) throws ObjectNotFoundException {
 		return adminService.deleteDavenfor(id);
 	}
 
-	//tested
-	@RequestMapping(path = "daveners")
-	public List<Davener> findAllDaveners() {
-		return adminService.getAllDaveners();
+	// tested
+	@RequestMapping(path = "users")
+	public List<User> findAllUsers() {
+		return adminService.getAllUsers();
 	}
 
-	//tested
-	@PostMapping(path = "davener")
-	public List<Davener> createDavener(@RequestBody Davener davener) throws NoRelatedEmailException {
-		return adminService.addDavener(davener);
+	// tested
+	@PostMapping(path = "user")
+	public List<User> createUser(@RequestBody User user) throws NoRelatedEmailException {
+		return adminService.addUser(user);
 	}
 
-	//tested
-	@PutMapping(path = "davener")
-	public List<Davener> updateDavener(@RequestBody Davener davener) throws ObjectNotFoundException {
-		return adminService.updateDavener(davener);
+	// tested
+	@PutMapping(path = "user")
+	public List<User> updateUser(@RequestBody User user) throws ObjectNotFoundException {
+		return adminService.updateUser(user);
 	}
 
-	//tested
-	@DeleteMapping(path = "davener/{id}")
-	public List<Davener> deleteDavener(@PathVariable long id) throws ObjectNotFoundException {
-		return adminService.deleteDavener(id);
+	// tested
+	@DeleteMapping(path = "user/{id}")
+	public List<User> deleteUser(@PathVariable long id) throws ObjectNotFoundException {
+		return adminService.deleteUser(id);
 	}
 
-	//tested
-	@PostMapping(path = "disactivate/{davenerEmail}")
-	public List<Davener> disactivateDavener(@PathVariable String davenerEmail) throws EmptyInformationException {
-		return adminService.disactivateDavener(davenerEmail);
+	// tested
+	@PostMapping(path = "disactivate/{userEmail}")
+	public List<User> disactivateUser(@PathVariable String userEmail) throws EmptyInformationException {
+		return adminService.disactivateUser(userEmail);
 	}
 
-	//tested
-	@PostMapping(path = "activate/{davenerEmail}")
-	public List<Davener> activateDavener(@PathVariable String davenerEmail) throws EmptyInformationException {
-		return adminService.activateDavener(davenerEmail);
+	// tested
+	@PostMapping(path = "activate/{userEmail}")
+	public List<User> activateUser(@PathVariable String userEmail) throws EmptyInformationException {
+		return adminService.activateUser(userEmail);
 	}
 
-	//tested
+	// tested
 	@PostMapping(path = "weekly")
 	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo)
 			throws EmptyInformationException, IOException, ObjectNotFoundException {
@@ -127,14 +125,14 @@ public class AdminWebService {
 		return true;
 	}
 
-	//tested
+	// tested
 	@PostMapping(path = "preview", produces = "text/plain")
 	public String previewWeekly(@RequestBody Weekly weeklyInfo)
 			throws EmptyInformationException, ObjectNotFoundException {
 		return adminService.previewWeekly(weeklyInfo);
 	}
 
-	//tested
+	// tested
 	// A simplified sendOutWeekly which takes a GET request (for the one sent
 	// through Admin's email link)
 	@RequestMapping(path = "weeklylist")
@@ -143,48 +141,48 @@ public class AdminWebService {
 		return true;
 	}
 
-	//tested
+	// tested
 	@PutMapping(path = "updatedavenfor")
 	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
-		submitterService.updateDavenfor(davenfor, null, true);
+		userService.updateDavenfor(davenfor, null, true);
 		return adminService.getAllDavenfors();
 	}
 
-	//tested
+	// tested
 	@PutMapping(path = "updatename/{email}")
-	//TODO*: add test for 'validity' of Davenfor
+	// TODO*: add test for 'validity' of Davenfor
 	public Davenfor updateDavenfor(@RequestBody @Valid Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
-		return submitterService.updateDavenfor(davenfor, email, false);
+		return userService.updateDavenfor(davenfor, email, false);
 	}
 
-	//tested
+	// tested
 	@PostMapping(path = "urgent")
 	public boolean sendOutUrgent(@RequestBody Davenfor davenfor) throws EmptyInformationException {
 		emailSender.sendUrgentEmail(davenfor);
 		return true;
 	}
 
-	//tested
+	// tested
 	@RequestMapping(path = "categories")
 	public List<Category> findAllCategories() {
 		return adminService.getAllCategories();
 	}
 
-	//tested
+	// tested
 	@RequestMapping(path = "parashot")
 	public List<Parasha> findAllParashot() {
 		return adminService.getAllParashot();
 	}
 
-	//currently not in use.  No tests
+	// currently not in use. No tests
 //	@RequestMapping(path = "parasha")
 //	public Parasha getCurrentParasha() {
 //		return adminService.findCurrentParasha();
 //	}
 //
-	@RequestMapping(path = "category") //TODO*: test
+	@RequestMapping(path = "category") // TODO*: test
 	public Category getCurrentCategory() {
 		return adminService.findCurrentCategory();
 	}

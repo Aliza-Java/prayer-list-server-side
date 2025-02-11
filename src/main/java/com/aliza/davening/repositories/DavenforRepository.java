@@ -33,7 +33,7 @@ public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 	@Modifying
 	public void deleteByExpireAtLessThan(LocalDate expireAt);
 
-	public List<Davenfor> findAllDavenforBySubmitterEmail(String email);
+	public List<Davenfor> findAllDavenforByUserEmail(String email);
 
 	List<Davenfor> findAllDavenforByCategory(String category);
 }

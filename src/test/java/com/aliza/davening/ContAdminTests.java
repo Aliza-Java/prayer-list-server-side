@@ -46,7 +46,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.Davener;
+import com.aliza.davening.entities.User;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.DatabaseException;
@@ -60,7 +60,7 @@ import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.security.UserDetailsServiceImpl;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
-import com.aliza.davening.services.SubmitterService;
+import com.aliza.davening.services.UserService;
 import com.aliza.davening.util_classes.AdminSettings;
 
 @WebMvcTest(controllers = AdminWebService.class)
@@ -78,7 +78,7 @@ public class ContAdminTests {
 	private AdminService adminService;
 
 	@MockBean
-	private SubmitterService submitterService;
+	private UserService userService;
 
 	@MockBean
 	private EmailSender emailSender;
@@ -101,20 +101,20 @@ public class ContAdminTests {
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
 	public static Category catYeshuah = new Category(YESHUAH, false, 180, 5);
 
-	public static Davenfor dfRefua = new Davenfor(1, "sub1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshuah1 = new Davenfor(2, "sub1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfYeshuah1 = new Davenfor(2, "user1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfBanim = new Davenfor(3, "sub2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshuah2 = new Davenfor(4, "sub2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfYeshuah2 = new Davenfor(4, "user2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshuah1, dfBanim, dfYeshuah2);
 
-	public static Davener davener1 = new Davener(1, "Israel", "davener1@gmail.com", null, false);
-	public static Davener davener2 = new Davener(2, "Israel", "davener2@gmail.com", null, false);
-	public static Davener davener3 = new Davener(3, "Israel", "davener3@gmail.com", null, true);
-	public static List<Davener> daveners = Arrays.asList(davener1, davener2, davener3);
+	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
+	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
+	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+	public static List<User> users = Arrays.asList(user1, user2, user3);
 
 	public static Parasha parasha1 = new Parasha(1, "Bereshit", "בראשית", true);
 	public static Parasha parasha2 = new Parasha(2, "Noach", "נח", false);
@@ -284,22 +284,22 @@ public class ContAdminTests {
 
 	@Test
 	@Order(8)
-	public void testFindAllDaveners() {
+	public void testFindAllUsers() {
 		try {
-			when(adminService.getAllDaveners()).thenReturn(daveners);
+			when(adminService.getAllUsers()).thenReturn(users);
 
-			mockMvc.perform(get("/admin/daveners")).andDo(print()).andExpect(status().isOk())
+			mockMvc.perform(get("/admin/users")).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.length()").value(3))
-					.andExpect(jsonPath("$[0].email").value("davener1@gmail.com"))
-					.andExpect(jsonPath("$[1].email").value("davener2@gmail.com"))
-					.andExpect(jsonPath("$[2].email").value("davener3@gmail.com"));
+					.andExpect(jsonPath("$[0].email").value("user1@gmail.com"))
+					.andExpect(jsonPath("$[1].email").value("user2@gmail.com"))
+					.andExpect(jsonPath("$[2].email").value("user3@gmail.com"));
 
-			when(adminService.getAllDaveners()).thenReturn(Collections.emptyList());
+			when(adminService.getAllUsers()).thenReturn(Collections.emptyList());
 
-			mockMvc.perform(get("/admin/daveners")).andDo(print()).andExpect(status().isOk())
+			mockMvc.perform(get("/admin/users")).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.length()").value(0));
 
-			verify(adminService, times(2)).getAllDaveners();
+			verify(adminService, times(2)).getAllUsers();
 
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
@@ -308,33 +308,33 @@ public class ContAdminTests {
 
 	@Test
 	@Order(9)
-	public void testCreateDavener() {
-		Davener newDavener = new Davener(4, "Africa", "davener4@gmail.com", null, true);
-		List<Davener> extendedDaveners = Arrays.asList(davener1, davener2, davener3, newDavener);
-		assertEquals(4, extendedDaveners.size());
+	public void testCreateUser() {
+		User newUser = new User(4, null, "user4@gmail.com", "Africa", null, null, true);
+		List<User> extendedUsers = Arrays.asList(user1, user2, user3, newUser);
+		assertEquals(4, extendedUsers.size());
 
-		String requestBody = "{\"id\": 4, \"country\": \"Africa\", \"email\": \"davener4@gmail.com\", \"whatsapp\" : null, \"active\" : true}";
+		String requestBody = "{\"id\": 4, \"country\": \"Africa\", \"email\": \"user4@gmail.com\", \"whatsapp\" : null, \"active\" : true}";
 
 		try {
-			when(adminService.addDavener(any())).thenReturn(extendedDaveners);
+			when(adminService.addUser(any())).thenReturn(extendedUsers);
 
-			mockMvc.perform(post("/admin/davener").content(requestBody).contentType(MediaType.APPLICATION_JSON))
+			mockMvc.perform(post("/admin/user").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(4))
-					.andExpect(jsonPath("$[0].email").value("davener1@gmail.com"))
-					.andExpect(jsonPath("$[1].email").value("davener2@gmail.com"))
-					.andExpect(jsonPath("$[2].email").value("davener3@gmail.com"))
-					.andExpect(jsonPath("$[3].email").value("davener4@gmail.com"));
+					.andExpect(jsonPath("$[0].email").value("user1@gmail.com"))
+					.andExpect(jsonPath("$[1].email").value("user2@gmail.com"))
+					.andExpect(jsonPath("$[2].email").value("user3@gmail.com"))
+					.andExpect(jsonPath("$[3].email").value("user4@gmail.com"));
 
-			newDavener.setEmail(null);
-			when(adminService.addDavener(any())).thenThrow(
-					new NoRelatedEmailException("Cannot enter this davener into the system.  No email associated. "));
+			newUser.setEmail(null);
+			when(adminService.addUser(any())).thenThrow(
+					new NoRelatedEmailException("Cannot enter this user into the system.  No email associated. "));
 
-			mockMvc.perform(post("/admin/davener").content(requestBody).contentType(MediaType.APPLICATION_JSON))
+			mockMvc.perform(post("/admin/user").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isNoContent())
 					.andExpect(jsonPath("$.code").value("EMPTY_INFORMATION"))
 					.andExpect(jsonPath("$.messages[0]", containsString("No email associated.")));
 
-			verify(adminService, times(2)).addDavener(any());
+			verify(adminService, times(2)).addUser(any());
 
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
@@ -343,28 +343,28 @@ public class ContAdminTests {
 
 	@Test
 	@Order(10)
-	public void testUpdateDavener() {
+	public void testUpdateUser() {
 		try {
-			String requestBody = "{\"id\": 1, \"country\": \"Australia\", \"email\": \"davener1@gmail.com\", \"whatsapp\" : null, \"active\" : true}";
+			String requestBody = "{\"id\": 1, \"country\": \"Australia\", \"email\": \"user1@gmail.com\", \"whatsapp\" : null, \"active\" : true}";
 
-			Davener updatedDavener1 = new Davener(davener1);
-			updatedDavener1.setCountry("Australia");
-			updatedDavener1.setId(1L);
-			List<Davener> davenersToReturn = Arrays.asList(updatedDavener1, davener2, davener3);
+			User updatedUser1 = new User(user1);
+			updatedUser1.setCountry("Australia");
+			updatedUser1.setId(1L);
+			List<User> usersToReturn = Arrays.asList(updatedUser1, user2, user3);
 
-			when(adminService.updateDavener(any())).thenReturn(davenersToReturn);
-			mockMvc.perform(put("/admin/davener").content(requestBody).contentType(MediaType.APPLICATION_JSON))
+			when(adminService.updateUser(any())).thenReturn(usersToReturn);
+			mockMvc.perform(put("/admin/user").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isOk()).andExpect(jsonPath("$[0].id").value(1))
 					.andExpect(jsonPath("$[0].country").value("Australia"))
 					.andExpect(jsonPath("$[1].country").value("Israel"));
 
-			when(adminService.updateDavener(any())).thenThrow(new ObjectNotFoundException("Davener with id 1"));
-			mockMvc.perform(put("/admin/davener").content(requestBody).contentType(MediaType.APPLICATION_JSON))
+			when(adminService.updateUser(any())).thenThrow(new ObjectNotFoundException("User with id 1"));
+			mockMvc.perform(put("/admin/user").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.code").value("OBJECT_NOT_FOUND_ERROR"))
-					.andExpect(jsonPath("$.messages[0]", containsString("Davener with id 1")));
+					.andExpect(jsonPath("$.messages[0]", containsString("User with id 1")));
 
-			verify(adminService, times(2)).updateDavener(any());
+			verify(adminService, times(2)).updateUser(any());
 
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
@@ -373,22 +373,22 @@ public class ContAdminTests {
 
 	@Test
 	@Order(11)
-	public void testDeleteDavener() {
+	public void testDeleteUser() {
 		try {
-			when(adminService.deleteDavener(1L)).thenReturn(Arrays.asList(davener2, davener3));
+			when(adminService.deleteUser(1L)).thenReturn(Arrays.asList(user2, user3));
 
-			mockMvc.perform(delete("/admin/davener/{id}", 1L)).andDo(print()).andExpect(status().isOk())
+			mockMvc.perform(delete("/admin/user/{id}", 1L)).andDo(print()).andExpect(status().isOk())
 			.andExpect(jsonPath("$.length()").value(2))
-			.andExpect(jsonPath("$[0].email").value("davener2@gmail.com"))
-			.andExpect(jsonPath("$[1].email").value("davener3@gmail.com"));
+			.andExpect(jsonPath("$[0].email").value("user2@gmail.com"))
+			.andExpect(jsonPath("$[1].email").value("user3@gmail.com"));
 
-			when(adminService.deleteDavener(2L)).thenThrow(new ObjectNotFoundException("Name with id: 2"));
+			when(adminService.deleteUser(2L)).thenThrow(new ObjectNotFoundException("Name with id: 2"));
 
-			mockMvc.perform(delete("/admin/davener/{id}", 2L)).andDo(print()).andExpect(status().isNotFound())
+			mockMvc.perform(delete("/admin/user/{id}", 2L)).andDo(print()).andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.code").value("OBJECT_NOT_FOUND_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("Name with id: 2")));
 
-			verify(adminService, times(2)).deleteDavener(anyLong());
+			verify(adminService, times(2)).deleteUser(anyLong());
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -396,25 +396,25 @@ public class ContAdminTests {
 
 	@Test
 	@Order(12)
-	public void testDisactivateDavener() {
+	public void testDisactivateUser() {
 		try {
-			davener3.setActive(false);
-			when(adminService.disactivateDavener("davener3@gmail.com")).thenReturn(daveners);
+			user3.setActive(false);
+			when(adminService.disactivateUser("user3@gmail.com")).thenReturn(users);
 
-			mockMvc.perform(post("/admin/disactivate/{davenerEmail}", "davener3@gmail.com")).andDo(print())
+			mockMvc.perform(post("/admin/disactivate/{userEmail}", "user3@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(3))
-					.andExpect(jsonPath("$[0].email").value("davener1@gmail.com"))
-					.andExpect(jsonPath("$[1].email").value("davener2@gmail.com"))
-					.andExpect(jsonPath("$[2].email").value("davener3@gmail.com"))
+					.andExpect(jsonPath("$[0].email").value("user1@gmail.com"))
+					.andExpect(jsonPath("$[1].email").value("user2@gmail.com"))
+					.andExpect(jsonPath("$[2].email").value("user3@gmail.com"))
 					.andExpect(jsonPath("$[2].active").value("false"));
 
-			when(adminService.disactivateDavener(""))
+			when(adminService.disactivateUser(""))
 					.thenThrow(new EmptyInformationException("Recipient email address missing."));
-			mockMvc.perform(post("/admin/disactivate/{davenerEmail}", "")).andDo(print()).andDo(print())
+			mockMvc.perform(post("/admin/disactivate/{userEmail}", "")).andDo(print()).andDo(print())
 					.andExpect(status().isNotFound());
 
 			// empty email doesn't even go to the mapping and gives NOT_FOUND
-			verify(adminService, times(1)).disactivateDavener(any());
+			verify(adminService, times(1)).disactivateUser(any());
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -422,26 +422,26 @@ public class ContAdminTests {
 
 	@Test
 	@Order(13)
-	public void testActivateDavener() {
+	public void testActivateUser() {
 		try {
-			davener3.setActive(true);
-			when(adminService.activateDavener("davener3@gmail.com")).thenReturn(daveners);
+			user3.setActive(true);
+			when(adminService.activateUser("user3@gmail.com")).thenReturn(users);
 
-			mockMvc.perform(post("/admin/activate/{davenerEmail}", "davener3@gmail.com")).andDo(print())
+			mockMvc.perform(post("/admin/activate/{userEmail}", "user3@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(3))
-					.andExpect(jsonPath("$[0].email").value("davener1@gmail.com"))
-					.andExpect(jsonPath("$[1].email").value("davener2@gmail.com"))
-					.andExpect(jsonPath("$[2].email").value("davener3@gmail.com"))
+					.andExpect(jsonPath("$[0].email").value("user1@gmail.com"))
+					.andExpect(jsonPath("$[1].email").value("user2@gmail.com"))
+					.andExpect(jsonPath("$[2].email").value("user3@gmail.com"))
 					.andExpect(jsonPath("$[2].active").value("true"));
 
-			davener2.setEmail("");
-			when(adminService.activateDavener(""))
+			user2.setEmail("");
+			when(adminService.activateUser(""))
 					.thenThrow(new EmptyInformationException("Recipient email address missing."));
-			mockMvc.perform(post("/admin/activate/{davenerEmail}", "")).andDo(print()).andDo(print())
+			mockMvc.perform(post("/admin/activate/{userEmail}", "")).andDo(print()).andDo(print())
 					.andExpect(status().isNotFound());
 
 			// empty email doesn't even go to the mapping and gives NOT_FOUND
-			verify(adminService, times(1)).activateDavener(any());
+			verify(adminService, times(1)).activateUser(any());
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -573,7 +573,7 @@ public class ContAdminTests {
 	@Order(19)
 	public void testUpdateNameByAdmin() {
 
-		String requestBody = "{ \"email\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			when(adminService.getAllDavenfors()).thenReturn(davenfors);
@@ -584,14 +584,14 @@ public class ContAdminTests {
 					.andExpect(jsonPath("$[1].id").value(2))
 					.andExpect(jsonPath("$[1].nameEnglish").value("Moshe ben Sara"));
 
-			when(submitterService.updateDavenfor(any(), eq(null), eq(true))).thenThrow(
+			when(userService.updateDavenfor(any(), eq(null), eq(true))).thenThrow(
 					new EmptyInformationException("No information submitted regarding the name you wish to update. "));
 			mockMvc.perform(put("/admin/updatedavenfor").content("{ }").contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isNoContent())
 					.andExpect(jsonPath("$.code").value("EMPTY_INFORMATION"))
 					.andExpect(jsonPath("$.messages[0]", containsString("No information")));
 
-			when(submitterService.updateDavenfor(any(), eq(null), eq(true)))
+			when(userService.updateDavenfor(any(), eq(null), eq(true)))
 					.thenThrow(new ObjectNotFoundException("Name with id: 3"));
 			mockMvc.perform(put("/admin/updatedavenfor").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isNotFound())
@@ -600,7 +600,7 @@ public class ContAdminTests {
 
 			// permission exception can't ever be thrown from updateNameByAdmin()
 
-			verify(submitterService, times(3)).updateDavenfor(any(), eq(null), eq(true));
+			verify(userService, times(3)).updateDavenfor(any(), eq(null), eq(true));
 			verify(adminService, times(1)).getAllDavenfors();
 
 		} catch (Exception e) {
@@ -612,30 +612,30 @@ public class ContAdminTests {
 	@Order(20)
 	public void testUpdateDavenfor() {
 
-		String requestBody = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
-			when(submitterService.updateDavenfor(any(), eq("sub3@gmail.com"), eq(false))).thenReturn(dfYeshuah1);
-			mockMvc.perform(put("/admin/updatename/{email}", "sub3@gmail.com").content(requestBody)
+			when(userService.updateDavenfor(any(), eq("user3@gmail.com"), eq(false))).thenReturn(dfYeshuah1);
+			mockMvc.perform(put("/admin/updatename/{email}", "user3@gmail.com").content(requestBody)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.nameEnglish").value("Moshe ben Sara"))
-					.andExpect(jsonPath("$.submitterEmail").value("sub1@gmail.com"));
+					.andExpect(jsonPath("$.userEmail").value("user1@gmail.com"));
 
-			when(submitterService.updateDavenfor(any(), eq("sub3@gmail.com"), eq(false))).thenThrow(
+			when(userService.updateDavenfor(any(), eq("user3@gmail.com"), eq(false))).thenThrow(
 					new EmptyInformationException("No information submitted regarding the name you wish to update. "));
-			mockMvc.perform(put("/admin/updatename/{email}", "sub3@gmail.com").content("{ }")
+			mockMvc.perform(put("/admin/updatename/{email}", "user3@gmail.com").content("{ }")
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNoContent())
 					.andExpect(jsonPath("$.code").value("EMPTY_INFORMATION"))
 					.andExpect(jsonPath("$.messages[0]", containsString("No information")));
 
-			when(submitterService.updateDavenfor(any(), eq("sub3@gmail.com"), eq(false)))
+			when(userService.updateDavenfor(any(), eq("user3@gmail.com"), eq(false)))
 					.thenThrow(new ObjectNotFoundException("Name with id: 3"));
-			mockMvc.perform(put("/admin/updatename/{email}", "sub3@gmail.com").content(requestBody)
+			mockMvc.perform(put("/admin/updatename/{email}", "user3@gmail.com").content(requestBody)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.code").value("OBJECT_NOT_FOUND_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("Name with id")));
 
-			when(submitterService.updateDavenfor(any(), eq("different@gmail.com"), eq(false)))
+			when(userService.updateDavenfor(any(), eq("different@gmail.com"), eq(false)))
 					.thenThrow(new PermissionException(
 							"This name is registered under a different email address.  You do not have the permission to update it."));
 			mockMvc.perform(put("/admin/updatename/{email}", "different@gmail.com").content(requestBody)
@@ -643,7 +643,7 @@ public class ContAdminTests {
 					.andExpect(jsonPath("$.code").value("LOGIN_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("do not have the permission")));
 
-			verify(submitterService, times(4)).updateDavenfor(any(), any(), eq(false));
+			verify(userService, times(4)).updateDavenfor(any(), any(), eq(false));
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -652,8 +652,8 @@ public class ContAdminTests {
 	@Test
 	@Order(21)
 	public void testSendOutUrgent() {
-		String requestBody = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
-		String incompleteDf = "{ \"submitterEmail\": \"sub3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \" \", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String incompleteDf = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"yeshuah\",  \"nameEnglish\": \" \", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			doNothing().when(emailSender).sendUrgentEmail(any());
