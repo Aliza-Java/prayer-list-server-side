@@ -1,5 +1,6 @@
 package com.aliza.davening.services;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,10 +10,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aliza.davening.EmailScheme;
-import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.User;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
@@ -69,7 +70,8 @@ public class UserService {
 	}
 
 	// tested
-	public Davenfor addDavenfor(Davenfor davenfor, String userEmail) throws EmptyInformationException {
+	public Davenfor addDavenfor(Davenfor davenfor, String userEmail)
+			throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {
 
 		Category category = Category.getCategory(davenfor.getCategory());
 		if (category == null) {
@@ -83,7 +85,7 @@ public class UserService {
 		// If davenfor needs 2 names (e.g. Zera shel Kayama), validate that second name
 		// is in too, and if indeed exist - trim them.
 
-		if (SchemeValues.BANIM.equalsIgnoreCase(category.getCname().toString())) {
+		if (Category.isBanim(category.getCname().toString())) {
 			if (davenfor.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
@@ -101,18 +103,27 @@ public class UserService {
 		// Davenfor will expire in future according to its category's settings.
 		davenfor.setExpireAt(LocalDate.now().plusDays(category.getUpdateRate()));
 
-		davenforRepository.save(davenfor);
+		Davenfor savedDavenfor;
+		try {
+			savedDavenfor = davenforRepository.save(davenfor);
+		} catch (Exception e) {
+			System.err.println("Error saving entity: " + e.getMessage());
+			return null;
+		}
+
+		emailSender.sendConfirmationEmail(savedDavenfor.getId());
 
 		// TODO*: in future, adjust that admin can choose:
 		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
 		String subject = EmailScheme.getInformAdminOfNewNameSubject();
 		String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
-				davenfor.getNameHebrew(), category.toString(), userEmail);
+				davenfor.getNameHebrew(), category.getCname().toString(), userEmail);
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
+		//TODONOW: add link for admin to log into website
 		// }
 
-		return davenfor;
+		return savedDavenfor;
 	}
 
 	// tested
@@ -146,8 +157,7 @@ public class UserService {
 
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
-		// TODO - change this banim condition to 'isBanim' across the board
-		if (SchemeValues.BANIM.equalsIgnoreCase(davenforToUpdate.getCategory())) {
+		if (Category.isBanim(davenforToUpdate.getCategory())) {
 			if (davenforToUpdate.noSpouseInfo()) {
 				throw new EmptyInformationException(
 						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
@@ -173,8 +183,7 @@ public class UserService {
 		String subject = EmailScheme.getInformAdminOfUpdateSubject();
 		String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getUserEmail(),
 				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
-		// TODO: when email works, enable and add test
-		// emailSender.informAdmin(subject, message);
+		emailSender.informAdmin(subject, message);
 		// }
 
 		return davenforToUpdate;
@@ -240,9 +249,9 @@ public class UserService {
 	public String existingOrNewUser(String userEmail) {
 		Optional<User> validUser = userRepository.findByEmail(userEmail);
 
-		// If submitter has never submitted a name, need to create a new one in
+		// If user has never submitted a name, need to create a new one in
 		// database.
-		if (validUser.isEmpty()) {// TODO - re-add this function
+		if (validUser.isEmpty()) {
 			userRepository.save(new User(userEmail));
 		}
 		return userEmail;

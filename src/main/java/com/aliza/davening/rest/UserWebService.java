@@ -1,5 +1,6 @@
 package com.aliza.davening.rest;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
@@ -43,7 +45,7 @@ public class UserWebService {
 	// tested
 	@PostMapping(path = "{email}")
 	public Davenfor addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
-			throws EmptyInformationException {
+			throws EmptyInformationException, ObjectNotFoundException, IOException, EmailException {//TODO*: add tests for last 3 exceptions
 		return userService.addDavenfor(davenfor, email);
 	}
 
@@ -56,14 +58,17 @@ public class UserWebService {
 	}
 
 	// tested
-	@RequestMapping("extend/{davenforId}")
-	public void extendDavenfor(@PathVariable long davenforId, @RequestParam("email") String email)
+	//TODONOW: need to redirect user to something after extended
+	@RequestMapping("extend/{davenforId}/{email}")
+	public void extendDavenfor(@PathVariable long davenforId, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 		userService.extendDavenfor(davenforId, email);
 	}
 
-	// tested
-	@DeleteMapping("delete/{id}/{email}")
+	//TODONOW: in future, make deleteName landing page like chatGpt suggested. with an 'are you sure' button 
+	// tested 
+	//TODONOW: link from email also gives list of all user davenfors.  not nice.  make a landing page. 
+	@RequestMapping("delete/{id}/{email}") //since handled through email (for now), delete mapping is not supported
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
 		return userService.deleteDavenfor(id, email);

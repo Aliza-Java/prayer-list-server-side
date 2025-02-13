@@ -50,7 +50,7 @@ public class EmailScheme {
 
 	private static String htmlBodyEnd = "</body></html>";
 
-	//TODO - make a real unsubscribe link
+	//TODONOW - make a real unsubscribe link
 	private static String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='http://www.google.com'>HERE</a>";
 
 	// Subject includes the category

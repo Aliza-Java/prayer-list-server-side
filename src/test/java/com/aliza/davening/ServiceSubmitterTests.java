@@ -244,7 +244,7 @@ public class ServiceSubmitterTests {
 		} catch (ObjectNotFoundException | PermissionException | EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-		// TODO - maybe in integration tests make test that extends davenfor with
+		// TODO* - maybe in integration tests make test that extends davenfor with
 		// different email than submitter (exception)
 	}
 

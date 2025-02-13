@@ -12,6 +12,7 @@ import javax.persistence.Id;
 
 import javax.validation.constraints.*;
 
+import com.aliza.davening.SchemeValues;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
@@ -28,6 +29,8 @@ import lombok.Setter;
 @Entity
 public class Category {
 	//TODO*: in future, make repository tests for all validations
+	
+	public final static String BANIM = "BANIM"; 
 
 	public Category(CategoryName cname, boolean current, int updateRate, int catOrder) {
 		this.cname = cname;
@@ -87,5 +90,9 @@ public class Category {
 	@JsonValue
 	public String toJson() {
 		return cname.toString().toLowerCase();
+	}
+	
+	public static boolean isBanim(String catString) {
+		return BANIM.equalsIgnoreCase(catString);
 	}
 }

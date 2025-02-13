@@ -2,11 +2,15 @@ package com.aliza.davening.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -20,9 +24,11 @@ import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.CategoryRepository;
+import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.services.session.EmailSessionProvider;
@@ -54,6 +60,9 @@ public class EmailSender {
 	private ParashaRepository parashaRepository;
 
 	@Autowired
+	private DavenforRepository davenforRepository;
+
+	@Autowired
 	private Utilities utilities;
 
 	@Value("${admin.email}")
@@ -61,6 +70,12 @@ public class EmailSender {
 
 	// @Value("${admin.id}")
 	long adminId = 1;
+	
+	@Value("${link.to.confirm}")
+	String linkToConfirmPartial;
+	
+	@Value("${link.to.remove}")
+	String linkToRemovePartial;
 
 	private List<String> adminAsList;
 
@@ -90,7 +105,7 @@ public class EmailSender {
 			Multipart multipart = new MimeMultipart();
 
 			MimeBodyPart textPart = new MimeBodyPart();
-			textPart.setText(text);
+			textPart.setContent(text, "text/html; charset=UTF-8");
 			multipart.addBodyPart(textPart);
 
 			if (attachment != null) {
@@ -112,7 +127,7 @@ public class EmailSender {
 	// general method
 	// tested
 	public boolean sendEmail(MimeMessage message) {
-		// TODO: allow attachment, make all methods use this, services and controllers
+		// TODONOW: allow attachment, make all methods use this, services and controllers
 		// to direct to EmailSender correctly.
 
 		try {
@@ -122,9 +137,6 @@ public class EmailSender {
 			e.printStackTrace();
 			throw new RuntimeException("Failed to send email");
 		}
-
-		// TODO - where to put the encoding utf-8?
-		// TODO - mimeMessageHelper for attachment and more
 
 		return true;
 	}
@@ -145,7 +157,7 @@ public class EmailSender {
 	}
 
 	// tested
-	public void sendSimplifiedWeekly() throws  ObjectNotFoundException, EmptyInformationException, IOException {
+	public void sendSimplifiedWeekly() throws ObjectNotFoundException, EmptyInformationException, IOException {
 		Weekly simplified = new Weekly();
 
 		Parasha parasha = parashaRepository.findCurrent()
@@ -153,7 +165,7 @@ public class EmailSender {
 		simplified.parashaName = parasha.getEnglishName();
 
 		Category category = categoryRepository.getCurrent()
-		.orElseThrow(() -> new ObjectNotFoundException("current category"));
+				.orElseThrow(() -> new ObjectNotFoundException("current category"));
 		simplified.cName = category.getCname().toString();
 
 		sendOutWeekly(simplified);
@@ -163,7 +175,7 @@ public class EmailSender {
 	public void sendOutWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException, IOException {
 
 		Category category;
-		if (info.cName != null && info.cName.length()>0)
+		if (info.cName != null && info.cName.length() > 0)
 			category = Category.getCategory(info.cName);
 		else
 			category = categoryRepository.findById(info.categoryId)
@@ -196,7 +208,7 @@ public class EmailSender {
 	// tested
 	public void sendUrgentEmail(Davenfor davenfor) throws EmptyInformationException {
 
-		if (davenfor == null || davenfor.getNameEnglish().isEmpty()) { //TODO: maybe put a validity check here
+		if (davenfor == null || davenfor.getNameEnglish().isEmpty()) { // TODO*: maybe put a validity check here
 			throw new EmptyInformationException("The name you submitted for davening is incomplete.  ");
 		}
 
@@ -210,7 +222,7 @@ public class EmailSender {
 
 		// If category is banim, need to list also spouse name (if exists in at least
 		// one language).
-		if (SchemeValues.BANIM.equalsIgnoreCase((davenfor.getCategory()))
+		if (Category.isBanim(davenfor.getCategory())
 				&& (davenfor.getNameEnglishSpouse() != null || davenfor.getNameHebrewSpouse() != null)) {
 			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailBanim(), davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
@@ -230,51 +242,41 @@ public class EmailSender {
 				null, null));
 	}
 
-	// TODO: how to implement the html style? it gets sent as plain text
 	// tested
 	public void informAdmin(String subject, String message) {
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, adminEmail, null, null, null));
 	}
 
-	// TODO - when ready, make someone call this method
-	// The controller will use this method to send out a confirmation email to
-	// user when sending in a new name. public boolean
-	/*
-	 * boolean sendConfirmationEmail(long davenforId) //TODO - make someone call
-	 * this, if want. Or delete. throws EmailException, IOException,
-	 * EmptyInformationException, ObjectNotFoundException {
-	 * 
-	 * Optional<Davenfor> optionalDavenfor =
-	 * davenforRepository.findById(davenforId); if (!optionalDavenfor.isPresent()) {
-	 * throw new ObjectNotFoundException("Name with id: " + davenforId); }
-	 * 
-	 * Davenfor confirmedDavenfor = optionalDavenfor.get(); String subject =
-	 * EmailScheme.getConfirmationEmailSubject();
-	 * 
-	 * 
-	 * Retrieving standard confirmation email text, and personalizing it
-	 * respectively. Code gets email text from file saved in src/resources (path
-	 * defined in SchemeValues), replaces values with specific davenfor values and
-	 * sets it as the email body.
-	 * 
-	 * 
-	 * String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.
-	 * getConfirmationEmailTextLocation())), StandardCharsets.UTF_8); String
-	 * personalizedEmailText = String.format(emailText,
-	 * confirmedDavenfor.getNameEnglish(),
-	 * confirmedDavenfor.getCategory().getCname(), confirmedDavenfor.getId());
-	 * 
-	 * String to = confirmedDavenfor.getUserEmail();
-	 * 
-	 * try { sendEmail(createMimeMessage(sessionProvider.getSession(), subject,
-	 * personalizedEmailText, to, adminAsList, null, null)); } catch (Exception e) {
-	 * throw new EmailException(
-	 * 
-	 * String.format("Could not send confirmation email to %s",
-	 * confirmedDavenfor.getUserEmail())); } return true;
-	 * 
-	 * }
-	 */
+	public boolean sendConfirmationEmail(long davenforId) throws EmailException, IOException, ObjectNotFoundException {
+
+		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
+		if (!optionalDavenfor.isPresent()) {
+			throw new ObjectNotFoundException("Name with id: " + davenforId);
+		}
+
+		Davenfor confirmedDavenfor = optionalDavenfor.get();
+		String subject = EmailScheme.getConfirmationEmailSubject();
+		String emailAddress = confirmedDavenfor.getUserEmail();
+		
+		String linkToConfirm = String.format(linkToConfirmPartial, davenforId, emailAddress);
+		String linkToRemove = String.format(linkToRemovePartial, davenforId, emailAddress);
+
+		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.getConfirmationEmailTextLocation())),
+				StandardCharsets.UTF_8);
+		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
+				confirmedDavenfor.getCategory(), linkToConfirm, linkToRemove);
+		String to = confirmedDavenfor.getUserEmail();
+
+		try {
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, to, adminAsList,
+					null, null));
+		} catch (Exception e) {
+			throw new EmailException(
+					String.format("Could not send confirmation email to %s", emailAddress));
+		}
+
+		return true;
+	}
 
 	// tested
 	public void notifyDisactivatedUser(String email) throws EmptyInformationException {

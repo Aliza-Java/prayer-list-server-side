@@ -162,7 +162,6 @@ public class AdminService {
 	// tested
 	public List<User> addUser(User user) throws NoRelatedEmailException {
 
-		// saving user's email, as it may be used multiple times in this method.
 		String userEmail = user.getEmail();
 
 		// Lack of email needs to be detected before trying to save to DB, since other
@@ -174,14 +173,12 @@ public class AdminService {
 		/*
 		 * If davener already exists on database (but was disactivated at a different
 		 * time from receiving weekly emails), will change to active and save him under
-		 * the same davener (in order not to create new daveners with same email.) Then
-		 * add him to the database. If new - will create new. If old - will receive the
-		 * old id and save in the same row.
+		 * the same user
 		 */
-		Optional<User> existingDavener = userRepository.findByEmail(userEmail);
+		Optional<User> existingUser = userRepository.findByEmail(userEmail);
 
-		if (existingDavener.isPresent()) {
-			user = existingDavener.get(); // giving davener the existing id
+		if (existingUser.isPresent()) {
+			user = existingUser.get(); // giving davener the existing id
 			user.setActive(true);
 		} else { // new davener - save full incoming data
 			userRepository.save(user);
@@ -369,7 +366,7 @@ public class AdminService {
 
 	// tested
 	public List<User> disactivateUser(String userEmail) throws EmptyInformationException {
-		List<User> davenerList = null;
+		List<User> userList = null;
 		try {
 			Optional<User> userToDisactivate = userRepository.findByEmail(userEmail);
 			if (userToDisactivate.isEmpty()) { // TODO* - add test that user not found (really can't get empty
@@ -392,10 +389,10 @@ public class AdminService {
 				emailSender.notifyDisactivatedUser(userEmail);
 			}
 		} finally { // in case there were previous errors (such as in emailSender), return
-					// davenerList anyway.
-			davenerList = userRepository.findAll();
+					// userList anyway.
+			userList = userRepository.findAll();
 		}
-		return davenerList;
+		return userList;
 
 	}
 
@@ -405,15 +402,15 @@ public class AdminService {
 		List<User> userList = null;
 
 		try {
-			Optional<User> davenerToActivate = userRepository.findByEmail(userEmail);
-			if (davenerToActivate.isEmpty()) { // TODO* - add test that davener not found (really can't get empty
+			Optional<User> userToActivate = userRepository.findByEmail(userEmail);
+			if (userToActivate.isEmpty()) { // TODO* - add test that user not found (really can't get empty
 				// email because "" doesn't go to link)
 				System.out.println(String.format(
 						"The email %s cannot be activated because it is not found.  Please check the email address. ",
 						userEmail));
 				return userRepository.findAll();
 			}
-			if (davenerToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual,
+			if (userToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual,
 																// returning
 				// most recent daveners list.
 				System.out.println(String.format("The email %s is already receiving the davening lists. ", userEmail));
@@ -426,7 +423,7 @@ public class AdminService {
 				emailSender.notifyActivatedUser(userEmail);
 			}
 		} finally {// in case there were previous errors (such as in emailSender), return
-			// davenerList anyway.
+			// userList anyway.
 			userList = userRepository.findAll();
 		}
 		return userList;

@@ -1,6 +1,7 @@
 package com.aliza.davening.security;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 
 import javax.crypto.SecretKey;
@@ -22,27 +23,43 @@ public class JwtUtils {
 	@Value("${jwt.secret}")
 	private String jwtSecret;
 
-	private int jwtExpirationMs = 900000;
+	@Value("${jwt.expiration.ms}")
+	private int jwtExpirationMs;
+
+	public SecretKey getSigningKey() {
+		byte[] keyBytes = Base64.getDecoder().decode(jwtSecret);
+		return Keys.hmacShaKeyFor(keyBytes);
+	}
 
 	public String generateJwtToken(Authentication authentication) {
 
 		UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
 
 		return Jwts.builder().setSubject(userPrincipal.getUsername()).setIssuedAt(new Date())
-				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(getSecretKey()).compact();
-	}
-
-	private SecretKey getSecretKey() {
-		return Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(getSigningKey()).compact();
 	}
 
 	public String getUserNameFromJwtToken(String token) {
-		return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody().getSubject();
+		try {
+			return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody()
+					.getSubject();
+		} catch (ExpiredJwtException e) {
+			System.err.println("JWT token is expired: " + e.getMessage());
+		} catch (UnsupportedJwtException e) {
+			System.err.println("JWT token is unsupported: " + e.getMessage());
+		} catch (MalformedJwtException e) {
+			System.err.println("JWT token is invalid: " + e.getMessage());
+		} catch (SignatureException e) {
+			System.err.println("JWT signature is invalid: " + e.getMessage());
+		} catch (IllegalArgumentException e) {
+			System.err.println("JWT claims string is empty: " + e.getMessage());
+		}
+		return null; // Return null if the token is invalid or expired
 	}
 
 	public boolean validateJwtToken(String authToken) {
 		try {
-			Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(authToken);
+			Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken);
 			return true;
 		} catch (SignatureException e) {
 			logger.error("Invalid JWT signature: {}", e.getMessage());

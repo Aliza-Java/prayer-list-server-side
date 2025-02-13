@@ -196,7 +196,7 @@ public class Utilities {
 
 		// banim category prints nusach first, and includes name and spouse name in one
 		// box
-		if (CategoryName.BANIM.equals(category.getCname())) {
+		if (Category.isBanim(category.getCname().toString())) {
 			stringBuilder.append(String.format(EmailScheme.getHtmlNameRowInList(), EmailScheme.getBanimLineEnglish(),
 					EmailScheme.getBanimLineHebrew()));
 

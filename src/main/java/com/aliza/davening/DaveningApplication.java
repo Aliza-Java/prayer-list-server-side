@@ -30,9 +30,9 @@ public class DaveningApplication {
 		builder.headless(false);
 		@SuppressWarnings("unused")
 		ConfigurableApplicationContext context = builder.run(args);
-		
-		// For testing:
 
+		// For testing:
+		
 		// AdminService adminService = context.getBean(AdminService.class);
 		// adminService.activateDavener("aliza.shanet@gmail.com");
 		// SubmitterService submitterService = context.getBean(SubmitterService.class);

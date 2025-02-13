@@ -20,6 +20,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,6 +42,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
@@ -118,7 +120,7 @@ public class ContSubmitterTests {
 
 	@Test
 	@Order(2)
-	public void testAddDavenfor() throws EmptyInformationException {
+	public void testAddDavenfor() throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {//TODO*: add tests for last 3 exceptions
 		when(userService.addDavenfor(any(), eq("user1@gmail.com"))).thenThrow(new EmptyInformationException(
 				"This category requires also a spouse name (English and Hebrew) to be submitted. "));
 

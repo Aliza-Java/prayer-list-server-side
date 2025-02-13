@@ -65,7 +65,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
 
-//TODO: make a beforeEach with GreenMail start, and aftereach (or after?) with GreenMail stop.
+//TODONOW: make a beforeEach with GreenMail start, and aftereach (or after?) with GreenMail stop.
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
