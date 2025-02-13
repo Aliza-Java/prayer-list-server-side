@@ -393,7 +393,6 @@ public class AdminService {
 			userList = userRepository.findAll();
 		}
 		return userList;
-
 	}
 
 	// tested

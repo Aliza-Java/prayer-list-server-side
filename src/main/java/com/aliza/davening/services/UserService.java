@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.persistence.EntityManager;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +23,7 @@ import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.UserRepository;
+import com.aliza.davening.security.JwtUtils;
 
 @Service
 public class UserService {
@@ -39,6 +42,12 @@ public class UserService {
 
 	@Autowired
 	EmailSender emailSender;
+
+	@Autowired
+	EntityManager entityManager;
+	
+	@Autowired
+	private JwtUtils jwtUtils;
 
 	// All user functions receive his email address and allow him to proceed if
 	// his email matches davenfor.getUser().getEmail()
@@ -115,12 +124,12 @@ public class UserService {
 
 		// TODO*: in future, adjust that admin can choose:
 		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
-		String subject = EmailScheme.getInformAdminOfNewNameSubject();
-		String message = String.format(EmailScheme.getInformAdminOfNewName(), davenfor.getNameEnglish(),
+		String subject = EmailScheme.informAdminOfNewNameSubject;
+		String message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
 				davenfor.getNameHebrew(), category.getCname().toString(), userEmail);
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
-		//TODONOW: add link for admin to log into website
+		// TODONOW: add link for admin to log into website
 		// }
 
 		return savedDavenfor;
@@ -180,8 +189,8 @@ public class UserService {
 		davenforRepository.save(davenforToUpdate);
 
 		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
-		String subject = EmailScheme.getInformAdminOfUpdateSubject();
-		String message = String.format(EmailScheme.getInformAdminOfUpdate(), davenforToUpdate.getUserEmail(),
+		String subject = EmailScheme.informAdminOfUpdateSubject;
+		String message = String.format(EmailScheme.informAdminOfUpdate, davenforToUpdate.getUserEmail(),
 				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
 		emailSender.informAdmin(subject, message);
 		// }
@@ -268,4 +277,26 @@ public class UserService {
 		return optionalCategory.get();
 	}
 
+	// TODO* test
+	// similar to admin's disactivate
+	public boolean unsubscribe(String token) throws EmptyInformationException {
+		String email = jwtUtils.getUserNameFromJwtToken(token);
+		Optional<User> userToUnsubscribe = userRepository.findByEmail(email);
+		if (userToUnsubscribe.isEmpty()) {
+			System.out.println(String.format(
+					"The email cannot be disactivated because it is not found: %s.  Please check the email address. ",
+					email));
+			return false;
+		}
+		if (!userToUnsubscribe.get().isActive()) { // Just to log/notify, and continue business as usual
+			System.out.println(String
+					.format("The email %s has already been disactivated from receiving the davening lists. ", email));
+		} else {
+			userRepository.disactivateUser(email);
+			entityManager.flush();
+			entityManager.clear();
+		}
+		emailSender.notifyDisactivatedUser(email);
+		return true;
+	}
 }

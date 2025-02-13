@@ -13,47 +13,30 @@ public class SchemeValues {
 	public static int waitBeforeDeletion = 7;
 	public static boolean adminNewNamePrompt = false;
 
-	public static int jwtExpirationMS = 900000;
-	
-	public static String banimName = "Zera Shel Kayama";
+	public final static String banimName = "Zera Shel Kayama";
 
 	public static int adminId = 10;
 	
-	@Value("${client.origin}")
-	public static String client;
-	
-	@Value("${server.url}")
-	public static String server;
-	
-	// Links inserted to email allowing submitters to extend or delete names. URL
-	// will change when uploaded to cloud
-	private final static String linkToExtend = server + "extend/%s?email=%s";
-	private final static String linkToDelete = server + "delete/%s?email=%s";
-
-	private final static String linkToLogin = client + "admin";
-	private final static String linkToSendList = server + "admin/weeklylist";
-	private final static String linkToReviewWeekly = client + "admin/weekly";
-
-	private final static String notAdminsEmail = "The email you provided is not associated with an admin.";
+	public final static String notAdminsEmail = "The email you provided is not associated with an admin.";
 	
 	public static String getLinkToExtend() {
-		return linkToExtend;
+		return EmailScheme.linkToExtend;
 	}
 
 	public static String getLinkToDelete() {
-		return linkToDelete;
+		return EmailScheme.linkToDelete;
 	}
 
 	public static String getLinkToLogin() {
-		return linkToLogin;
+		return EmailScheme.linkToLogin;
 	}
 
 	public static String getLinkToSendList() {
-		return linkToSendList;
+		return EmailScheme.linkToSendList;
 	}
 
 	public static String getLinkToReviewWeekly() {
-		return linkToReviewWeekly;
+		return EmailScheme.linkToReviewWeekly;
 	}
 
 	public static String getNotAdminsEmailMessage() {

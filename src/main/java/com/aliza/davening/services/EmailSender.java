@@ -70,10 +70,10 @@ public class EmailSender {
 
 	// @Value("${admin.id}")
 	long adminId = 1;
-	
+
 	@Value("${link.to.confirm}")
 	String linkToConfirmPartial;
-	
+
 	@Value("${link.to.remove}")
 	String linkToRemovePartial;
 
@@ -127,7 +127,8 @@ public class EmailSender {
 	// general method
 	// tested
 	public boolean sendEmail(MimeMessage message) {
-		// TODONOW: allow attachment, make all methods use this, services and controllers
+		// TODONOW: allow attachment, make all methods use this, services and
+		// controllers
 		// to direct to EmailSender correctly.
 
 		try {
@@ -150,7 +151,7 @@ public class EmailSender {
 		}
 
 		Session session = sessionProvider.getSession();
-		MimeMessage mimeMessage = createMimeMessage(session, EmailScheme.getAdminMessageSubject(), text, recipient,
+		MimeMessage mimeMessage = createMimeMessage(session, EmailScheme.adminMessageSubject, text, recipient,
 				adminAsList, null, null);
 
 		sendEmail(mimeMessage);
@@ -186,8 +187,8 @@ public class EmailSender {
 		String parashaName = (info.parashaName != null && info.parashaName.length() > 0)
 				? "Parashat " + info.parashaName + " - " + todaysDate
 				: todaysDate;
-		String subject = String.format(EmailScheme.getWeeklyEmailSubject(), parashaName);
-		String emailText = EmailScheme.getWeeklyEmailText();
+		String subject = String.format(EmailScheme.weeklyEmailSubject, parashaName);
+		String emailText = EmailScheme.weeklyEmailText;
 
 		// If there is a message from the admin, add it beforehand.
 		if (info.message != null) {
@@ -196,7 +197,7 @@ public class EmailSender {
 
 		List<String> usersList = userRepository.getAllUsersEmails();
 
-		String fileName = String.format(EmailScheme.getWeeklyFileName(), parashaName);
+		String fileName = String.format(EmailScheme.weeklyFileName, parashaName);
 
 		// 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		// therefore including admin's email.
@@ -224,13 +225,13 @@ public class EmailSender {
 		// one language).
 		if (Category.isBanim(davenfor.getCategory())
 				&& (davenfor.getNameEnglishSpouse() != null || davenfor.getNameHebrewSpouse() != null)) {
-			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailBanim(), davenfor.getNameEnglish(),
+			urgentMessage = String.format(EmailScheme.urgentDavenforEmailBanim, davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
 					SchemeValues.banimName);
 		}
 
 		else {
-			urgentMessage = String.format(EmailScheme.getUrgentDavenforEmailText(), davenfor.getNameEnglish(),
+			urgentMessage = String.format(EmailScheme.urgentDavenforEmailText, davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), davenfor.getCategory());
 		}
 
@@ -255,13 +256,13 @@ public class EmailSender {
 		}
 
 		Davenfor confirmedDavenfor = optionalDavenfor.get();
-		String subject = EmailScheme.getConfirmationEmailSubject();
+		String subject = EmailScheme.confirmationEmailSubject;
 		String emailAddress = confirmedDavenfor.getUserEmail();
-		
+
 		String linkToConfirm = String.format(linkToConfirmPartial, davenforId, emailAddress);
 		String linkToRemove = String.format(linkToRemovePartial, davenforId, emailAddress);
 
-		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.getConfirmationEmailTextLocation())),
+		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
 				confirmedDavenfor.getCategory(), linkToConfirm, linkToRemove);
@@ -271,8 +272,7 @@ public class EmailSender {
 			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, to, adminAsList,
 					null, null));
 		} catch (Exception e) {
-			throw new EmailException(
-					String.format("Could not send confirmation email to %s", emailAddress));
+			throw new EmailException(String.format("Could not send confirmation email to %s", emailAddress));
 		}
 
 		return true;
@@ -280,18 +280,18 @@ public class EmailSender {
 
 	// tested
 	public void notifyDisactivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.getUserDisactivated());
+		sendEmailFromAdmin(email, EmailScheme.userDisactivated);
 	}
 
 	// tested
 	public void notifyActivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.getUserActivated());
+		sendEmailFromAdmin(email, EmailScheme.userActivated);
 	}
 
 	// tested
 	public void offerExtensionOrDelete(Davenfor davenfor) {
 
-		String subject = EmailScheme.getExpiringNameSubject();
+		String subject = EmailScheme.expiringNameSubject;
 		String message = String.format(Utilities.setExpiringNameMessage(davenfor));
 		String recipient = davenfor.getUserEmail();
 
@@ -302,12 +302,12 @@ public class EmailSender {
 	private String concatAdminMessage(String adminMessage, String emailText) {
 		// adding admin message before name and bolding it according to settings in
 		// EmailScheme.
-		return String.format(EmailScheme.getBoldFirstMessage(), adminMessage, emailText);
+		return String.format(EmailScheme.boldFirstMessage, adminMessage, emailText);
 	}
 
 	private String concatAdminMessageAfter(String adminMessage, String emailText) {
 		// adding admin message after name and bolding it according to settings in
 		// EmailScheme.
-		return String.format(EmailScheme.getBoldSecondMessage(), emailText, adminMessage);
+		return String.format(EmailScheme.boldSecondMessage, emailText, adminMessage);
 	}
 }

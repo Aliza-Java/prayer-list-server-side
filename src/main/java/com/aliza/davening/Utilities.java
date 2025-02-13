@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.CategoryName;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -46,8 +45,8 @@ public class Utilities {
 
 	public File buildListImage(Category category, String weekName) throws IOException, EmptyInformationException {
 
-		int imageWidth = EmailScheme.getImageWidth();
-		int imageHeight = EmailScheme.getImageHeight();
+		int imageWidth = EmailScheme.imageWidth;
+		int imageHeight = EmailScheme.imageHeight;
 
 		String weeklyHtml = createWeeklyHtml(category, weekName);
 
@@ -180,30 +179,30 @@ public class Utilities {
 		}
 
 		// building standard html format: head and opening <body> tag
-		stringBuilder.append(EmailScheme.getHtmlHead());
-		stringBuilder.append(EmailScheme.getHtmlBodyStart());
+		stringBuilder.append(EmailScheme.htmlHead);
+		stringBuilder.append(EmailScheme.htmlBodyStart);
 
 		// building headlines and starting table
-		stringBuilder.append(String.format(EmailScheme.getSimpleHeader(), EmailScheme.getInMemoryHebrew()));
-		stringBuilder.append(String.format(EmailScheme.getSimpleHeader(), EmailScheme.getInMemoryEnglish()));
+		stringBuilder.append(String.format(EmailScheme.simpleHeader, EmailScheme.inMemoryHebrew));
+		stringBuilder.append(String.format(EmailScheme.simpleHeader, EmailScheme.inMemoryEnglish));
 		stringBuilder.append(weekName);
 
 		stringBuilder.append(
-				String.format(EmailScheme.getBilingualHeader(), category.getCname(), category.getCname().getHebName()));
-		stringBuilder.append(EmailScheme.getTableStart());
+				String.format(EmailScheme.bilingualHeader, category.getCname(), category.getCname().getHebName()));
+		stringBuilder.append(EmailScheme.tableStart);
 
 		// Running through names, adding them in columns - English and Hebrew
 
 		// banim category prints nusach first, and includes name and spouse name in one
 		// box
 		if (Category.isBanim(category.getCname().toString())) {
-			stringBuilder.append(String.format(EmailScheme.getHtmlNameRowInList(), EmailScheme.getBanimLineEnglish(),
-					EmailScheme.getBanimLineHebrew()));
+			stringBuilder.append(String.format(EmailScheme.htmlNameRowInList, EmailScheme.banimLineEnglish,
+					EmailScheme.banimLineHebrew));
 
 			// Inserting in one box both name and spouse name. If spouse name is null (it is
 			// not mandatory), just put an empty string.
 			for (Davenfor d : categoryDavenfors) {
-				stringBuilder.append(String.format(EmailScheme.getHtmlBanimRowInList(), d.getNameEnglish(),
+				stringBuilder.append(String.format(EmailScheme.htmlBanimRowInList, d.getNameEnglish(),
 						d.getNameEnglishSpouse() != null ? d.getNameEnglishSpouse() : "", d.getNameHebrew(),
 						d.getNameHebrewSpouse() != null ? d.getNameHebrewSpouse() : ""));
 			}
@@ -213,23 +212,23 @@ public class Utilities {
 		else {
 			for (Davenfor d : categoryDavenfors) {
 				stringBuilder.append(
-						String.format(EmailScheme.getHtmlNameRowInList(), d.getNameEnglish(), d.getNameHebrew()));
+						String.format(EmailScheme.htmlNameRowInList, d.getNameEnglish(), d.getNameHebrew()));
 			}
 		}
 
 		// Closing table
-		stringBuilder.append(EmailScheme.getTableClose());
+		stringBuilder.append(EmailScheme.tableClose);
 
 		// Adding line about next week's category
 		Category nextCategory = getNextCategory(category);
-		stringBuilder.append(String.format(EmailScheme.getNextWeekCategory(), nextCategory.getCname(),
+		stringBuilder.append(String.format(EmailScheme.nextWeekCategory, nextCategory.getCname(),
 				nextCategory.getCname().getHebName()));
 
 		// Adding line to email with name and good news.
-		stringBuilder.append(String.format(EmailScheme.getSendGoodNewsMessage(), adminEmail));
+		stringBuilder.append(String.format(EmailScheme.sendGoodNewsMessage, adminEmail));
 
 		// Closing <body> tag
-		stringBuilder.append(EmailScheme.getHtmlBodyEnd());
+		stringBuilder.append(EmailScheme.htmlBodyEnd);
 		String finalString = stringBuilder.toString();
 
 		return finalString;

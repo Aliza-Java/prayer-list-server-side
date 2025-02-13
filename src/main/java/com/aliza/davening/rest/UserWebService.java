@@ -80,9 +80,15 @@ public class UserWebService {
 		return userService.getAllCategories();
 	}
 
+	//TODO*: test?
 	@RequestMapping(path = "category/{id}")
 	public Category findCategory(@PathVariable long id) throws ObjectNotFoundException {
 		return userService.getCategory(id);
 	}
-
+	
+	//TODO*: test
+	@PostMapping(path = "unsubscribe/{token}")
+	public  boolean unsubscribe(@PathVariable String token) throws EmptyInformationException {
+		return userService.unsubscribe(token);
+	}
 }
