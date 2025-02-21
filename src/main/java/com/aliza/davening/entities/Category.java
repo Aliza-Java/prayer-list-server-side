@@ -9,10 +9,8 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.validation.constraints.Positive;
 
-import javax.validation.constraints.*;
-
-import com.aliza.davening.SchemeValues;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
@@ -28,9 +26,9 @@ import lombok.Setter;
 //Different types of davening lists e.g. shidduchim, banim etc.
 @Entity
 public class Category {
-	//TODO*: in future, make repository tests for all validations
-	
-	public final static String BANIM = "BANIM"; 
+	// TODO*: in future, make repository tests for all validations
+
+	public final static String BANIM = "BANIM";
 
 	public Category(CategoryName cname, boolean current, int updateRate, int catOrder) {
 		this.cname = cname;
@@ -48,7 +46,8 @@ public class Category {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 
-	// TODO*: In future, when allow admin to add more categories, enable validations somehow in cname fields
+	// TODO*: In future, when allow admin to add more categories, enable validations
+	// somehow in cname fields
 //	@Column(unique = true)
 //	@NotNull(message = "Category's English name cannot be null. ")
 //	@NotBlank(message = "Category's English name cannot be blank. ")
@@ -68,10 +67,10 @@ public class Category {
 	private boolean isCurrent;
 
 	// How many days a name of this category adds on when extending expiration date
-    @Positive(message = "The update rate of a category must be a positive number")
+	@Positive(message = "The update rate of a category must be a positive number")
 	private int updateRate;
 
-	//The order in which the categories get sent out.
+	// The order in which the categories get sent out.
 	@Positive(message = "The category order must be represented by a positive number. ")
 	private int catOrder;
 
@@ -81,17 +80,14 @@ public class Category {
 	}
 
 	public static Category getCategory(String name) {
-		return categories.stream()
-			    .filter(c -> name.equalsIgnoreCase(c.cname.toString()))
-			    .findFirst()
-			    .orElse(null); 
+		return categories.stream().filter(c -> name.equalsIgnoreCase(c.cname.toString())).findFirst().orElse(null);
 	}
 
 	@JsonValue
 	public String toJson() {
 		return cname.toString().toLowerCase();
 	}
-	
+
 	public static boolean isBanim(String catString) {
 		return BANIM.equalsIgnoreCase(catString);
 	}

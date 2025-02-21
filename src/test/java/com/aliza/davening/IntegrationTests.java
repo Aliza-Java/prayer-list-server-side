@@ -126,12 +126,6 @@ public class IntegrationTests {
 
 	@BeforeAll
 	void setupOnce() {
-		categoryRepository.save(catRefua);
-		categoryRepository.save(catShidduchim);
-		categoryRepository.save(catBanim);
-		categoryRepository.save(catSoldiers);
-		categoryRepository.save(catYeshuah);
-
 		System.out.println(categoryRepository.findAll());
 
 		adminRepository.save(new Admin(1L, "admin1@gmail.com", "pass1", true, 7));

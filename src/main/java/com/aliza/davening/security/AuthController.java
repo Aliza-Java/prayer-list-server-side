@@ -1,9 +1,6 @@
 package com.aliza.davening.security;
 
-import javax.crypto.SecretKey;
 import javax.validation.Valid;
-import io.jsonwebtoken.security.Keys;
-import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +44,7 @@ public class AuthController {
 
 		return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getId(), userDetails.getUsername()));
 	}
-	
+
 	@PostMapping(path = "/signup")
 	public ResponseEntity<?> setAdmin(@RequestBody LoginRequest credentials) throws DatabaseException {
 		if (adminService.setAdmin(credentials)) {
@@ -55,7 +52,7 @@ public class AuthController {
 		}
 		return ResponseEntity.badRequest().body("Could not create new admin.");
 	}
-	
+
 //	public ResponseEntity<?> registerAdmin(@RequestBody Admin admin) {
 //		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
 //			return ResponseEntity

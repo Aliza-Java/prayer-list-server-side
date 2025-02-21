@@ -31,6 +31,7 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.UserRepository;
+import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
 
@@ -65,8 +66,14 @@ public class EmailSender {
 	@Autowired
 	private Utilities utilities;
 
+	@Autowired
+	private JwtUtils jwtUtils;
+
 	@Value("${admin.email}")
 	String adminEmail;
+
+	@Value("${client.origin}")
+	public String client;
 
 	// @Value("${admin.id}")
 	long adminId = 1;
@@ -77,6 +84,9 @@ public class EmailSender {
 	@Value("${link.to.remove}")
 	String linkToRemovePartial;
 
+	@Value("${link.to.unsubscribe}")
+	String linkToUnsubscribe;
+
 	private List<String> adminAsList;
 
 	@PostConstruct
@@ -84,8 +94,8 @@ public class EmailSender {
 		adminAsList = Collections.singletonList(adminEmail);
 	}
 
-	public static MimeMessage createMimeMessage(Session session, String subject, String text, String to,
-			List<String> bccList, File attachment, String attachmentName) {
+	public MimeMessage createMimeMessage(Session session, String subject, String text, String to, List<String> bccList,
+			File attachment, String attachmentName) {
 
 		// Create the email message
 		MimeMessage message = new MimeMessage(session);
@@ -188,7 +198,8 @@ public class EmailSender {
 				? "Parashat " + info.parashaName + " - " + todaysDate
 				: todaysDate;
 		String subject = String.format(EmailScheme.weeklyEmailSubject, parashaName);
-		String emailText = EmailScheme.weeklyEmailText;
+		String linkToUnsubscribe = client + "/unsubscribe";
+		String emailText = String.format(EmailScheme.weeklyEmailText, linkToUnsubscribe);
 
 		// If there is a message from the admin, add it beforehand.
 		if (info.message != null) {
@@ -292,11 +303,18 @@ public class EmailSender {
 	public void offerExtensionOrDelete(Davenfor davenfor) {
 
 		String subject = EmailScheme.expiringNameSubject;
-		String message = String.format(Utilities.setExpiringNameMessage(davenfor));
+		String message = String.format(utilities.setExpiringNameMessage(davenfor));
 		String recipient = davenfor.getUserEmail();
 
 		sendEmail(
 				createMimeMessage(sessionProvider.getSession(), subject, message, recipient, adminAsList, null, null));
+	}
+
+	public String requestToUnsubscribe(String email) {// TODO*: test
+		MimeMessage mimeMessage = createMimeMessage(sessionProvider.getSession(), EmailScheme.unsubscribeSubject,
+				setUnsubscribeMessage(email), email, adminAsList, null, null);
+		sendEmail(mimeMessage);
+		return String.format("Please check your email address: %s for an 'Unsubscribe' message", email);
 	}
 
 	private String concatAdminMessage(String adminMessage, String emailText) {
@@ -309,5 +327,10 @@ public class EmailSender {
 		// adding admin message after name and bolding it according to settings in
 		// EmailScheme.
 		return String.format(EmailScheme.boldSecondMessage, emailText, adminMessage);
+	}
+
+	private String setUnsubscribeMessage(String email) {
+		String unsubscribeLink = linkToUnsubscribe + jwtUtils.generateUnsubscribeToken(email);
+		return String.format(EmailScheme.unsubscribeMessage, unsubscribeLink, adminEmail);
 	}
 }

@@ -25,6 +25,9 @@ public class MaintainList {
 
 	@Autowired
 	EmailSender emailSender;
+	
+	@Autowired
+	Utilities utilities;
 
 	@Autowired
 	ParashaRepository parashaRepository;
@@ -62,7 +65,7 @@ public class MaintainList {
 	// list and send out, with link to his login page.
 	@Scheduled(cron = "0 0 8 * * THU")
 	public void remindAdmin() {
-		emailSender.informAdmin(EmailScheme.weeklyAdminReminderSubject, Utilities.setWeeklyAdminReminderMessage());
+		emailSender.informAdmin(EmailScheme.weeklyAdminReminderSubject, utilities.setWeeklyAdminReminderMessage());
 	}
 
 	// Every Sunday at 2 a.m. changes category

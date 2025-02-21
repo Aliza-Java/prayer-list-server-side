@@ -47,7 +47,6 @@ public class SimpleCORSFilter implements Filter {
 			response.setStatus(HttpServletResponse.SC_OK);
 		}
 		chain.doFilter(request, response);
-
 	}
 
 	@Override

@@ -1,13 +1,17 @@
 package com.aliza.davening.rest;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -28,6 +32,7 @@ import com.aliza.davening.services.UserService;
 @RestController
 @RequestMapping("user")
 @CrossOrigin(origins = ("${client.origin}"), allowCredentials = "true")
+
 public class UserWebService {
 
 	@Autowired
@@ -45,7 +50,9 @@ public class UserWebService {
 	// tested
 	@PostMapping(path = "{email}")
 	public Davenfor addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
-			throws EmptyInformationException, ObjectNotFoundException, IOException, EmailException {//TODO*: add tests for last 3 exceptions
+			throws EmptyInformationException, ObjectNotFoundException, IOException, EmailException {// TODO*: add tests
+																									// for last 3
+																									// exceptions
 		return userService.addDavenfor(davenfor, email);
 	}
 
@@ -58,17 +65,19 @@ public class UserWebService {
 	}
 
 	// tested
-	//TODONOW: need to redirect user to something after extended
+	// TODONOW: need to redirect user to something after extended
 	@RequestMapping("extend/{davenforId}/{email}")
 	public void extendDavenfor(@PathVariable long davenforId, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 		userService.extendDavenfor(davenforId, email);
 	}
 
-	//TODONOW: in future, make deleteName landing page like chatGpt suggested. with an 'are you sure' button 
-	// tested 
-	//TODONOW: link from email also gives list of all user davenfors.  not nice.  make a landing page. 
-	@RequestMapping("delete/{id}/{email}") //since handled through email (for now), delete mapping is not supported
+	// TODONOW: in future, make deleteName landing page like chatGpt suggested. with
+	// an 'are you sure' button
+	// tested
+	// TODONOW: link from email also gives list of all user davenfors. not nice.
+	// make a landing page.
+	@RequestMapping("delete/{id}/{email}") // since handled through email (for now), delete mapping is not supported
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
 		return userService.deleteDavenfor(id, email);
@@ -80,15 +89,18 @@ public class UserWebService {
 		return userService.getAllCategories();
 	}
 
-	//TODO*: test?
+	// TODO*: test?
 	@RequestMapping(path = "category/{id}")
 	public Category findCategory(@PathVariable long id) throws ObjectNotFoundException {
 		return userService.getCategory(id);
 	}
-	
-	//TODO*: test
-	@PostMapping(path = "unsubscribe/{token}")
-	public  boolean unsubscribe(@PathVariable String token) throws EmptyInformationException {
-		return userService.unsubscribe(token);
+
+	// TODO*: test
+	@GetMapping(path = "unsubscribe/request", produces = MediaType.APPLICATION_JSON_VALUE)	
+	public ResponseEntity<Map<String, String>> requestToUnsubscribe(@RequestParam String email) {
+	    String message = emailSender.requestToUnsubscribe(email);
+	    Map<String, String> response = new HashMap<>();
+	    response.put("message", message);
+	    return ResponseEntity.ok(response);
 	}
 }

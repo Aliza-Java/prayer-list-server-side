@@ -10,8 +10,10 @@ import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.aliza.davening.EmailScheme;
+import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.User;
@@ -26,6 +28,7 @@ import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.JwtUtils;
 
 @Service
+@Transactional
 public class UserService {
 
 	@Autowired
@@ -48,7 +51,7 @@ public class UserService {
 	
 	@Autowired
 	private JwtUtils jwtUtils;
-
+	
 	// All user functions receive his email address and allow him to proceed if
 	// his email matches davenfor.getUser().getEmail()
 
@@ -279,14 +282,14 @@ public class UserService {
 
 	// TODO* test
 	// similar to admin's disactivate
-	public boolean unsubscribe(String token) throws EmptyInformationException {
+	public String unsubscribe(String token) throws EmptyInformationException {
 		String email = jwtUtils.getUserNameFromJwtToken(token);
 		Optional<User> userToUnsubscribe = userRepository.findByEmail(email);
 		if (userToUnsubscribe.isEmpty()) {
 			System.out.println(String.format(
 					"The email cannot be disactivated because it is not found: %s.  Please check the email address. ",
 					email));
-			return false;
+			return "There was a problem unsubscribing the email sent";
 		}
 		if (!userToUnsubscribe.get().isActive()) { // Just to log/notify, and continue business as usual
 			System.out.println(String
@@ -297,6 +300,7 @@ public class UserService {
 			entityManager.clear();
 		}
 		emailSender.notifyDisactivatedUser(email);
-		return true;
+		String response = String.format(SchemeValues.unsubscribeText, email);
+		return response;
 	}
 }

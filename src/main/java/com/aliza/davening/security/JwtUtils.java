@@ -1,6 +1,5 @@
 package com.aliza.davening.security;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Date;
 
@@ -12,9 +11,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
-import io.jsonwebtoken.*;
 
 @Component
 public class JwtUtils {
@@ -43,6 +45,7 @@ public class JwtUtils {
 		try {
 			return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody()
 					.getSubject();
+			
 		} catch (ExpiredJwtException e) {
 			System.err.println("JWT token is expired: " + e.getMessage());
 		} catch (UnsupportedJwtException e) {
@@ -55,6 +58,10 @@ public class JwtUtils {
 			System.err.println("JWT claims string is empty: " + e.getMessage());
 		}
 		return null; // Return null if the token is invalid or expired
+	}
+
+	public String generateUnsubscribeToken(String email) {
+		return Jwts.builder().setSubject(email).signWith(getSigningKey()).compact();
 	}
 
 	public boolean validateJwtToken(String authToken) {

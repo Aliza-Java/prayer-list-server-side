@@ -16,6 +16,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JEditorPane;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.aliza.davening.entities.Category;
@@ -31,6 +32,12 @@ import com.aliza.davening.services.AdminService;
 @Component
 public class Utilities {
 
+	@Value("${client.origin}")
+	public String client;
+
+	@Value("${server.url}")
+	public String server;	
+
 	@Autowired
 	CategoryRepository categoryRepository;
 
@@ -42,6 +49,12 @@ public class Utilities {
 
 	// @Value("${admin.email}")
 	private String adminEmail = "davening.list@gmail.com";
+
+	String linkToExtendFromServer = server + EmailScheme.linkToExtendS;
+	String linkToDeleteFromServer = server + EmailScheme.linkToDeleteS;
+	String linkToLoginFromClient = client + EmailScheme.linkToLoginC;
+	String linkToSendListFromServer = server + EmailScheme.linkToSendListS;
+	String linkToReviewWeeklyFromClient = client + EmailScheme.linkToReviewWeeklyC;
 
 	public File buildListImage(Category category, String weekName) throws IOException, EmptyInformationException {
 
@@ -116,19 +129,19 @@ public class Utilities {
 		return nextCategory;
 	}
 
-	public static Parasha findParasha(long parashaId) {
+	public Parasha findParasha(long parashaId) {
 		return null;
 	}
 
 	// Builds the long and complex email message that gets sent every week to Admin
 	// (to review and send list)
-	public static String setWeeklyAdminReminderMessage() {
+	public String setWeeklyAdminReminderMessage() {
 
 		// Prepare buttons
-		String button1 = createButton(SchemeValues.getLinkToReviewWeekly(), "#ffa200", "Review the list first");
+		String button1 = createButton(linkToReviewWeeklyFromClient, "#ffa200", "Review the list first");
 
 		// This button includes also a parasha id and needs to be built
-		String linkWithParasha = SchemeValues.getLinkToSendList();
+		String linkWithParasha = linkToSendListFromServer;
 		String button2 = createButton(linkWithParasha, "#32a842", "Send out the list");
 
 		String buttonArea = "<table cellspacing='0' cellpadding='0'>	<tbody>	<tr> " + button1 + "<tr>" + button2
@@ -143,12 +156,12 @@ public class Utilities {
 		return message;
 	}
 
-	public static String setExpiringNameMessage(Davenfor davenfor) {
+	public String setExpiringNameMessage(Davenfor davenfor) {
 
 		// Building links that the buttons will refer to
-		String personalizedExtendLink = String.format(SchemeValues.getLinkToExtend(), davenfor.getId(),
-				davenfor.getUserEmail());
-		String personalizedDeleteLink = String.format(SchemeValues.getLinkToDelete(), davenfor.getId(),
+		String extendLink = linkToExtendFromServer;
+		String personalizedExtendLink = String.format(extendLink, davenfor.getId(), davenfor.getUserEmail());
+		String personalizedDeleteLink = String.format(linkToDeleteFromServer, davenfor.getId(),
 				davenfor.getUserEmail());
 
 		// Creating the button 'components' as html tds
@@ -211,8 +224,8 @@ public class Utilities {
 		// All other categories print every name in a single row
 		else {
 			for (Davenfor d : categoryDavenfors) {
-				stringBuilder.append(
-						String.format(EmailScheme.htmlNameRowInList, d.getNameEnglish(), d.getNameHebrew()));
+				stringBuilder
+						.append(String.format(EmailScheme.htmlNameRowInList, d.getNameEnglish(), d.getNameHebrew()));
 			}
 		}
 
@@ -236,7 +249,7 @@ public class Utilities {
 	}
 
 	// Creates a button according to varying parameters sent in
-	private static String createButton(String link, String buttonColor, String buttonText) {
+	private String createButton(String link, String buttonColor, String buttonText) {
 
 		return String.format(
 				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;' align='center' bgcolor=%s width='300' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",

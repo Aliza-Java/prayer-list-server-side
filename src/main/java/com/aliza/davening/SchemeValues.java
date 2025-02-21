@@ -1,8 +1,6 @@
 //General variables throughout the project (email variables are stored in EmailScheme)
 package com.aliza.davening;
 
-import org.springframework.beans.factory.annotation.Value;
-
 public class SchemeValues {
 
 	// a static field to stand for id's that have not been created.
@@ -16,30 +14,12 @@ public class SchemeValues {
 	public final static String banimName = "Zera Shel Kayama";
 
 	public static int adminId = 10;
-	
+
 	public final static String notAdminsEmail = "The email you provided is not associated with an admin.";
-	
-	public static String getLinkToExtend() {
-		return EmailScheme.linkToExtend;
-	}
-
-	public static String getLinkToDelete() {
-		return EmailScheme.linkToDelete;
-	}
-
-	public static String getLinkToLogin() {
-		return EmailScheme.linkToLogin;
-	}
-
-	public static String getLinkToSendList() {
-		return EmailScheme.linkToSendList;
-	}
-
-	public static String getLinkToReviewWeekly() {
-		return EmailScheme.linkToReviewWeekly;
-	}
 
 	public static String getNotAdminsEmailMessage() {
 		return notAdminsEmail;
 	}
+
+	public final static String unsubscribeText = "The email %s has been successfully unsubscribed";
 }

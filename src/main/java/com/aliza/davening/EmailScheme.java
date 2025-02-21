@@ -2,17 +2,27 @@
 package com.aliza.davening;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+@Component
 public class EmailScheme {
-	
+
 	@Value("${client.origin}")
-	public static String client;
-	
+	public String client;
+
+	public String getClient() {
+		return client;
+	}
+
 	@Value("${server.url}")
-	public static String server;
-	
+	public String server;
+
+	public String getServer() {
+		return server;
+	}
+
 	public static final int imageWidth = 500;
-	
+
 	public static final int imageHeight = 800;
 
 	public static final String simpleHeader = "<h2>%s</h2>";
@@ -88,16 +98,16 @@ public class EmailScheme {
 	public static final String weeklyAdminReminderSubject = "Davening list reminder: Send out the weekly list!";
 
 	public static final String expiringNameSubject = "Davening List Confirmation";
-	
+
+	public static final String unsubscribeSubject = "Unsubscribe - action required";
+
 	// Links inserted to email allowing submitters to extend or delete names. URL
 	// will change when uploaded to cloud
-	public final static String linkToExtend = server + "extend/%s?email=%s";
-	
-	public final static String linkToDelete = server + "delete/%s?email=%s";
+	public static String linkToExtendS = "extend/%s?email=%s";
+	public static String linkToDeleteS = "delete/%s?email=%s";
+	public static String linkToLoginC = "admin";
+	public static String linkToSendListS = "admin/weeklylist";
+	public static String linkToReviewWeeklyC = "admin/weekly";
 
-	public final static String linkToLogin = client + "admin";
-	
-	public final static String linkToSendList = server + "admin/weeklylist";
-	
-	public final static String linkToReviewWeekly = client + "admin/weekly";
+	public static final String unsubscribeMessage = "We are sorry to see you go. <br> Click <a href=%s>HERE</a> to complete the process. <br><br> If you ever wish to join again, email the list admin at %s.";
 }

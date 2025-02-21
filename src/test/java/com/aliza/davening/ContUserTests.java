@@ -59,7 +59,7 @@ import com.aliza.davening.services.UserService;
 @ActiveProfiles("test")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ContSubmitterTests {
+public class ContUserTests {
 
 	@Autowired
 	private MockMvc mockMvc;
@@ -188,7 +188,7 @@ public class ContSubmitterTests {
 	@Order(4)
 	public void testExtendDavenfor() {
 		try {
-			mockMvc.perform(get("/user/extend/{davenforId}", 3L).param("email", "user1@gmail.com")).andDo(print())
+			mockMvc.perform(get("/user/extend/{davenforId}/{email}", 3L).param("email", "user1@gmail.com").param("davenforId", "1")).andDo(print())
 					.andExpect(status().isOk());
 
 			when(userService.extendDavenfor(anyLong(), eq("user2@gmail.com")))
