@@ -162,7 +162,7 @@ public class EmailSender {
 
 		Session session = sessionProvider.getSession();
 		MimeMessage mimeMessage = createMimeMessage(session, EmailScheme.adminMessageSubject, text, recipient,
-				adminAsList, null, null);
+				null, null, null);
 
 		sendEmail(mimeMessage);
 	}
@@ -213,7 +213,7 @@ public class EmailSender {
 		// 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		// therefore including admin's email.
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, adminEmail, usersList,
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
 				utilities.buildListImage(category, info.parashaName), fileName));
 	}
 
@@ -250,7 +250,7 @@ public class EmailSender {
 			urgentMessage = concatAdminMessageAfter(davenfor.getNote(), urgentMessage);
 		}
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, adminEmail, davenersList,
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, null, davenersList,
 				null, null));
 	}
 
@@ -307,12 +307,12 @@ public class EmailSender {
 		String recipient = davenfor.getUserEmail();
 
 		sendEmail(
-				createMimeMessage(sessionProvider.getSession(), subject, message, recipient, adminAsList, null, null));
+				createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
 	}
 
 	public String requestToUnsubscribe(String email) {// TODO*: test
 		MimeMessage mimeMessage = createMimeMessage(sessionProvider.getSession(), EmailScheme.unsubscribeSubject,
-				setUnsubscribeMessage(email), email, adminAsList, null, null);
+				setUnsubscribeMessage(email), email, null, null, null);
 		sendEmail(mimeMessage);
 		return String.format("Please check your email address: %s for an 'Unsubscribe' message", email);
 	}
