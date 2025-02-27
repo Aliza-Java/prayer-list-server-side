@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -63,8 +65,6 @@ import jakarta.mail.Part;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
-
-//TODONOW: make a beforeEach with GreenMail start, and aftereach (or after?) with GreenMail stop.
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -136,6 +136,8 @@ public class ServiceEmailSenderTests {
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @EmailSenderTest unexpected Exception: ";
 
+	private static GreenMail greenMail;
+
 	@BeforeAll
 	private void baseTest() {
 
@@ -148,13 +150,22 @@ public class ServiceEmailSenderTests {
 		when(categoryRep.findByCname(SOLDIERS)).thenReturn(Optional.of(catSoldiers));
 	}
 
+	@BeforeEach
+	void startEmail() {
+		greenMail = new GreenMail(ServerSetup.SMTP);
+		greenMail.start();
+	}
+
+	@AfterEach
+	void endMail() {
+		greenMail.stop();
+	}
+
 	@Test
 	@Order(1)
 	void sendEmailTest() throws MessagingException {
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
-
 		MimeMessage message = new MimeMessage(sessionProvider.getSession());
+
 		message.setFrom("davening44@gmail.com");
 		message.addRecipient(Message.RecipientType.TO, new InternetAddress("test@gmail.com"));
 		message.setSubject("Test Email");
@@ -169,16 +180,11 @@ public class ServiceEmailSenderTests {
 		assertEquals(1, receivedMessages.length);
 		assertEquals("Test Email", receivedMessages[0].getSubject());
 		assertEquals("This is a test email.", GreenMailUtil.getBody(receivedMessages[0]));
-
-		greenMail.stop();
 	}
 
 	@Test
 	@Order(2)
 	public void sendEmailFromAdminTest() {
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
-
 		Exception exception = assertThrows(EmptyInformationException.class, () -> {
 			emailSender.sendEmailFromAdmin(null, "some text");
 		});
@@ -204,7 +210,6 @@ public class ServiceEmailSenderTests {
 		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-		greenMail.stop();
 	}
 
 	@Test
@@ -224,9 +229,6 @@ public class ServiceEmailSenderTests {
 		when(categoryRep.findAll()).thenReturn(categories);
 
 		Weekly info = new Weekly("Vayeshev", 5L, "yeshuah", "special information");
-
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
 
 		try {
 			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString())).thenReturn(Collections.emptyList());
@@ -284,7 +286,6 @@ public class ServiceEmailSenderTests {
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-		greenMail.stop();
 
 		verify(categoryRep, times(1)).findById(any());
 		verify(userRep, times(2)).getAllUsersEmails();
@@ -299,9 +300,6 @@ public class ServiceEmailSenderTests {
 		when(davenforRep.findAllDavenforByCategory("YESHUAH")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Weekly info = new Weekly(null, 5L, "yeshuah", "special information");
-
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
 
 		try {
 			System.out.println(davenforRep.findAll());
@@ -340,7 +338,6 @@ public class ServiceEmailSenderTests {
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-		greenMail.stop();
 
 		verify(userRep, times(1)).getAllUsersEmails();
 		verify(davenforRep, times(1)).findAllDavenforByCategory(any());
@@ -370,9 +367,6 @@ public class ServiceEmailSenderTests {
 		when(categoryRep.getCurrent()).thenReturn(Optional.of(catRefua));
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
-
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
 
 		try {
 			when(davenforRep.findAllDavenforByCategory(REFUA.toString())).thenReturn(Arrays.asList(dfRefua));
@@ -418,7 +412,6 @@ public class ServiceEmailSenderTests {
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-		greenMail.stop();
 
 		verify(parashaRep, times(3)).findCurrent();
 		verify(categoryRep, times(2)).getCurrent();
@@ -434,9 +427,6 @@ public class ServiceEmailSenderTests {
 		assertTrue(exception.getMessage().contains("incomplete"));
 
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
-
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
 
 		try {
 			dfRefua.setNote("testNote");
@@ -468,7 +458,6 @@ public class ServiceEmailSenderTests {
 		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-		greenMail.stop();
 
 		verify(userRep, times(2)).getAllUsersEmails();
 	}
@@ -476,9 +465,6 @@ public class ServiceEmailSenderTests {
 	@Test
 	@Order(7)
 	public void informAdminTest() {
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
-
 		try {
 			emailSender.informAdmin("testSubject", "testMessage");
 
@@ -491,7 +477,6 @@ public class ServiceEmailSenderTests {
 			// that there's more than just the message sent in
 			assertTrue((GreenMailUtil.getBody(receivedMessages[0]).length()) > "testMessage".length());
 
-			greenMail.stop();
 		} catch (MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -500,9 +485,6 @@ public class ServiceEmailSenderTests {
 	@Test
 	@Order(8)
 	public void notifyDisactivatedUserTest() {
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
-
 		try {
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
 				emailSender.notifyDisactivatedUser(null);
@@ -518,7 +500,6 @@ public class ServiceEmailSenderTests {
 			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("You will no longer receive"));
 
-			greenMail.stop();
 		} catch (MessagingException | EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -527,9 +508,6 @@ public class ServiceEmailSenderTests {
 	@Test
 	@Order(9)
 	public void notifyActivatedUserTest() {
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
-
 		try {
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
 				emailSender.notifyActivatedUser("");
@@ -546,7 +524,6 @@ public class ServiceEmailSenderTests {
 			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("now be receiving emails"));
 
-			greenMail.stop();
 		} catch (MessagingException | EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -555,9 +532,6 @@ public class ServiceEmailSenderTests {
 	@Test
 	@Order(10)
 	public void offerExtensionOrDelete() {
-		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
-		greenMail.start();
-
 		try {
 			emailSender.offerExtensionOrDelete(dfYeshuah1);
 
@@ -574,7 +548,6 @@ public class ServiceEmailSenderTests {
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("the name on the list"));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Remove this name"));
 
-			greenMail.stop();
 		} catch (MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
