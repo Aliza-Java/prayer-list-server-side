@@ -7,12 +7,12 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
-import javax.annotation.PostConstruct;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -35,6 +35,7 @@ import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
 
+import jakarta.mail.Address;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Multipart;
@@ -87,13 +88,6 @@ public class EmailSender {
 	@Value("${link.to.unsubscribe}")
 	String linkToUnsubscribe;
 
-	private List<String> adminAsList;
-
-	@PostConstruct
-	public void init() {
-		adminAsList = Collections.singletonList(adminEmail);
-	}
-
 	public MimeMessage createMimeMessage(Session session, String subject, String text, String to, List<String> bccList,
 			File attachment, String attachmentName) {
 
@@ -139,7 +133,31 @@ public class EmailSender {
 	public boolean sendEmail(MimeMessage message) {
 		try {
 			Transport.send(message);
-			System.out.println("Email sent successfully!");
+
+			Address[] toRecipients = message.getRecipients(Message.RecipientType.TO);
+			// int toAmount = (toRecipients != null) ? toRecipients.length : 0;
+
+			Address[] ccRecipients = message.getRecipients(Message.RecipientType.CC);
+			// int ccAmount = (ccRecipients != null) ? ccRecipients.length : 0;
+
+			Address[] bccRecipients = message.getRecipients(Message.RecipientType.BCC);
+			// int bccAmount = (bccRecipients != null) ? bccRecipients.length : 0;
+
+			Address[] emptyArray = new Address[0];
+
+			List<Address> allRecipients = Stream
+					.of((toRecipients == null ? emptyArray : toRecipients),
+							ccRecipients == null ? emptyArray : ccRecipients,
+							bccRecipients == null ? emptyArray : bccRecipients)
+					.flatMap(Arrays::stream).distinct().collect(Collectors.toList());
+
+			String additionalMessage = "";
+			if (allRecipients.size() > 1)
+				additionalMessage = String.format("(and %d more) ", allRecipients.size() - 1);
+
+			System.out.println(String.format("Email to %s %ssent successfully!", allRecipients.get(0).toString(),
+					additionalMessage));
+
 		} catch (MessagingException e) {
 			e.printStackTrace();
 			throw new RuntimeException("Failed to send email");
@@ -157,8 +175,8 @@ public class EmailSender {
 		}
 
 		Session session = sessionProvider.getSession();
-		MimeMessage mimeMessage = createMimeMessage(session, EmailScheme.adminMessageSubject, text, recipient,
-				null, null, null);
+		MimeMessage mimeMessage = createMimeMessage(session, EmailScheme.adminMessageSubject, text, recipient, null,
+				null, null);
 
 		sendEmail(mimeMessage);
 	}
@@ -246,8 +264,8 @@ public class EmailSender {
 			urgentMessage = concatAdminMessageAfter(davenfor.getNote(), urgentMessage);
 		}
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, null, davenersList,
-				null, null));
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, null, davenersList, null,
+				null));
 	}
 
 	// tested
@@ -276,8 +294,8 @@ public class EmailSender {
 		String to = confirmedDavenfor.getUserEmail();
 
 		try {
-			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, to, adminAsList,
-					null, null));
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, to, null, null,
+					null));
 		} catch (Exception e) {
 			throw new EmailException(String.format("Could not send confirmation email to %s", emailAddress));
 		}
@@ -302,8 +320,7 @@ public class EmailSender {
 		String message = String.format(utilities.setExpiringNameMessage(davenfor));
 		String recipient = davenfor.getUserEmail();
 
-		sendEmail(
-				createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
 	}
 
 	public String requestToUnsubscribe(String email) {// TODO*: test
