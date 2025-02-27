@@ -120,7 +120,7 @@ public class AdminWebService {
 	// tested
 	@PostMapping(path = "weekly")
 	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo)
-			throws EmptyInformationException, IOException, ObjectNotFoundException {
+			throws Exception {
 		emailSender.sendOutWeekly(weeklyInfo);
 		return true;
 	}
@@ -136,7 +136,7 @@ public class AdminWebService {
 	// A simplified sendOutWeekly which takes a GET request (for the one sent
 	// through Admin's email link)
 	@RequestMapping(path = "weeklylist")
-	public boolean sendOutWeeklyFromEmail() throws EmptyInformationException, IOException, ObjectNotFoundException {
+	public boolean sendOutWeeklyFromEmail() throws Exception {
 		emailSender.sendSimplifiedWeekly();
 		return true;
 	}

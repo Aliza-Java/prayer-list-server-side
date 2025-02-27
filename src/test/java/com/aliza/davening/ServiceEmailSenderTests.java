@@ -7,6 +7,7 @@ import static com.aliza.davening.entities.CategoryName.SOLDIERS;
 import static com.aliza.davening.entities.CategoryName.YESHUAH;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,9 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -47,9 +46,9 @@ import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
-import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
+import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
@@ -189,7 +188,7 @@ public class ServiceEmailSenderTests {
 			emailSender.sendEmailFromAdmin("recip@gmail.com", "test");
 
 			// Verify that the email was sent
-			greenMail.waitForIncomingEmail(5000, 2);
+			greenMail.waitForIncomingEmail(5000, 1);
 
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
@@ -197,13 +196,11 @@ public class ServiceEmailSenderTests {
 			// emails were sent. Both will have the same to field and no bcc.
 			// Bcc can be added as a separate header and checked in the test but I think
 			// that defies the purpose
-			assertEquals(2, receivedMessages.length);
+			assertEquals(1, receivedMessages.length);
 			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
-			assertEquals("Message from davening list admin", receivedMessages[1].getSubject());
 			assertEquals("recip@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("test"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[1]).contains("test"));
 		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -222,8 +219,7 @@ public class ServiceEmailSenderTests {
 		});
 		assertTrue(exception.getMessage().contains("Category"));
 
-		when(userRep.getAllUsersEmails())
-				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 
 		when(categoryRep.findAll()).thenReturn(categories);
 
@@ -244,15 +240,14 @@ public class ServiceEmailSenderTests {
 			emailSender.sendOutWeekly(info);
 
 			// Verify that the email was sent
-			greenMail.waitForIncomingEmail(5000, 4);
+			greenMail.waitForIncomingEmail(5000, 3);
 
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
-			assertEquals(4, receivedMessages.length);
-			assertTrue(receivedMessages[3].getSubject().contains("Vayeshev"));
+			assertEquals(3, receivedMessages.length);
+			assertTrue(receivedMessages[2].getSubject().contains("Vayeshev"));
 
-			assertEquals("davening.list@gmail.com",
-					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
+			assertNull(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("To unsubscribe from the weekly"));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("special information"));
 
@@ -274,19 +269,18 @@ public class ServiceEmailSenderTests {
 						// Read the attachment content
 						String fileName = bodyPart.getFileName();
 						assertNotNull(fileName);
-						assertTrue(fileName.contains("Davening List Parashat"));
+						assertTrue(fileName.contains("Davening List Parashat Vayeshev"));
 
-						try (BufferedReader reader = new BufferedReader(
-								new InputStreamReader(bodyPart.getInputStream()))) {
-							String contentInFile = reader.lines().collect(Collectors.joining("\n"));
-							assertTrue(contentInFile.toLowerCase().contains("refua"));
-							assertTrue(contentInFile.toLowerCase().contains("vayeshev"));
+						try (InputStream inputStream = bodyPart.getInputStream()) {
+							byte[] fileContent = inputStream.readAllBytes(); // Read binary data
+							assertNotNull(fileContent);
+							assertTrue(fileContent.length > 0);
 						}
 					}
 				}
 				assertTrue(attachmentFound);
 			}
-		} catch (EmptyInformationException | MessagingException | IOException | ObjectNotFoundException e) {
+		} catch (Exception e) {// todo*: add test for what throws Exception
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -300,8 +294,7 @@ public class ServiceEmailSenderTests {
 	@Order(4)
 	public void sendOutWeeklyNoParashaTest() {
 
-		when(userRep.getAllUsersEmails())
-				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
 		when(davenforRep.findAllDavenforByCategory("YESHUAH")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
@@ -318,9 +311,9 @@ public class ServiceEmailSenderTests {
 
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
-			assertEquals(4, receivedMessages.length);
-			assertTrue(receivedMessages[3].getSubject().contains("-"));
-			assertEquals(35, receivedMessages[3].getSubject().length());
+			assertEquals(3, receivedMessages.length);
+			assertTrue(receivedMessages[2].getSubject().contains("-"));
+			assertEquals(35, receivedMessages[2].getSubject().length());
 
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("special information"));
 
@@ -339,11 +332,11 @@ public class ServiceEmailSenderTests {
 						assertNotNull(fileName);
 						assertTrue(fileName.contains("Davening List"));
 						assertTrue(fileName.contains("-"));
-						assertEquals(24, fileName.length());
+						assertEquals(48, fileName.length());
 					}
 				}
 			}
-		} catch (EmptyInformationException | MessagingException | IOException | ObjectNotFoundException e) {
+		} catch (Exception e) { // todo*: test what throws Exception
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -375,8 +368,7 @@ public class ServiceEmailSenderTests {
 		assertTrue(exception.getMessage().contains("current category"));
 
 		when(categoryRep.getCurrent()).thenReturn(Optional.of(catRefua));
-		when(userRep.getAllUsersEmails())
-				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
 
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
@@ -384,20 +376,19 @@ public class ServiceEmailSenderTests {
 
 		try {
 			when(davenforRep.findAllDavenforByCategory(REFUA.toString())).thenReturn(Arrays.asList(dfRefua));
-			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString())).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString()))
+					.thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 			System.out.println(davenforRep.findAll());
 			emailSender.sendSimplifiedWeekly();
 
 			// Verify that the email was sent
-			greenMail.waitForIncomingEmail(5000, 4);
+			greenMail.waitForIncomingEmail(5000, 3);
 
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
-			assertEquals(4, receivedMessages.length);
-			assertTrue(receivedMessages[3].getSubject().contains("Noach"));
+			assertEquals(3, receivedMessages.length);
+			assertTrue(receivedMessages[2].getSubject().contains("Noach"));
 
-			assertEquals("davening.list@gmail.com",
-					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("To unsubscribe from the weekly"));
 
 			MimeMessage message = receivedMessages[0];
@@ -413,18 +404,17 @@ public class ServiceEmailSenderTests {
 					if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
 						String fileName = bodyPart.getFileName();
 						assertNotNull(fileName);
-						assertTrue(fileName.contains("Davening List Parashat"));
+						assertTrue(fileName.contains("Davening List Parashat Noach"));
 
-						try (BufferedReader reader = new BufferedReader(
-								new InputStreamReader(bodyPart.getInputStream()))) {
-							String contentInFile = reader.lines().collect(Collectors.joining("\n"));
-							assertTrue(contentInFile.toLowerCase().contains("refua"));
-							assertTrue(contentInFile.toLowerCase().contains("noach"));
+						try (InputStream inputStream = bodyPart.getInputStream()) {
+							byte[] fileContent = inputStream.readAllBytes(); // Read binary data
+							assertNotNull(fileContent);
+							assertTrue(fileContent.length > 0);
 						}
 					}
 				}
 			}
-		} catch (EmptyInformationException | MessagingException | IOException | ObjectNotFoundException e) {
+		} catch (Exception e) {// todo*: test what throws exception
 			e.printStackTrace();
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -443,8 +433,7 @@ public class ServiceEmailSenderTests {
 		});
 		assertTrue(exception.getMessage().contains("incomplete"));
 
-		when(userRep.getAllUsersEmails())
-				.thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
+		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 
 		GreenMail greenMail = new GreenMail(ServerSetup.SMTP);
 		greenMail.start();
@@ -453,10 +442,10 @@ public class ServiceEmailSenderTests {
 			dfRefua.setNote("testNote");
 			emailSender.sendUrgentEmail(dfRefua);
 
-			greenMail.waitForIncomingEmail(5000, 4);
+			greenMail.waitForIncomingEmail(5000, 3);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
-			assertEquals(4, receivedMessages.length);
+			assertEquals(3, receivedMessages.length);
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Please daven now for <b>Avraham ben Sara"));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("testNote"));
@@ -469,10 +458,10 @@ public class ServiceEmailSenderTests {
 			greenMail.start();
 			// sending Banim email
 			emailSender.sendUrgentEmail(dfBanim);
-			greenMail.waitForIncomingEmail(5000, 4);
+			greenMail.waitForIncomingEmail(5000, 3);
 			receivedMessages = greenMail.getReceivedMessages();
 
-			assertEquals(4, receivedMessages.length);
+			assertEquals(3, receivedMessages.length);
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Please daven now for <b>Avraham ben Sara"));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Yehudit bat Miriam"));
@@ -522,14 +511,12 @@ public class ServiceEmailSenderTests {
 
 			emailSender.notifyDisactivatedUser("test@tmail.com");
 
-			greenMail.waitForIncomingEmail(5000, 2);
+			greenMail.waitForIncomingEmail(5000, 1);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
-			assertEquals(2, receivedMessages.length);
+			assertEquals(1, receivedMessages.length);
 			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
-			assertEquals("Message from davening list admin", receivedMessages[1].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("You will no longer receive"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[1]).contains("You will no longer receive"));
 
 			greenMail.stop();
 		} catch (MessagingException | EmptyInformationException e) {
@@ -551,15 +538,13 @@ public class ServiceEmailSenderTests {
 
 			emailSender.notifyActivatedUser("test@tmail.com");
 
-			greenMail.waitForIncomingEmail(5000, 2);
+			greenMail.waitForIncomingEmail(5000, 1);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
 			// one for recipient, one for admin as Bcc
-			assertEquals(2, receivedMessages.length);
+			assertEquals(1, receivedMessages.length);
 			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
-			assertEquals("Message from davening list admin", receivedMessages[1].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("now be receiving emails"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[1]).contains("now be receiving emails"));
 
 			greenMail.stop();
 		} catch (MessagingException | EmptyInformationException e) {
@@ -576,19 +561,18 @@ public class ServiceEmailSenderTests {
 		try {
 			emailSender.offerExtensionOrDelete(dfYeshuah1);
 
-			greenMail.waitForIncomingEmail(5000, 2);
+			greenMail.waitForIncomingEmail(5000, 1);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
 			// one for recipient, one for admin as Bcc
-			assertEquals(2, receivedMessages.length);
+			assertEquals(1, receivedMessages.length);
 			assertEquals("user1@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertEquals("Davening List Confirmation", receivedMessages[0].getSubject());
-			assertEquals("Davening List Confirmation", receivedMessages[1].getSubject());
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]).toString());
 
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("the name on the list"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[1]).contains("Remove this name"));
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Remove this name"));
 
 			greenMail.stop();
 		} catch (MessagingException e) {

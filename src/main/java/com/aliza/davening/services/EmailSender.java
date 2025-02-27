@@ -137,10 +137,6 @@ public class EmailSender {
 	// general method
 	// tested
 	public boolean sendEmail(MimeMessage message) {
-		// TODONOW: allow attachment, make all methods use this, services and
-		// controllers
-		// to direct to EmailSender correctly.
-
 		try {
 			Transport.send(message);
 			System.out.println("Email sent successfully!");
@@ -168,7 +164,7 @@ public class EmailSender {
 	}
 
 	// tested
-	public void sendSimplifiedWeekly() throws ObjectNotFoundException, EmptyInformationException, IOException {
+	public void sendSimplifiedWeekly() throws Exception {
 		Weekly simplified = new Weekly();
 
 		Parasha parasha = parashaRepository.findCurrent()
@@ -183,7 +179,7 @@ public class EmailSender {
 	}
 
 	// tested
-	public void sendOutWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException, IOException {
+	public void sendOutWeekly(Weekly info) throws Exception {
 
 		Category category;
 		if (info.cName != null && info.cName.length() > 0)
@@ -208,7 +204,7 @@ public class EmailSender {
 
 		List<String> usersList = userRepository.getAllUsersEmails();
 
-		String fileName = String.format(EmailScheme.weeklyFileName, parashaName);
+		String fileName = String.format(EmailScheme.weeklyFileName, utilities.getFileName(parashaName));
 
 		// 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
 		// therefore including admin's email.
