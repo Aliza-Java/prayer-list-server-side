@@ -137,8 +137,7 @@ public class ServiceAdminTests {
 		// when(submitterRep.findByEmail(submitterEmail)).thenReturn(new
 		// Submitter(submitterEmail));
 
-		// TODONOW: when email works enable real emailing through email
-		// service tests) TODO*: create integration tests for whole process including emailing
+		//TODO*: create integration tests for whole process including emailing
 
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
 		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
