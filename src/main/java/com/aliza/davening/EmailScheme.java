@@ -10,20 +10,12 @@ public class EmailScheme {
 	@Value("${client.origin}")
 	public String client;
 
-	public String getClient() {
-		return client;
-	}
-
 	@Value("${server.url}")
 	public String server;
 
 	public String getServer() {
 		return server;
 	}
-
-	public static final int imageWidth = 500;
-
-	public static final int imageHeight = 800;
 
 	public static final String h5Header = "<h5>%s</h5>";
 
@@ -91,8 +83,9 @@ public class EmailScheme {
 
 	public static final String confirmationEmailSubject = "Davening list submission";
 
+	//todo*: Make the 'tame me to the website' a button
 	public static final String informAdminOfNewName = "The name: <br><b>%s <br> %s </b><br> has been added to the category: <br> <b>%s. </b><br> by <b>%s</b>"
-			+ "<br><br> You might want to check that it was properly entered. ";
+			+ "<br><br> You might want to check that it was properly entered.  <br> <a href=\"%s\">Take me to the website</a> ";
 
 	public static final String informAdminOfNewNameSubject = "A new name has been added to your davening list. ";
 

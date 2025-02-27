@@ -9,6 +9,7 @@ import java.util.Optional;
 import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,6 +31,9 @@ import com.aliza.davening.security.JwtUtils;
 @Service
 @Transactional
 public class UserService {
+	
+	@Value("${client.origin}")
+	String client;
 
 	@Autowired
 	DavenforRepository davenforRepository;
@@ -125,15 +129,12 @@ public class UserService {
 
 		emailSender.sendConfirmationEmail(savedDavenfor.getId());
 
-		// TODO*: in future, adjust that admin can choose:
-		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
+		// TODO*: in future, adjust that admin can choose if to get prompts:  if (getMyGroupSettings(adminId).isNewNamePrompt())...
 		String subject = EmailScheme.informAdminOfNewNameSubject;
 		String message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
-				davenfor.getNameHebrew(), category.getCname().toString(), userEmail);
+				davenfor.getNameHebrew(), category.getCname().toString(), userEmail, client + "/admin" );
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
-		// TODONOW: add link for admin to log into website
-		// }
 
 		return savedDavenfor;
 	}
