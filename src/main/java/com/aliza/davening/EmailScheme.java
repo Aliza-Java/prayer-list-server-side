@@ -25,23 +25,24 @@ public class EmailScheme {
 
 	public static final int imageHeight = 800;
 
-	public static final String simpleHeader = "<h2>%s</h2>";
+	public static final String h5Header = "<h5>%s</h5>";
 
-	public static final String bilingualHeader = "<h2>%s     %s</h2>";
+	public static final String categoryAndParashaHeader = "<h4>%s <br>%s   %s</h4>";
 
-	public static final String inMemoryHebrew = "לעילוי נשמת אסתר נעמי בת יעקב ע\"ה";
-
-	public static final String inMemoryEnglish = "L\'iluy Nishmat Esther Naomi Bat Yaakov";
+	public static final String inMemory = "לעילוי נשמת אסתר נעמי בת יעקב ע\"ה <br> L\'iluy Nishmat Esther Naomi Bat Yaakov";
 
 	public static final String banimLineEnglish = "Yehi ratzon she_____ yipakdu b'zera chaya v'kayama";
 
 	public static final String banimLineHebrew = "יהי רצון ש___ יפקדו בזרע חיא וקימא";
 
 	public static final String confirmationEmailTextLocation = "src/main/resources/static/confirmationEmailText.html";
+	
+	public static final String pageDivider = "<script>document.addEventListener(\"DOMContentLoaded\", function () { const rows = Array.from(document.querySelectorAll(\"table tr\")); const pageHeight = 900; let currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); let currentHeight = 0; rows.forEach(row => { const rowHeight = row.offsetHeight; if (currentHeight + rowHeight > pageHeight) { currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); currentHeight = 0; } currentPage.appendChild(row); currentHeight += rowHeight; }); });</script>";
+	
+//TODO*: move to separate file, to make editing easier.  All long htmls should be read from files
+	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=15cm, initial-scale=1.0\"><title>Weekly Davening List</title><style>  @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 100%; margin: 0; padding: 0; overflow: hidden;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 100%; font-size: 12pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
 
-	public static final String htmlHead = "<!DOCTYPE html><html><head><title>Weekly Davening List</title><style>body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4{text-align:center}</style></head>";
-
-	public static final String htmlBodyStart = "<body>";
+	public static final String htmlBodyStart = "<body><div class='page'>";
 
 	public static final String tableStart = "<table style='width:100%'>";
 
@@ -55,7 +56,7 @@ public class EmailScheme {
 
 	public static final String sendGoodNewsMessage = "Please email %s with name and good news!";
 
-	public static final String htmlBodyEnd = "</body></html>";
+	public static final String htmlBodyEnd = "</div></body></html>";
 
 	public static final String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='%s'>HERE</a>";
 
@@ -83,10 +84,10 @@ public class EmailScheme {
 	public static final String weeklyFileName = "Davening List %s";
 
 	// putting one message first, in bold, with new line before other text.
-	public static final String boldFirstMessage = "<h4>%s</h4>%s";
+	public static final String boldFirstMessage = "<h5>%s</h5>%s";
 
 	// putting second message, in bold, on new line after other text.
-	public static final String boldSecondMessage = "%s<h4>%s</h4>";
+	public static final String boldSecondMessage = "%s<h5>%s</h5>";
 
 	public static final String confirmationEmailSubject = "Davening list submission";
 

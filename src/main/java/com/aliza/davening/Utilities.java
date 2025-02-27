@@ -1,20 +1,18 @@
 //Helpful miscellaneous functions
 package com.aliza.davening;
 
-import java.awt.Graphics;
-import java.awt.GraphicsEnvironment;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import javax.imageio.ImageIO;
-import javax.swing.JEditorPane;
-
+import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,7 +34,10 @@ public class Utilities {
 	public String client;
 
 	@Value("${server.url}")
-	public String server;	
+	public String server;
+	
+	@Value("${page.width}")
+	public int width;
 
 	@Autowired
 	CategoryRepository categoryRepository;
@@ -56,41 +57,57 @@ public class Utilities {
 	String linkToSendListFromServer = server + EmailScheme.linkToSendListS;
 	String linkToReviewWeeklyFromClient = client + EmailScheme.linkToReviewWeeklyC;
 
-	public File buildListImage(Category category, String weekName) throws IOException, EmptyInformationException {
-
-		int imageWidth = EmailScheme.imageWidth;
-		int imageHeight = EmailScheme.imageHeight;
+	public File buildListImage(Category category, String weekName) throws Exception {
 
 		String weeklyHtml = createWeeklyHtml(category, weekName);
 
-		String fileName = "builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png";
-		Path filePath = Paths.get("builtFiles/" + weekName + "_" + LocalDate.now().toString() + ".png");
+		String fileName = "builtFiles/" + getFileName(weekName);
+		Path filePath = Paths.get(fileName);
 
-		if (!GraphicsEnvironment.isHeadless()) {
-			BufferedImage image = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
-					.getDefaultConfiguration().createCompatibleImage(imageWidth, imageHeight);
-
-			Graphics graphics = image.createGraphics();
-
-			JEditorPane jep = new JEditorPane("text/html", weeklyHtml);
-			jep.setSize(imageWidth, imageHeight);
-			jep.print(graphics);
-
-			// png seems to be better than jpeg, writes without a blotch behind the text
-			ImageIO.write(image, "png", new File(fileName));
-		} else {
-			System.out.println("File name: " + fileName);
-			System.out.println("File path: " + filePath);
-
-			try {
-				Files.write(filePath, weeklyHtml.getBytes());
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-
-			return filePath.toFile();
-
+		String driverPath = null;
+		try {
+			driverPath = ChromeDriverUtil.extractChromeDriver();
+		} catch (Exception e) {
+			System.out.println("There was a problem extracting ChromeDriver");
+			throw new Exception(e.getMessage());
 		}
+		System.setProperty("webdriver.chrome.driver", driverPath);
+
+		// Set up headless Chrome
+		ChromeOptions options = new ChromeOptions();
+		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
+
+		WebDriver driver = new ChromeDriver(options);
+
+		// Load HTML and take a screenshot (JPEG)
+		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
+
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
+		}
+
+		JavascriptExecutor js = (JavascriptExecutor) driver;
+		long height = (long) js.executeScript("return document.body.scrollHeight;");
+		driver.manage().window().setSize(new Dimension(width, (int) height)); // Adjust height dynamically
+
+		System.out.println("Computed Page Height: " + height);
+
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
+		}
+
+		try {
+			ScreenshotHelper.captureScreenshot(driver, fileName);
+		} catch (Exception e) {
+			System.out.println("There was an error with capturing the screenshot: " + e.getMessage());
+		}
+
+		driver.quit();
+
 		return filePath.toFile();
 	}
 
@@ -182,7 +199,8 @@ public class Utilities {
 		return message;
 	}
 
-	public String createWeeklyHtml(Category category, String weekName) throws EmptyInformationException {
+	public String createWeeklyHtml(Category category, String weekName) throws EmptyInformationException { 
+		//todo*: make solution for too many names.  Onto another page? two columns? 
 		StringBuilder stringBuilder = new StringBuilder();
 
 		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category.getCname().toString());
@@ -196,12 +214,11 @@ public class Utilities {
 		stringBuilder.append(EmailScheme.htmlBodyStart);
 
 		// building headlines and starting table
-		stringBuilder.append(String.format(EmailScheme.simpleHeader, EmailScheme.inMemoryHebrew));
-		stringBuilder.append(String.format(EmailScheme.simpleHeader, EmailScheme.inMemoryEnglish));
-		stringBuilder.append(weekName);
+		stringBuilder.append(String.format(EmailScheme.h5Header, EmailScheme.inMemory));
 
-		stringBuilder.append(
-				String.format(EmailScheme.bilingualHeader, category.getCname(), category.getCname().getHebName()));
+		stringBuilder.append(String.format(EmailScheme.categoryAndParashaHeader, weekName, category.getCname(),
+				category.getCname().getHebName()));
+
 		stringBuilder.append(EmailScheme.tableStart);
 
 		// Running through names, adding them in columns - English and Hebrew
@@ -255,5 +272,12 @@ public class Utilities {
 				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;' align='center' bgcolor=%s width='300' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
 				buttonColor, link, buttonText);
 
+	}
+
+	public String getFileName(String weekName) {
+		LocalDateTime now = LocalDateTime.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+		String formattedNow = now.format(formatter);
+		return weekName + "_" + formattedNow + ".png";
 	}
 }

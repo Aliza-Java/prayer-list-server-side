@@ -133,6 +133,13 @@
 			<version>${itext.version}</version>
 		</dependency>
 
+		<!-- selenium - HTML->JAVA -->
+		<dependency>
+			<groupId>org.seleniumhq.selenium</groupId>
+			<artifactId>selenium-java</artifactId>
+			<!-- Use a compatible version -->
+		</dependency>
+
 		<!-- https://mvnrepository.com/artifact/org.jasypt/jasypt : Java Simplified 
 			Encription -->
 		<dependency>
@@ -176,6 +183,13 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>test</scope>
+		</dependency>
+
+<!-- Ashot library for screenshots -->
+		<dependency>
+			<groupId>ru.yandex.qatools.ashot</groupId>
+			<artifactId>ashot</artifactId>
+			<version>1.5.4</version>
 		</dependency>
 
 	</dependencies>
