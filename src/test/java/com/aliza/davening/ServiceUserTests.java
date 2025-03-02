@@ -255,7 +255,7 @@ public class ServiceUserTests {
 		refua.setId(9L);
 		when(davenforRep.findById(9L)).thenReturn(Optional.empty());
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			userService.deleteDavenfor(9L, submitterEmail);
+			userService.deleteDavenfor(9L, submitterEmail, false);
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
@@ -263,7 +263,7 @@ public class ServiceUserTests {
 		Davenfor dfToDelete = getDf(catRefua);
 		when(davenforRep.findById(6L)).thenReturn(Optional.of(dfToDelete));
 		exception = assertThrows(PermissionException.class, () -> {
-			userService.deleteDavenfor(6L, "otherEmail@gmail.com");
+			userService.deleteDavenfor(6L, "otherEmail@gmail.com", false);
 		});
 		assertTrue(exception.getMessage().contains("different"));
 
@@ -272,7 +272,7 @@ public class ServiceUserTests {
 		when(davenforRep.findAllDavenforByUserEmail(submitterEmail)).thenReturn(getDfList());
 		List<Davenfor> returnValue = null;
 		try {
-			returnValue = userService.deleteDavenfor(1L, submitterEmail);
+			returnValue = userService.deleteDavenfor(1L, submitterEmail, false);
 			assertEquals(3, returnValue.size());
 		} catch (ObjectNotFoundException | PermissionException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());

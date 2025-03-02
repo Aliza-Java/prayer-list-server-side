@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Unsubscribed Successfully</title>
+<title>There was a problem</title>
 <style>
 body {
 	font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@ body {
 
 .icon {
 	font-size: 50px;
-	color: #93d314;
+	color: #e74c3c;
 }
 
 h1 {
@@ -44,7 +44,7 @@ p {
 	padding: 10px 20px;
 	font-size: 16px;
 	color: white;
-	background-color: #93d314;
+	background-color: #e74c3c;
 	border: none;
 	border-radius: 5px;
 	text-decoration: none;
@@ -52,16 +52,15 @@ p {
 }
 
 .button:hover {
-	background-color: #93d314;
+	background-color: #e74c3c;
 }
 </style>
 </head>
 <body>
 	<div class="container">
-		<div class="icon">✅</div>
-		<h1>Unsubscribed Successfully</h1>
-		<p th:text="${response}"></p>
-		<a th:href="${client}" class="button">Return to Davening List Home</a>
+	<div class="icon">❌</div>
+		<h2>There was a problem deleting this name</h2>
+		<a th:href="${client}" class="button">Log in and delete from website</a>
 	</div>
 </body>
 </html>

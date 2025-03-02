@@ -285,7 +285,7 @@ public class EmailSender {
 		String emailAddress = confirmedDavenfor.getUserEmail();
 
 		String linkToConfirm = String.format(linkToConfirmPartial, davenforId, emailAddress);
-		String linkToRemove = String.format(linkToRemovePartial, davenforId, emailAddress);
+		String linkToRemove = String.format(linkToRemovePartial, davenforId, jwtUtils.generateEmailToken(emailAddress));
 
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
@@ -343,7 +343,7 @@ public class EmailSender {
 	}
 
 	private String setUnsubscribeMessage(String email) {
-		String unsubscribeLink = linkToUnsubscribe + jwtUtils.generateUnsubscribeToken(email);
+		String unsubscribeLink = linkToUnsubscribe + jwtUtils.generateEmailToken(email);
 		return String.format(EmailScheme.unsubscribeMessage, unsubscribeLink, adminEmail);
 	}
 }

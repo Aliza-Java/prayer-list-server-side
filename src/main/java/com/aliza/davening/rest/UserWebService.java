@@ -8,9 +8,12 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -35,6 +38,9 @@ import com.aliza.davening.services.UserService;
 
 public class UserWebService {
 
+	@Value("${client.origin}")
+	String client;
+	
 	@Autowired
 	UserService userService;
 
@@ -72,15 +78,15 @@ public class UserWebService {
 		userService.extendDavenfor(davenforId, email);
 	}
 
-	// TODONOW: in future, make deleteName landing page like chatGpt suggested. with
-	// an 'are you sure' button
-	// tested
-	// TODONOW: link from email also gives list of all user davenfors. not nice.
-	// make a landing page.
-	@RequestMapping("delete/{id}/{email}") // since handled through email (for now), delete mapping is not supported
+	@GetMapping("/test-delete")
+	public String testDelete(Model model) {
+	    return "delete-confirmation";
+	}
+	
+	@DeleteMapping("delete/{id}/{email}") 
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
-		return userService.deleteDavenfor(id, email);
+		return userService.deleteDavenfor(id, email, false);
 	}
 
 	// tested
@@ -96,11 +102,11 @@ public class UserWebService {
 	}
 
 	// TODO*: test
-	@GetMapping(path = "unsubscribe/request", produces = MediaType.APPLICATION_JSON_VALUE)	
+	@GetMapping(path = "unsubscribe/request", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<Map<String, String>> requestToUnsubscribe(@RequestParam String email) {
-	    String message = emailSender.requestToUnsubscribe(email);
-	    Map<String, String> response = new HashMap<>();
-	    response.put("message", message);
-	    return ResponseEntity.ok(response);
+		String message = emailSender.requestToUnsubscribe(email);
+		Map<String, String> response = new HashMap<>();
+		response.put("message", message);
+		return ResponseEntity.ok(response);
 	}
 }

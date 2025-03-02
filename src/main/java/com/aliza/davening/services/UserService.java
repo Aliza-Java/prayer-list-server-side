@@ -31,7 +31,7 @@ import com.aliza.davening.security.JwtUtils;
 @Service
 @Transactional
 public class UserService {
-	
+
 	@Value("${client.origin}")
 	String client;
 
@@ -52,10 +52,10 @@ public class UserService {
 
 	@Autowired
 	EntityManager entityManager;
-	
+
 	@Autowired
 	private JwtUtils jwtUtils;
-	
+
 	// All user functions receive his email address and allow him to proceed if
 	// his email matches davenfor.getUser().getEmail()
 
@@ -129,10 +129,11 @@ public class UserService {
 
 		emailSender.sendConfirmationEmail(savedDavenfor.getId());
 
-		// TODO*: in future, adjust that admin can choose if to get prompts:  if (getMyGroupSettings(adminId).isNewNamePrompt())...
+		// TODO*: in future, adjust that admin can choose if to get prompts: if
+		// (getMyGroupSettings(adminId).isNewNamePrompt())...
 		String subject = EmailScheme.informAdminOfNewNameSubject;
 		String message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
-				davenfor.getNameHebrew(), category.getCname().toString(), userEmail, client + "/admin" );
+				davenfor.getNameHebrew(), category.getCname().toString(), userEmail, client + "/admin");
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
 
@@ -231,7 +232,7 @@ public class UserService {
 	}
 
 	// tested
-	public List<Davenfor> deleteDavenfor(long davenforId, String submitterEmail)
+	public List<Davenfor> deleteDavenfor(long davenforId, String auth, boolean viaEmail)
 			throws ObjectNotFoundException, PermissionException {
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
 		if (!optionalDavenfor.isPresent()) {
@@ -239,15 +240,22 @@ public class UserService {
 		}
 
 		Davenfor davenforToDelete = optionalDavenfor.get();
-		String email = submitterEmail.trim();
+		String email = viaEmail? jwtUtils.getUserNameFromJwtToken(auth) : auth;
 		if (davenforToDelete.getUserEmail().equalsIgnoreCase(email)) {
 			davenforRepository.delete(davenforToDelete);
 		} else {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
+		
+		String adminSubject = String.format(EmailScheme.deleteNameSubject, davenforToDelete.getNameEnglish());
+		String adminMessage = String.format(EmailScheme.deleteNameMessage, davenforToDelete.getNameEnglish(), davenforToDelete.getCategory(), davenforToDelete.getUserEmail());
+		emailSender.informAdmin(adminSubject, adminMessage);
 
-		return davenforRepository.findAllDavenforByUserEmail(submitterEmail);
+		if (viaEmail)
+			return List.of(davenforToDelete); //return one so that can extract it in the confirmation message
+		else
+			return davenforRepository.findAllDavenforByUserEmail(email); //return all to show on website remaining ones		
 	}
 
 	// tested

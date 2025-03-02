@@ -60,7 +60,7 @@ public class JwtUtils {
 		return null; // Return null if the token is invalid or expired
 	}
 
-	public String generateUnsubscribeToken(String email) {
+	public String generateEmailToken(String email) {
 		return Jwts.builder().setSubject(email).signWith(getSigningKey()).compact();
 	}
 

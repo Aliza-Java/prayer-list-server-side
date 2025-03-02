@@ -83,7 +83,7 @@ public class EmailScheme {
 
 	public static final String confirmationEmailSubject = "Davening list submission";
 
-	//todo*: Make the 'tame me to the website' a button
+
 	public static final String informAdminOfNewName = "The name: <br><b>%s <br> %s </b><br> has been added to the category: <br> <b>%s. </b><br> by <b>%s</b>"
 			+ "<br><br> You might want to check that it was properly entered.  <br> <a href=\"%s\">Take me to the website</a> ";
 
@@ -94,6 +94,10 @@ public class EmailScheme {
 	public static final String expiringNameSubject = "Davening List Confirmation";
 
 	public static final String unsubscribeSubject = "Unsubscribe - action required";
+	
+	public static final String deleteNameSubject = "Name deleted: %s";
+	
+	public static final String deleteNameMessage = "We want to let you know that the name <b>%s</b> from category <b>%s</b> has been deleted from the davening list by <b>%s</b>.";
 
 	// Links inserted to email allowing submitters to extend or delete names. URL
 	// will change when uploaded to cloud

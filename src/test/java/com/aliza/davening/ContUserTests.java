@@ -220,7 +220,7 @@ public class ContUserTests {
 	@Order(5)
 	public void testDeleteDavenfor() {
 		try {
-			when(userService.deleteDavenfor(1L, "user1@gmail.com"))
+			when(userService.deleteDavenfor(1L, "user1@gmail.com", false))
 					.thenReturn(Arrays.asList(dfYeshuah1, dfBanim, dfYeshuah2));
 
 			mockMvc.perform(delete("/user/delete/{id}/{email}", "1", "user1@gmail.com")).andDo(print())
@@ -231,21 +231,21 @@ public class ContUserTests {
 					.andExpect(jsonPath("$[1].nameEnglish").value("Avraham ben Sara"))
 					.andExpect(jsonPath("$[2].nameEnglish").value("Amram ben Shira"));
 
-			when(userService.deleteDavenfor(2L, "user2@gmail.com"))
+			when(userService.deleteDavenfor(2L, "user2@gmail.com", false))
 					.thenThrow(new ObjectNotFoundException("Name with id 2"));
 
 			mockMvc.perform(delete("/user/delete/{id}/{email}", "2", "user2@gmail.com")).andDo(print())
 					.andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value("OBJECT_NOT_FOUND_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("Name with id")));
 
-			when(userService.deleteDavenfor(3L, "user3@gmail.com")).thenThrow(new PermissionException(
+			when(userService.deleteDavenfor(3L, "user3@gmail.com", false)).thenThrow(new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it."));
 
 			mockMvc.perform(delete("/user/delete/{id}/{email}", 3L, "user3@gmail.com")).andDo(print())
 					.andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("LOGIN_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("do not have the permission")));
 
-			verify(userService, times(3)).deleteDavenfor(anyLong(), any());
+			verify(userService, times(3)).deleteDavenfor(anyLong(), any(), any());
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
