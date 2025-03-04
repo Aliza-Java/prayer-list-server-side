@@ -32,8 +32,7 @@ import com.aliza.davening.security.JwtUtils;
 @Transactional
 public class UserService {
 
-	@Value("${client.origin}")
-	String client;
+	public final String client = SchemeValues.client;
 
 	@Autowired
 	DavenforRepository davenforRepository;

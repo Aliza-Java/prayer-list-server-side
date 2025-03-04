@@ -7,8 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class EmailScheme {
 
-	@Value("${client.origin}")
-	public String client;
+	public final String client = SchemeValues.client;
 
 	@Value("${server.url}")
 	public String server;
@@ -102,7 +101,7 @@ public class EmailScheme {
 	// Links inserted to email allowing submitters to extend or delete names. URL
 	// will change when uploaded to cloud
 	public static String linkToExtendS = "extend/%s?email=%s";
-	public static String linkToDeleteS = "delete/%s?email=%s";
+	public static String linkToDeleteS = "/guest/delete?id=%d&token=%s";
 	public static String linkToLoginC = "admin";
 	public static String linkToSendListS = "admin/weeklylist";
 	public static String linkToReviewWeeklyC = "admin/weekly";

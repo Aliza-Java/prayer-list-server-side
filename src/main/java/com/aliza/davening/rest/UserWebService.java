@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.EmailException;
@@ -38,8 +39,7 @@ import com.aliza.davening.services.UserService;
 
 public class UserWebService {
 
-	@Value("${client.origin}")
-	String client;
+	public final String client = SchemeValues.client;
 	
 	@Autowired
 	UserService userService;

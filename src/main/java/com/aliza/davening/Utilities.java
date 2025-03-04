@@ -30,8 +30,7 @@ import com.aliza.davening.services.AdminService;
 @Component
 public class Utilities {
 
-	@Value("${client.origin}")
-	public String client;
+	public final String client = SchemeValues.client;
 
 	@Value("${server.url}")
 	public String server;
@@ -52,7 +51,7 @@ public class Utilities {
 	private String adminEmail = "davening.list@gmail.com";
 
 	String linkToExtendFromServer = server + EmailScheme.linkToExtendS;
-	String linkToDeleteFromServer = server + EmailScheme.linkToDeleteS;
+	String linkToDeleteFromClient = client + EmailScheme.linkToDeleteS;
 	String linkToLoginFromClient = client + EmailScheme.linkToLoginC;
 	String linkToSendListFromServer = server + EmailScheme.linkToSendListS;
 	String linkToReviewWeeklyFromClient = client + EmailScheme.linkToReviewWeeklyC;
@@ -178,7 +177,7 @@ public class Utilities {
 		// Building links that the buttons will refer to
 		String extendLink = linkToExtendFromServer;
 		String personalizedExtendLink = String.format(extendLink, davenfor.getId(), davenfor.getUserEmail());
-		String personalizedDeleteLink = String.format(linkToDeleteFromServer, davenfor.getId(),
+		String personalizedDeleteLink = String.format(linkToDeleteFromClient, davenfor.getId(),
 				davenfor.getUserEmail());
 
 		// Creating the button 'components' as html tds

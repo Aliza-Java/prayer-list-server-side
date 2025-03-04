@@ -73,8 +73,7 @@ public class EmailSender {
 	@Value("${admin.email}")
 	String adminEmail;
 
-	@Value("${client.origin}")
-	public String client;
+	public final String client = SchemeValues.client;
 
 	// @Value("${admin.id}")
 	long adminId = 1;
@@ -83,7 +82,7 @@ public class EmailSender {
 	String linkToConfirmPartial;
 
 	@Value("${link.to.remove}")
-	String linkToRemovePartial;
+	String linkToRemoveClient;
 
 	@Value("${link.to.unsubscribe}")
 	String linkToUnsubscribe;
@@ -285,7 +284,7 @@ public class EmailSender {
 		String emailAddress = confirmedDavenfor.getUserEmail();
 
 		String linkToConfirm = String.format(linkToConfirmPartial, davenforId, emailAddress);
-		String linkToRemove = String.format(linkToRemovePartial, davenforId, jwtUtils.generateEmailToken(emailAddress));
+		String linkToRemove = String.format(client + linkToRemoveClient, davenforId, jwtUtils.generateEmailToken(emailAddress));
 
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
