@@ -77,7 +77,7 @@ public class UserWebService {
 		userService.extendDavenfor(davenforId, email);
 	}
 
-	@DeleteMapping("delete/{id}/{email}") 
+	@DeleteMapping("delete/{id}/{email}") //this method is called from the website
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
 		return userService.deleteDavenfor(id, email, false);
