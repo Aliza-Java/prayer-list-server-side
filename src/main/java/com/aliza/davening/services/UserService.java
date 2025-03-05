@@ -202,11 +202,11 @@ public class UserService {
 		return davenforToUpdate;
 	}
 
-	// tested
-	public boolean extendDavenfor(long davenforId, String submitterEmail)
+	// TODO* need to test after adjustments
+	public Davenfor extendDavenfor(long davenforId, String token)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 
-		if (submitterEmail == null) {
+		if (token == null) {
 			throw new EmptyInformationException("No associated email address was received. ");
 		}
 
@@ -217,7 +217,9 @@ public class UserService {
 
 		Davenfor davenforToExtend = optionalDavenfor.get();
 
-		if (!davenforToExtend.getUserEmail().equalsIgnoreCase(submitterEmail)) {
+		String email = jwtUtils.getUserNameFromJwtToken(token);
+		
+		if (!davenforToExtend.getUserEmail().equalsIgnoreCase(email)) {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to update it.");
 		}
@@ -227,7 +229,7 @@ public class UserService {
 		Category categoryObj = Category.getCategory(davenforToExtend.getCategory());
 		LocalDate extendedDate = LocalDate.now().plusDays(categoryObj.getUpdateRate());
 		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());
-		return true;
+		return davenforToExtend;
 	}
 
 	// tested

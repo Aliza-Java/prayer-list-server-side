@@ -71,18 +71,12 @@ public class UserWebService {
 	}
 
 	// tested
-	// TODONOW: need to redirect user to something after extended
 	@RequestMapping("extend/{davenforId}/{email}")
 	public void extendDavenfor(@PathVariable long davenforId, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException, EmptyInformationException {
 		userService.extendDavenfor(davenforId, email);
 	}
 
-	@GetMapping("/test-delete")
-	public String testDelete(Model model) {
-	    return "delete-confirmation";
-	}
-	
 	@DeleteMapping("delete/{id}/{email}") 
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {

@@ -1,7 +1,6 @@
 package com.aliza.davening.rest;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -38,7 +37,7 @@ public class PopupWebService {
 	}
 
 	// todo*: test sending via token, with errors and good
-	@DeleteMapping("delete/{id}/{token}") 
+	@DeleteMapping("delete/{id}/{token}")
 	public String deleteDavenforViaEmail(@PathVariable long id, @PathVariable String token, Model model) {
 		Davenfor deletedDf;
 		model.addAttribute("client", client);
@@ -51,8 +50,32 @@ public class PopupWebService {
 			return "delete-problem"; // maps to `src/main/resources/templates/delete-problem.html` due to Thymeleaf
 		}
 
-		model.addAttribute("response", String.format("The name %s has been removed from our lists", deletedDf.getNameEnglish()));
+		model.addAttribute("response",
+				String.format("The name %s has been removed from our lists", deletedDf.getNameEnglish()));
 		return "delete-confirmation"; // maps to `src/main/resources/templates/delete-confirmation.html` due to
 										// Thymeleaf
+	}
+
+	// to test
+	@GetMapping("extend/{id}/{token}")
+	public String extendDavenfor(@PathVariable long id, @PathVariable String token, Model model) {
+
+		Davenfor extendedDf = null;
+
+		model.addAttribute("client", client);
+
+		try {
+			extendedDf = userService.extendDavenfor(id, token);
+		} catch (Exception e) {
+			model.addAttribute("message","There was a problem confirming this name");
+			model.addAttribute("reason", e.getMessage());
+			return "extend-problem"; // maps to `src/main/resources/templates/extend-problem.html` due to Thymeleaf
+		}
+
+		model.addAttribute("response", String.format("Thank you for confirming %s in the category: %s",
+				extendedDf.getNameEnglish(), extendedDf.getCategory()));
+		return "extend-confirmation"; // maps to `src/main/resources/templates/extend-confirmation.html` due to
+										// Thymeleaf
+
 	}
 }

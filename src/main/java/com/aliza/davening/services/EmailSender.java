@@ -78,8 +78,8 @@ public class EmailSender {
 	// @Value("${admin.id}")
 	long adminId = 1;
 
-	@Value("${link.to.confirm}")
-	String linkToConfirmPartial;
+	@Value("${link.to.extend}")
+	String linkToExtendClient;
 
 	@Value("${link.to.remove}")
 	String linkToRemoveClient;
@@ -283,7 +283,7 @@ public class EmailSender {
 		String subject = EmailScheme.confirmationEmailSubject;
 		String emailAddress = confirmedDavenfor.getUserEmail();
 
-		String linkToConfirm = String.format(linkToConfirmPartial, davenforId, emailAddress);
+		String linkToConfirm = String.format(client + linkToExtendClient, davenforId, confirmedDavenfor.getNameEnglish(), jwtUtils.generateEmailToken(emailAddress));
 		String linkToRemove = String.format(client + linkToRemoveClient, davenforId, jwtUtils.generateEmailToken(emailAddress));
 
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
