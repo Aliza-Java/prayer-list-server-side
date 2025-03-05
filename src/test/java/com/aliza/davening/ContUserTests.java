@@ -8,6 +8,8 @@ import static com.aliza.davening.entities.CategoryName.YESHUAH;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -245,7 +247,7 @@ public class ContUserTests {
 					.andExpect(status().isUnauthorized()).andExpect(jsonPath("$.code").value("LOGIN_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("do not have the permission")));
 
-			verify(userService, times(3)).deleteDavenfor(anyLong(), any(), any());
+			verify(userService, times(3)).deleteDavenfor(anyLong(), anyString(), anyBoolean());
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
