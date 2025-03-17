@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.EmptyInformationException;
+import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.services.UserService;
 
 @Controller // special web service for all methods that redirect to a new response page.
@@ -44,9 +45,13 @@ public class PopupWebService {
 
 		try {
 			deletedDf = userService.deleteDavenfor(id, token, true).get(0);
-		} catch (Exception e) {
-			e.printStackTrace();
-
+		} catch (ObjectNotFoundException e) {
+			model.addAttribute("status", "This name may have been deleted already");
+			model.addAttribute("action", "Take me to the website");
+			return "delete-problem";
+		} catch (Exception e) {			
+			model.addAttribute("status", "There was a problem deleting this name");
+			model.addAttribute("action", "Delete directly from the website");
 			return "delete-problem"; // maps to `src/main/resources/templates/delete-problem.html` due to Thymeleaf
 		}
 

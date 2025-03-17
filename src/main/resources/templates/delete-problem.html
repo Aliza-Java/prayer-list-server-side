@@ -58,8 +58,8 @@ p {
 <body>
 	<div class="container">
 	<div class="icon">❌</div>
-		<h2>There was a problem deleting this name</h2>
-		<a th:href="${client}" class="button">Log in and delete from website</a>
+		<h4 th:text="${status}"></h4>
+		<a th:href="${client}" th:text="${action}" class="button"></a>
 	</div>
 </body>
 </html>
