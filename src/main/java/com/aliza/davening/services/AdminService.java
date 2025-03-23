@@ -87,11 +87,9 @@ public class AdminService {
 			categoryRepository.save(new Category(SOLDIERS, false, 180, 4));
 			categoryRepository.save(new Category(YESHUAH, false, 180, 5));
 		}
-		
-		Category.categories = Arrays.asList(new Category(REFUA, false, 180, 1),
-				new Category(SHIDDUCHIM, true, 40, 2),
-				new Category(BANIM, false, 50, 3),
-				new Category(SOLDIERS, false, 180, 4),
+
+		Category.categories = Arrays.asList(new Category(REFUA, false, 180, 1), new Category(SHIDDUCHIM, true, 40, 2),
+				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 180, 4),
 				new Category(YESHUAH, false, 180, 5));
 	}
 
@@ -418,7 +416,7 @@ public class AdminService {
 				return userRepository.findAll();
 			}
 			if (userToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual,
-																// returning
+															// returning
 				// most recent daveners list.
 				System.out.println(String.format("The email %s is already receiving the davening lists. ", userEmail));
 			}
@@ -444,6 +442,19 @@ public class AdminService {
 		Category nextCategory = utilities.getNextCategory(currentCategory);
 		categoryRepository.updateCategoryCurrent(false, currentCategory.getId());
 		categoryRepository.updateCategoryCurrent(true, nextCategory.getId());
+	}
+
+	// TODO*: test
+	public void updateParasha() {
+		Optional<Parasha> currentParashaOptional = parashaRepository.findCurrent();
+		if (currentParashaOptional.isEmpty())
+			System.out.println("No current parasha was found");
+		else {
+			Parasha currentParasha = currentParashaOptional.get();
+			Parasha nextParasha = utilities.getNextParasha(currentParasha);
+			parashaRepository.updateParashaCurrent(false, currentParasha.getId());
+			parashaRepository.updateParashaCurrent(true, nextParasha.getId());
+		}
 	}
 
 	// tested
@@ -482,11 +493,10 @@ public class AdminService {
 	// tested
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
 
-		Optional<Category> optionalCategory = categoryRepository.findById(info.categoryId);
-		if (!optionalCategory.isPresent()) {
-			throw new ObjectNotFoundException("category of id " + info.categoryId);
+		Category category = Category.getCategory(info.category);
+		if (category == null) {
+			throw new ObjectNotFoundException("category named " + info.category);
 		}
-		Category category = optionalCategory.get();
 
 		return utilities.createWeeklyHtml(category, info.parashaName);
 	}

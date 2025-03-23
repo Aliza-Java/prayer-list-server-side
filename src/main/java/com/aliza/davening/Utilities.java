@@ -23,6 +23,7 @@ import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
+import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.services.AdminService;
 
 //A helper class for building long and winding messages and files
@@ -43,6 +44,9 @@ public class Utilities {
 
 	@Autowired
 	DavenforRepository davenforRepository;
+	
+	@Autowired
+	ParashaRepository parashaRepository;
 
 	@Autowired
 	AdminService adminService;
@@ -143,6 +147,15 @@ public class Utilities {
 			}
 		}
 		return nextCategory;
+	}
+	
+	public Parasha getNextParasha(Parasha current) {
+		List<Parasha> parashot = parashaRepository.findAll();
+		Parasha nextParasha = parashot.stream().filter(p -> p.getId() == current.getId()+1 ).findFirst().orElse(null);
+		if (nextParasha == null)
+			return parashot.get(0);
+		else 
+			return nextParasha;
 	}
 
 	public Parasha findParasha(long parashaId) {

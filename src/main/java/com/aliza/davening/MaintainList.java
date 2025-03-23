@@ -15,7 +15,7 @@ import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
 
 @Component
-public class MaintainList {
+public class MaintainList { //TODO*: tests for all these
 
 	@Autowired
 	DavenforRepository davenforRepository;
@@ -68,10 +68,11 @@ public class MaintainList {
 		emailSender.informAdmin(EmailScheme.weeklyAdminReminderSubject, utilities.setWeeklyAdminReminderMessage());
 	}
 
-	// Every Sunday at 2 a.m. changes category
+	// Every Sunday at 2 a.m. changes category and parasha
 	@Scheduled(cron = "0 0 2 * * SUN")
-	public void updateCurrentCategory() {
+	public void updateNewWeek() {
 		adminService.updateCurrentCategory();
+		adminService.updateParasha();
 	}
 
 }
