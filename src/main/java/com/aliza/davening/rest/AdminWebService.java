@@ -1,6 +1,5 @@
 package com.aliza.davening.rest;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -20,6 +19,7 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.User;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
@@ -82,7 +82,7 @@ public class AdminWebService {
 	}
 
 	// tested
-	@RequestMapping(path = "users")
+	@RequestMapping("users")
 	public List<User> findAllUsers() {
 		return adminService.getAllUsers();
 	}
@@ -117,18 +117,17 @@ public class AdminWebService {
 		return adminService.activateUser(userEmail);
 	}
 
-	// tested
+	// tested.  TODO*: still test exceptions thrown
 	@PostMapping(path = "weekly")
-	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo)
-			throws Exception {
-		emailSender.sendOutWeekly(weeklyInfo);
-		return true;
+	public boolean sendOutWeekly(@RequestBody Weekly weeklyInfo) throws EmptyInformationException, ObjectNotFoundException, EmailException   {
+		return emailSender.sendOutWeekly(weeklyInfo);		 
 	}
 
 	// tested
 	@PostMapping(path = "preview", produces = "text/plain")
 	public String previewWeekly(@RequestBody Weekly weeklyInfo)
 			throws EmptyInformationException, ObjectNotFoundException {
+		System.out.println("Generating preview for week: " + weeklyInfo.fullWeekName);
 		return adminService.previewWeekly(weeklyInfo);
 	}
 
@@ -176,12 +175,12 @@ public class AdminWebService {
 		return adminService.getAllParashot();
 	}
 
-	// currently not in use. No tests
-//	@RequestMapping(path = "parasha")
-//	public Parasha getCurrentParasha() {
-//		return adminService.findCurrentParasha();
-//	}
-//
+	//TODO*: need to test
+	@RequestMapping(path = "parasha")
+	public Parasha getCurrentParasha() {
+		return adminService.findCurrentParasha();
+	}
+
 	@RequestMapping(path = "category") // TODO*: test
 	public Category getCurrentCategory() {
 		return adminService.findCurrentCategory();

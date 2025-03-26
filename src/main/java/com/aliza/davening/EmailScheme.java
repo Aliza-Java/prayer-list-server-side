@@ -31,9 +31,9 @@ public class EmailScheme {
 	public static final String pageDivider = "<script>document.addEventListener(\"DOMContentLoaded\", function () { const rows = Array.from(document.querySelectorAll(\"table tr\")); const pageHeight = 900; let currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); let currentHeight = 0; rows.forEach(row => { const rowHeight = row.offsetHeight; if (currentHeight + rowHeight > pageHeight) { currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); currentHeight = 0; } currentPage.appendChild(row); currentHeight += rowHeight; }); });</script>";
 	
 //TODO*: move to separate file, to make editing easier.  All long htmls should be read from files
-	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=15cm, initial-scale=1.0\"><title>Weekly Davening List</title><style>  @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 100%; margin: 0; padding: 0; overflow: hidden;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 100%; font-size: 12pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
+	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Weekly Davening List</title><style>.container {width: 630px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 630px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 630px; font-size: 12pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
 
-	public static final String htmlBodyStart = "<body><div class='page'>";
+	public static final String htmlBodyStart = "<body><div class='container'><div class='page'>";
 
 	public static final String tableStart = "<table style='width:100%'>";
 
@@ -47,7 +47,7 @@ public class EmailScheme {
 
 	public static final String sendGoodNewsMessage = "Please email %s with name and good news!";
 
-	public static final String htmlBodyEnd = "</div></body></html>";
+	public static final String htmlBodyEnd = "</div></div></body></html>";
 
 	public static final String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='%s'>HERE</a>";
 
@@ -57,10 +57,14 @@ public class EmailScheme {
 	// Default subject in emails from admin
 	public static final String adminMessageSubject = "Message from davening list admin";
 
-	public static final String userDisactivated = "We are confirming that your participation on the davening list has been disactivated. <br><br> You will no longer receive emails regarding the davening list. <br><br>If you think you did not disactivate your participation on the list, please contact thes list admin immediately. ";
+	public static final String userDisactivated = "We are confirming that your participation on the davening list has been disactivated. <br><br> You will no longer receive emails regarding the davening list. <br><br>If you think you did not disactivate your participation on the list, please contact your list admin immediately. ";
 
 	public static final String userActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
 
+	public static final String userDisactivatedSubject = "You have been unsubscribed";
+	
+	public static final String userActivatedSubject = "Welcome to the Davening List";
+	
 	// Text appearing in Admin's email requesting to daven urgently (can be Banim or
 	// any category)
 	public static final String urgentDavenforEmailBanim = "Please daven now for <b>%s - %s</b> and <b>%s - %s</b>, for: <b>%s</b>. <br>";

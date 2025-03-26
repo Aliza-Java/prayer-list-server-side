@@ -167,14 +167,17 @@ public class EmailSender {
 
 	// A general method allowing Admin to send messages to system users public
 	// tested
-	public void sendEmailFromAdmin(String recipient, String text) throws EmptyInformationException {
+	public void sendEmailFromAdmin(String recipient, String text, String suggestedSubject) throws EmptyInformationException {
 
 		if (recipient == null || recipient.length() == 0) {
 			throw new EmptyInformationException("Recipient email address missing.");
 		}
 
 		Session session = sessionProvider.getSession();
-		MimeMessage mimeMessage = createMimeMessage(session, EmailScheme.adminMessageSubject, text, recipient, null,
+		
+		String subject = (suggestedSubject == null || suggestedSubject.trim().length() == 0) ? EmailScheme.adminMessageSubject : suggestedSubject;
+			
+		MimeMessage mimeMessage = createMimeMessage(session, subject, text, recipient, null,
 				null, null);
 
 		sendEmail(mimeMessage);
@@ -190,17 +193,17 @@ public class EmailSender {
 
 		Category category = categoryRepository.getCurrent()
 				.orElseThrow(() -> new ObjectNotFoundException("current category"));
-		simplified.cName = category.getCname().toString();
+		simplified.category = category.getCname().toString();
 
 		sendOutWeekly(simplified);
 	}
 
 	// tested
-	public void sendOutWeekly(Weekly info) throws Exception {
+	public boolean sendOutWeekly(Weekly info) throws EmailException, EmptyInformationException, ObjectNotFoundException {
 
 		Category category;
-		if (info.cName != null && info.cName.length() > 0)
-			category = Category.getCategory(info.cName);
+		if (info.category != null && info.category.length() > 0)
+			category = Category.getCategory(info.category);
 		else
 			category = categoryRepository.findById(info.categoryId)
 					.orElseThrow(() -> new ObjectNotFoundException("Category"));
@@ -220,6 +223,8 @@ public class EmailSender {
 		}
 
 		List<String> usersList = userRepository.getAllUsersEmails();
+		if (usersList.size() == 0)
+			throw new EmailException("There are no active users, cannot send list");
 
 		String fileName = String.format(EmailScheme.weeklyFileName, utilities.getFileName(parashaName));
 
@@ -228,6 +233,8 @@ public class EmailSender {
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
 				utilities.buildListImage(category, info.parashaName), fileName));
+		
+		return true;
 	}
 
 	// tested
@@ -304,12 +311,12 @@ public class EmailSender {
 
 	// tested
 	public void notifyDisactivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.userDisactivated);
+		sendEmailFromAdmin(email, EmailScheme.userDisactivated, EmailScheme.userDisactivatedSubject);
 	}
 
 	// tested
 	public void notifyActivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.userActivated);
+		sendEmailFromAdmin(email, EmailScheme.userActivated, EmailScheme.userActivatedSubject);
 	}
 
 	// tested

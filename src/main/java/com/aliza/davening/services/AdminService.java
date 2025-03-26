@@ -498,7 +498,7 @@ public class AdminService {
 			throw new ObjectNotFoundException("category named " + info.category);
 		}
 
-		return utilities.createWeeklyHtml(category, info.parashaName);
+		return utilities.createWeeklyHtml(category, info.parashaName, true);
 	}
 
 	// tested

@@ -491,17 +491,17 @@ public class ServiceAdminTests {
 				.thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.previewWeekly(new Weekly("Vayera", 3L, "banim", "message"));
+			adminService.previewWeekly(new Weekly("Vayera", "Vayera - וירא", 3L, "banim", "message"));
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
 		try {
 			exception = assertThrows(EmptyInformationException.class, () -> {
-				adminService.previewWeekly(new Weekly("Vayera", 2L, "shidduchim", "message"));
+				adminService.previewWeekly(new Weekly("Vayera", "Vayera - וירא", 2L, "shidduchim", "message"));
 			});
 			assertTrue(exception.getMessage().contains("no names"));
 
-			String html = adminService.previewWeekly(new Weekly("Vayechi", 5L, "yeshuah", "message 2"));
+			String html = adminService.previewWeekly(new Weekly("Vayechi", "Vayechi - ויחי", 5L, "yeshuah", "message 2"));
 
 			assertTrue(html.contains("Vayechi"));
 			assertTrue(html.contains("YESHUAH"));

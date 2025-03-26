@@ -14,7 +14,8 @@ import lombok.ToString;
 
 public class Weekly {
 	public String parashaName;
+	public String fullWeekName;
 	public long categoryId;
-	public String cName;
+	public String category;
 	public String message = null;
 }

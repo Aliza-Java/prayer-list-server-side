@@ -186,12 +186,12 @@ public class ServiceEmailSenderTests {
 	@Order(2)
 	public void sendEmailFromAdminTest() {
 		Exception exception = assertThrows(EmptyInformationException.class, () -> {
-			emailSender.sendEmailFromAdmin(null, "some text");
+			emailSender.sendEmailFromAdmin(null, "some text", "some subject");
 		});
 		assertTrue(exception.getMessage().contains("address missing"));
 
 		try {
-			emailSender.sendEmailFromAdmin("recip@gmail.com", "test");
+			emailSender.sendEmailFromAdmin("recip@gmail.com", "test", "subject test");
 
 			// Verify that the email was sent
 			greenMail.waitForIncomingEmail(5000, 1);
@@ -207,6 +207,7 @@ public class ServiceEmailSenderTests {
 			assertEquals("recip@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("test"));
+			//TODO*: test subject too
 		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -228,7 +229,7 @@ public class ServiceEmailSenderTests {
 
 		when(categoryRep.findAll()).thenReturn(categories);
 
-		Weekly info = new Weekly("Vayeshev", 5L, "yeshuah", "special information");
+		Weekly info = new Weekly("Vayeshev", "Vayeshev - וישב", 5L, "yeshuah", "special information");
 
 		try {
 			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString())).thenReturn(Collections.emptyList());
@@ -299,7 +300,7 @@ public class ServiceEmailSenderTests {
 		when(categoryRep.findAll()).thenReturn(categories);
 		when(davenforRep.findAllDavenforByCategory("YESHUAH")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
-		Weekly info = new Weekly(null, 5L, "yeshuah", "special information");
+		Weekly info = new Weekly(null, null, 5L, "yeshuah", "special information");
 
 		try {
 			System.out.println(davenforRep.findAll());

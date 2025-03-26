@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
@@ -35,7 +36,7 @@ public class Utilities {
 
 	@Value("${server.url}")
 	public String server;
-	
+
 	@Value("${page.width}")
 	public int width;
 
@@ -44,7 +45,7 @@ public class Utilities {
 
 	@Autowired
 	DavenforRepository davenforRepository;
-	
+
 	@Autowired
 	ParashaRepository parashaRepository;
 
@@ -60,9 +61,9 @@ public class Utilities {
 	String linkToSendListFromServer = server + EmailScheme.linkToSendListS;
 	String linkToReviewWeeklyFromClient = client + EmailScheme.linkToReviewWeeklyC;
 
-	public File buildListImage(Category category, String weekName) throws Exception {
+	public File buildListImage(Category category, String weekName) throws EmptyInformationException, EmailException {
 
-		String weeklyHtml = createWeeklyHtml(category, weekName);
+		String weeklyHtml = createWeeklyHtml(category, weekName, false);
 
 		String fileName = "builtFiles/" + getFileName(weekName);
 		Path filePath = Paths.get(fileName);
@@ -71,8 +72,8 @@ public class Utilities {
 		try {
 			driverPath = ChromeDriverUtil.extractChromeDriver();
 		} catch (Exception e) {
-			System.out.println("There was a problem extracting ChromeDriver");
-			throw new Exception(e.getMessage());
+			System.out.println("There was a problem extracting ChromeDriver: " + e.getMessage());
+			throw new EmailException("There was a problem creating the list image");
 		}
 		System.setProperty("webdriver.chrome.driver", driverPath);
 
@@ -148,13 +149,13 @@ public class Utilities {
 		}
 		return nextCategory;
 	}
-	
+
 	public Parasha getNextParasha(Parasha current) {
 		List<Parasha> parashot = parashaRepository.findAll();
-		Parasha nextParasha = parashot.stream().filter(p -> p.getId() == current.getId()+1 ).findFirst().orElse(null);
+		Parasha nextParasha = parashot.stream().filter(p -> p.getId() == current.getId() + 1).findFirst().orElse(null);
 		if (nextParasha == null)
 			return parashot.get(0);
-		else 
+		else
 			return nextParasha;
 	}
 
@@ -211,8 +212,8 @@ public class Utilities {
 		return message;
 	}
 
-	public String createWeeklyHtml(Category category, String weekName) throws EmptyInformationException { 
-		//todo*: make solution for too many names.  Onto another page? two columns? 
+	public String createWeeklyHtml(Category category, String weekName, boolean preview) throws EmptyInformationException {
+		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
 
 		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category.getCname().toString());
@@ -222,7 +223,8 @@ public class Utilities {
 		}
 
 		// building standard html format: head and opening <body> tag
-		stringBuilder.append(EmailScheme.htmlHead);
+		String allowOverflow = preview ? "auto" : "hidden";
+		stringBuilder.append(String.format(EmailScheme.htmlHead, allowOverflow));
 		stringBuilder.append(EmailScheme.htmlBodyStart);
 
 		// building headlines and starting table
