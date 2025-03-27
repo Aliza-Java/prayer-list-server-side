@@ -85,7 +85,7 @@ public class UserService {
 	}
 
 	// tested
-	public Davenfor addDavenfor(Davenfor davenfor, String userEmail)
+	public boolean addDavenfor(Davenfor davenfor, String userEmail)
 			throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {
 
 		Category category = Category.getCategory(davenfor.getCategory());
@@ -123,7 +123,7 @@ public class UserService {
 			savedDavenfor = davenforRepository.save(davenfor);
 		} catch (Exception e) {
 			System.err.println("Error saving entity: " + e.getMessage());
-			return null;
+			return false;
 		}
 
 		emailSender.sendConfirmationEmail(savedDavenfor.getId());
@@ -136,7 +136,7 @@ public class UserService {
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
 
-		return savedDavenfor;
+		return true;
 	}
 
 	// tested

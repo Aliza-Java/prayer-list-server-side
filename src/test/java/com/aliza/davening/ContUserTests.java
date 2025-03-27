@@ -133,7 +133,7 @@ public class ContUserTests {
 					.andExpect(jsonPath("$.code").value("EMPTY_INFORMATION"))
 					.andExpect(jsonPath("$.messages[0]", containsString("spouse name (English and Hebrew)")));
 
-			when(userService.addDavenfor(any(), eq("user2@gmail.com"))).thenReturn(dfYeshuah2);
+			when(userService.addDavenfor(any(), eq("user2@gmail.com"))).thenReturn(true);
 			String requestBodyGood = "{ \"email\": \"user3@gmail.com\", \"category\": \"YESHUAH\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 			mockMvc.perform(post("/user/{email}", "user2@gmail.com").content(requestBodyGood)

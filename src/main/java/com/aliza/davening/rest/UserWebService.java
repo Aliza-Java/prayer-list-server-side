@@ -8,10 +8,8 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -55,7 +53,7 @@ public class UserWebService {
 
 	// tested
 	@PostMapping(path = "{email}")
-	public Davenfor addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
+	public boolean addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
 			throws EmptyInformationException, ObjectNotFoundException, IOException, EmailException {// TODO*: add tests
 																									// for last 3
 																									// exceptions
