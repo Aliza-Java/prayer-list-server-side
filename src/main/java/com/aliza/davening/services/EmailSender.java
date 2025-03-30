@@ -263,7 +263,7 @@ public class EmailSender {
 
 		else {
 			urgentMessage = String.format(EmailScheme.urgentDavenforEmailText, davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), davenfor.getCategory());
+					davenfor.getNameHebrew(), utilities.toTitlecase(davenfor.getCategory()));
 		}
 
 		if (davenfor.getNote() != null) {

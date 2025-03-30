@@ -6,7 +6,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.JavascriptExecutor;
@@ -293,5 +295,14 @@ public class Utilities {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 		String formattedNow = now.format(formatter);
 		return weekName + "_" + formattedNow + ".png";
+	}
+	
+	public String toTitlecase(String input) {
+		 if (input == null || input.isEmpty()) {
+	            return input;
+	        }
+	        return Arrays.stream(input.split("\\s+"))
+	                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
+	                .collect(Collectors.joining(" "));
 	}
 }
