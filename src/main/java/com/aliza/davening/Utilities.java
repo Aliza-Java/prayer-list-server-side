@@ -54,8 +54,8 @@ public class Utilities {
 	@Autowired
 	AdminService adminService;
 
-	// @Value("${admin.email}")
-	private String adminEmail = "davening.list@gmail.com";
+	@Value("${admin.email}")
+	String adminEmail;
 
 	String linkToExtendFromServer = server + EmailScheme.linkToExtendS;
 	String linkToDeleteFromClient = client + EmailScheme.linkToDeleteS;
