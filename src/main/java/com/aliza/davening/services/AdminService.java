@@ -36,6 +36,7 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.UserRepository;
+import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
@@ -71,11 +72,17 @@ public class AdminService {
 
 	@Autowired
 	EntityManager entityManager;
+	
+	@Autowired
+	JwtUtils jwtUtils;
 
 	public Admin thisAdmin = null;
 
 	@Value("${admin.id}")
 	long adminId;
+	
+	@Value("${admin.email}")
+	String adminEmail;
 
 	@PostConstruct
 	public void initializeCategories() {
@@ -490,21 +497,54 @@ public class AdminService {
 		return this.categoryRepository.getCurrent().get();
 	}
 
-	// tested
+	// todo* in future: test now that changed
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
 
-		Category category = Category.getCategory(info.category);
-		if (category == null) {
-			throw new ObjectNotFoundException("category named " + info.category);
+		Category category;
+		String parashaName;
+		
+		if (info == null) //came from direct, or other issue
+		{
+			Optional<Category> optionalCategory = categoryRepository.getCurrent();
+			if (optionalCategory.isEmpty())
+				throw new ObjectNotFoundException("current category");
+			category = optionalCategory.get();
+			
+			Optional<Parasha> optionalParasha = parashaRepository.findCurrent();
+			if (optionalParasha.isEmpty())
+				throw new ObjectNotFoundException("current parasha");
+			parashaName = optionalParasha.get().getEnglishName();				
+		}
+		
+		else //info came in
+		{
+			category = Category.getCategory(info.category);
+			if (category == null) {
+				throw new ObjectNotFoundException("category named " + info.category);
+			}
+			parashaName = info.parashaName;
 		}
 
-		return utilities.createWeeklyHtml(category, info.parashaName, true);
+		return utilities.createWeeklyHtml(category, parashaName, true);
 	}
 
 	// tested
 	public AdminSettings getAdminSettings(String email) throws ObjectNotFoundException {
 		Admin admin = findAdminByEmail(email);
 		return new AdminSettings(admin.getEmail(), admin.isNewNamePrompt(), admin.getWaitBeforeDeletion());
+	}
+	
+	//to test
+	public boolean checkTokenForDirect(String token, String email) { //verifying that email to be saved in frontend is good
+		String extractedEmail = jwtUtils.getUserNameFromJwtToken(token);
+		if (extractedEmail == null)
+			return false;
+		if (!extractedEmail.equalsIgnoreCase(adminEmail) || !extractedEmail.equalsIgnoreCase(email))
+		{
+			System.out.println("The email doesn't match the registered admin email");
+			return false;
+		}
+		return true;
 	}
 
 //	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)

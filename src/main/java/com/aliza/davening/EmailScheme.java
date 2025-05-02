@@ -94,7 +94,7 @@ public class EmailScheme {
 
 	public static final String weeklyAdminReminderSubject = "Davening list reminder: Send out the weekly list!";
 
-	public static final String expiringNameSubject = "Davening List Confirmation";
+	public static final String expiringNameSubject = "Action required - Is this name still relevant?";
 
 	public static final String unsubscribeSubject = "Unsubscribe - action required";
 	
@@ -107,8 +107,8 @@ public class EmailScheme {
 	public static String linkToExtendS = "extend/%s?email=%s";
 	public static String linkToDeleteS = "/guest/delete?id=%d&token=%s";
 	public static String linkToLoginC = "admin";
-	public static String linkToSendListS = "admin/weeklylist";
-	public static String linkToReviewWeeklyC = "admin/weekly";
+	public static String linkToSendListS = "/admin/direct?t=%s&redirect=sendbutneedtosee";
+	public static String linkToReviewWeeklyC = "/direct-preview?t=%s&email=%s";
 
 	public static final String unsubscribeMessage = "We are sorry to see you go. <br> Click <a href=%s>HERE</a> to complete the process. <br><br> If you ever wish to join again, email the list admin at %s.";
 }

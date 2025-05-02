@@ -7,12 +7,18 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.security.JwtUtils;
+import com.aliza.davening.security.TokenRequest;
+import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.UserService;
 
 @Controller // special web service for all methods that redirect to a new response page.
@@ -26,6 +32,12 @@ public class PopupWebService {
 
 	@Autowired
 	UserService userService;
+
+	@Autowired
+	AdminService adminService;
+
+	@Autowired
+	JwtUtils jwtUtils;
 
 	// TODO*: test
 	@GetMapping(path = "unsubscribe/{token}")
@@ -49,7 +61,7 @@ public class PopupWebService {
 			model.addAttribute("status", "This name may have been deleted already");
 			model.addAttribute("action", "Take me to the website");
 			return "delete-problem";
-		} catch (Exception e) {			
+		} catch (Exception e) {
 			model.addAttribute("status", "There was a problem deleting this name");
 			model.addAttribute("action", "Delete directly from the website");
 			return "delete-problem"; // maps to `src/main/resources/templates/delete-problem.html` due to Thymeleaf
@@ -72,7 +84,7 @@ public class PopupWebService {
 		try {
 			extendedDf = userService.extendDavenfor(id, token);
 		} catch (Exception e) {
-			model.addAttribute("message","There was a problem confirming this name");
+			model.addAttribute("message", "There was a problem confirming this name");
 			model.addAttribute("reason", e.getMessage());
 			return "extend-problem"; // maps to `src/main/resources/templates/extend-problem.html` due to Thymeleaf
 		}
@@ -83,4 +95,15 @@ public class PopupWebService {
 										// Thymeleaf
 
 	}
+
+	// to test
+	@PostMapping("preview")
+	@ResponseBody
+	public String getDirectPreview(@RequestBody TokenRequest data)
+			throws ObjectNotFoundException, EmptyInformationException {
+		if (adminService.checkTokenForDirect(data.getToken(), data.getEmail()))
+			return adminService.previewWeekly(null);
+		else
+			return "There was a problem generating the preview";
+		}
 }

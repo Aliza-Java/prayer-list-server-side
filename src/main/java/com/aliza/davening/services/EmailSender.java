@@ -2,6 +2,7 @@ package com.aliza.davening.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -290,17 +291,15 @@ public class EmailSender {
 		String subject = EmailScheme.confirmationEmailSubject;
 		String emailAddress = confirmedDavenfor.getUserEmail();
 
-		String linkToConfirm = String.format(client + linkToExtendClient, davenforId, confirmedDavenfor.getNameEnglish(), jwtUtils.generateEmailToken(emailAddress));
-		String linkToRemove = String.format(client + linkToRemoveClient, davenforId, jwtUtils.generateEmailToken(emailAddress));
-
+		//todo* in future - make these a method (used twice)
+	
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
-				confirmedDavenfor.getCategory(), linkToConfirm, linkToRemove);
-		String to = confirmedDavenfor.getUserEmail();
+				confirmedDavenfor.getCategory(), getLinkToExtend(confirmedDavenfor), getLinkToDelete(confirmedDavenfor));
 
 		try {
-			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, to, null, null,
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, emailAddress, null, null,
 					null));
 		} catch (Exception e) {
 			throw new EmailException(String.format("Could not send confirmation email to %s", emailAddress));
@@ -308,6 +307,16 @@ public class EmailSender {
 
 		return true;
 	}
+	
+	// tested
+		public void offerExtensionOrDelete(Davenfor davenfor) {
+
+			String subject = EmailScheme.expiringNameSubject;
+			String message = String.format(utilities.setExpiringNameMessage(davenfor));
+			String recipient = davenfor.getUserEmail();
+
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
+		}
 
 	// tested
 	public void notifyDisactivatedUser(String email) throws EmptyInformationException {
@@ -317,16 +326,6 @@ public class EmailSender {
 	// tested
 	public void notifyActivatedUser(String email) throws EmptyInformationException {
 		sendEmailFromAdmin(email, EmailScheme.userActivated, EmailScheme.userActivatedSubject);
-	}
-
-	// tested
-	public void offerExtensionOrDelete(Davenfor davenfor) {
-
-		String subject = EmailScheme.expiringNameSubject;
-		String message = String.format(utilities.setExpiringNameMessage(davenfor));
-		String recipient = davenfor.getUserEmail();
-
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
 	}
 
 	public String requestToUnsubscribe(String email) {// TODO*: test
@@ -351,5 +350,13 @@ public class EmailSender {
 	private String setUnsubscribeMessage(String email) {
 		String unsubscribeLink = linkToUnsubscribe + jwtUtils.generateEmailToken(email);
 		return String.format(EmailScheme.unsubscribeMessage, unsubscribeLink, adminEmail);
+	}
+	
+	public String getLinkToExtend(Davenfor davenfor) {
+		return String.format(client + linkToExtendClient, davenfor.getId(), URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8), jwtUtils.generateEmailToken(davenfor.getUserEmail()));
+	}
+	
+	public String getLinkToDelete(Davenfor davenfor) {
+		return String.format(client + linkToRemoveClient, davenfor.getId(), jwtUtils.generateEmailToken(davenfor.getUserEmail()));
 	}
 }

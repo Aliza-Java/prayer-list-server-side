@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,9 @@ import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
+import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.services.AdminService;
+import com.aliza.davening.services.EmailSender;
 
 //A helper class for building long and winding messages and files
 
@@ -53,6 +56,12 @@ public class Utilities {
 
 	@Autowired
 	AdminService adminService;
+
+	@Autowired
+	EmailSender emailSender;
+	
+	@Autowired 
+	JwtUtils jwtUtils;
 
 	@Value("${admin.email}")
 	String adminEmail;
@@ -167,16 +176,20 @@ public class Utilities {
 
 	// Builds the long and complex email message that gets sent every week to Admin
 	// (to review and send list)
+	//todo* in future: use StringBuilder (and in all text concats in this program...)
 	public String setWeeklyAdminReminderMessage() {
 
+		Date expiry = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000); //24 hours ahead
+		String token = jwtUtils.generateDirectAdminToken(adminEmail, expiry);
+		
 		// Prepare buttons
-		String button1 = createButton(linkToReviewWeeklyFromClient, "#ffa200", "Review the list first");
+		String button1 = createButton(String.format(linkToReviewWeeklyFromClient, token, adminEmail.trim()), "#ffa200", "Review the list first");
 
 		// This button includes also a parasha id and needs to be built
 		String linkWithParasha = linkToSendListFromServer;
 		String button2 = createButton(linkWithParasha, "#32a842", "Send out the list");
 
-		String buttonArea = "<table cellspacing='0' cellpadding='0'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
 				+ "</tr></tbody></table>";
 
 		String message = "This is a reminder to send out the weekly davening list."
@@ -184,24 +197,19 @@ public class Utilities {
 				+ "<br><br> Or, click the green button to go ahead and send out the list. "
 				// Inserting the button tds to an html table and connecting them to the bottom
 				// of the message
-				+ buttonArea;
+				+ buttonArea + "<br> Please note: " + jwtUtils.getExpiryNotice(expiry);
+		
 		return message;
 	}
 
 	public String setExpiringNameMessage(Davenfor davenfor) {
 
-		// Building links that the buttons will refer to
-		String extendLink = linkToExtendFromServer;
-		String personalizedExtendLink = String.format(extendLink, davenfor.getId(), davenfor.getUserEmail());
-		String personalizedDeleteLink = String.format(linkToDeleteFromClient, davenfor.getId(),
-				davenfor.getUserEmail());
-
 		// Creating the button 'components' as html tds
-		String button1 = createButton(personalizedExtendLink, "#32a842", "Keep the name on the list");
-		String button2 = createButton(personalizedDeleteLink, "#d10a3f", "Remove this name");
+		String button1 = createButton(emailSender.getLinkToExtend(davenfor), "#32a842", "Keep the name on the list");
+		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "Remove this name");
 
 		// Inserting the button tds to an html table
-		String buttonArea = "<table cellspacing='0' cellpadding='0'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
 				+ "</tr></tbody></table>";
 
 		// building the email message with the button area as a table at the bottom
@@ -214,7 +222,8 @@ public class Utilities {
 		return message;
 	}
 
-	public String createWeeklyHtml(Category category, String weekName, boolean preview) throws EmptyInformationException {
+	public String createWeeklyHtml(Category category, String weekName, boolean preview)
+			throws EmptyInformationException {
 		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
 
@@ -296,13 +305,14 @@ public class Utilities {
 		String formattedNow = now.format(formatter);
 		return weekName + "_" + formattedNow + ".png";
 	}
-	
+
 	public String toTitlecase(String input) {
-		 if (input == null || input.isEmpty()) {
-	            return input;
-	        }
-	        return Arrays.stream(input.split("\\s+"))
-	                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
-	                .collect(Collectors.joining(" "));
+		if (input == null || input.isEmpty()) {
+			return input;
+		}
+		return Arrays.stream(input.split("\\s+"))
+				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
+				.collect(Collectors.joining(" "));
 	}
 }
+

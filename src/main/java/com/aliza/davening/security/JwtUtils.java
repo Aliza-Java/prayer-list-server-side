@@ -1,5 +1,6 @@
 package com.aliza.davening.security;
 
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
 
@@ -45,9 +46,9 @@ public class JwtUtils {
 		try {
 			return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody()
 					.getSubject();
-			
+
 		} catch (ExpiredJwtException e) {
-			System.err.println("JWT token is expired: " + e.getMessage());
+			System.err.println("JWT token is expired line 51: " + e.getMessage());
 		} catch (UnsupportedJwtException e) {
 			System.err.println("JWT token is unsupported: " + e.getMessage());
 		} catch (MalformedJwtException e) {
@@ -73,7 +74,7 @@ public class JwtUtils {
 		} catch (MalformedJwtException e) {
 			logger.error("Invalid JWT token: {}", e.getMessage());
 		} catch (ExpiredJwtException e) {
-			logger.error("JWT token is expired: {}", e.getMessage());
+			logger.error("JWT token is expired line 77: {}", e.getMessage());
 		} catch (UnsupportedJwtException e) {
 			logger.error("JWT token is unsupported: {}", e.getMessage());
 		} catch (IllegalArgumentException e) {
@@ -81,5 +82,18 @@ public class JwtUtils {
 		}
 
 		return false;
+	}
+
+	public String generateDirectAdminToken(String email, Date expiry) {
+
+		System.out.println(getExpiryNotice(expiry));
+
+		return Jwts.builder().setSubject(email).setIssuedAt(new Date()).setExpiration(expiry) // 24 hours ahead
+				.signWith(getSigningKey()).compact();
+	}
+
+	public String getExpiryNotice(Date expiry) {
+		SimpleDateFormat formatter = new SimpleDateFormat("(EEEE) HH:mm");
+		return "Your token will expire tomorrow " + formatter.format(expiry);
 	}
 }
