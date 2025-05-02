@@ -1,8 +1,0 @@
-# pack-refs with: peeled fully-peeled sorted 
-09b5fe11a22a781f2aae19bd22d7c445859a4314 refs/heads/dependabot/maven/commons-io-commons-io-2.14.0
-80d9e49130c23fb35c3a6d9752a87ac196be4448 refs/heads/master
-40715ad1f51b2fd9c56c20ab2d588759662d9dd0 refs/pull/1/head
-c6fcd283890a256b0fe3c7a240026b91ea77e4b3 refs/pull/2/head
-7b7861695085896c95c65344006fa343e3569d28 refs/pull/3/head
-09b5fe11a22a781f2aae19bd22d7c445859a4314 refs/pull/4/head
-df7e7e42c843b748ddc3dce50cb9094a5f9ce3e7 refs/pull/4/merge
