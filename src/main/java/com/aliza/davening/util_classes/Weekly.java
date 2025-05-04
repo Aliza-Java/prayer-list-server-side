@@ -13,8 +13,8 @@ import lombok.ToString;
 @ToString
 
 public class Weekly {
-	public String parashaName;
-	public String fullWeekName;
+	public String parashaNameEnglish;
+	public String parashaNameFull;
 	public long categoryId;
 	public String category;
 	public String message = null;

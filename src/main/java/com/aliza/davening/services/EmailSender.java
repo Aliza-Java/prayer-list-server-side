@@ -24,7 +24,6 @@ import com.aliza.davening.SchemeValues;
 import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
-import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
@@ -64,6 +63,9 @@ public class EmailSender {
 
 	@Autowired
 	private DavenforRepository davenforRepository;
+
+	@Autowired
+	private AdminService adminService;
 
 	@Autowired
 	private Utilities utilities;
@@ -168,18 +170,20 @@ public class EmailSender {
 
 	// A general method allowing Admin to send messages to system users public
 	// tested
-	public void sendEmailFromAdmin(String recipient, String text, String suggestedSubject) throws EmptyInformationException {
+	public void sendEmailFromAdmin(String recipient, String text, String suggestedSubject)
+			throws EmptyInformationException {
 
 		if (recipient == null || recipient.length() == 0) {
 			throw new EmptyInformationException("Recipient email address missing.");
 		}
 
 		Session session = sessionProvider.getSession();
-		
-		String subject = (suggestedSubject == null || suggestedSubject.trim().length() == 0) ? EmailScheme.adminMessageSubject : suggestedSubject;
-			
-		MimeMessage mimeMessage = createMimeMessage(session, subject, text, recipient, null,
-				null, null);
+
+		String subject = (suggestedSubject == null || suggestedSubject.trim().length() == 0)
+				? EmailScheme.adminMessageSubject
+				: suggestedSubject;
+
+		MimeMessage mimeMessage = createMimeMessage(session, subject, text, recipient, null, null, null);
 
 		sendEmail(mimeMessage);
 	}
@@ -188,53 +192,58 @@ public class EmailSender {
 	public void sendSimplifiedWeekly() throws Exception {
 		Weekly simplified = new Weekly();
 
-		Parasha parasha = parashaRepository.findCurrent()
-				.orElseThrow(() -> new ObjectNotFoundException("current Parasha"));
-		simplified.parashaName = parasha.getEnglishName();
-
-		Category category = categoryRepository.getCurrent()
-				.orElseThrow(() -> new ObjectNotFoundException("current category"));
-		simplified.category = category.getCname().toString();
+		simplified.parashaNameEnglish = adminService.inferParashaName(false);
+		simplified.parashaNameFull = adminService.inferParashaName(true);
+		simplified.category = adminService.inferCategory().getCname().toString();
 
 		sendOutWeekly(simplified);
 	}
 
 	// tested
-	public boolean sendOutWeekly(Weekly info) throws EmailException, EmptyInformationException, ObjectNotFoundException {
+	public boolean sendOutWeekly(Weekly info)
+			throws EmailException, EmptyInformationException, ObjectNotFoundException {
 
 		Category category;
-		if (info.category != null && info.category.length() > 0)
-			category = Category.getCategory(info.category);
-		else
-			category = categoryRepository.findById(info.categoryId)
-					.orElseThrow(() -> new ObjectNotFoundException("Category"));
-
-		LocalDate date = LocalDate.now();
-		String todaysDate = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(date);
-		String parashaName = (info.parashaName != null && info.parashaName.length() > 0)
-				? "Parashat " + info.parashaName + " - " + todaysDate
-				: todaysDate;
-		String subject = String.format(EmailScheme.weeklyEmailSubject, parashaName);
+		String parashaNameEnglish;
+		String parashaNameFull;
 		String linkToUnsubscribe = client + "/unsubscribe";
 		String emailText = String.format(EmailScheme.weeklyEmailText, linkToUnsubscribe);
+		LocalDate date = LocalDate.now();
+		String todaysDate = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(date);
 
-		// If there is a message from the admin, add it beforehand.
-		if (info.message != null) {
-			emailText = concatAdminMessage(info.message, emailText);
+		if (info == null) {
+			category = adminService.inferCategory();
+			parashaNameEnglish = adminService.inferParashaName(false);
+			parashaNameFull = adminService.inferParashaName(true);
+		} 
+		else // info came in (but parts may be missing)
+		{
+			if (info.category != null && info.category.length() > 0)
+				category = Category.getCategory(info.category);
+			else
+				category = categoryRepository.findById(info.categoryId)
+						.orElseThrow(() -> new ObjectNotFoundException("Category"));
+
+			parashaNameEnglish = (info.parashaNameEnglish != null && info.parashaNameEnglish.length() > 0) ? info.parashaNameEnglish
+					: adminService.inferParashaName(false);
+			
+			parashaNameFull = info.parashaNameFull;
+
+			if (info.message != null)
+				emailText = concatAdminMessage(info.message, emailText);
 		}
+
+		String subject = String.format(EmailScheme.weeklyEmailSubject, parashaNameEnglish);
 
 		List<String> usersList = userRepository.getAllUsersEmails();
 		if (usersList.size() == 0)
 			throw new EmailException("There are no active users, cannot send list");
 
-		String fileName = String.format(EmailScheme.weeklyFileName, utilities.getFileName(parashaName));
-
-		// 'to' field in doEmail cannot be empty (JavaMailSender in subsequent methods),
-		// therefore including admin's email.
+		String fileName = String.format(EmailScheme.weeklyFileName, utilities.getFileName(parashaNameEnglish + "-" + todaysDate));
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
-				utilities.buildListImage(category, info.parashaName), fileName));
-		
+				utilities.buildListImage(category, parashaNameFull), fileName));
+
 		return true;
 	}
 
@@ -291,32 +300,33 @@ public class EmailSender {
 		String subject = EmailScheme.confirmationEmailSubject;
 		String emailAddress = confirmedDavenfor.getUserEmail();
 
-		//todo* in future - make these a method (used twice)
-	
+		// todo* in future - make these a method (used twice)
+
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
-				confirmedDavenfor.getCategory(), getLinkToExtend(confirmedDavenfor), getLinkToDelete(confirmedDavenfor));
+				confirmedDavenfor.getCategory(), getLinkToExtend(confirmedDavenfor),
+				getLinkToDelete(confirmedDavenfor));
 
 		try {
-			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, emailAddress, null, null,
-					null));
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, emailAddress,
+					null, null, null));
 		} catch (Exception e) {
 			throw new EmailException(String.format("Could not send confirmation email to %s", emailAddress));
 		}
 
 		return true;
 	}
-	
+
 	// tested
-		public void offerExtensionOrDelete(Davenfor davenfor) {
+	public void offerExtensionOrDelete(Davenfor davenfor) {
 
-			String subject = EmailScheme.expiringNameSubject;
-			String message = String.format(utilities.setExpiringNameMessage(davenfor));
-			String recipient = davenfor.getUserEmail();
+		String subject = EmailScheme.expiringNameSubject;
+		String message = String.format(utilities.setExpiringNameMessage(davenfor));
+		String recipient = davenfor.getUserEmail();
 
-			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
-		}
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
+	}
 
 	// tested
 	public void notifyDisactivatedUser(String email) throws EmptyInformationException {
@@ -351,12 +361,15 @@ public class EmailSender {
 		String unsubscribeLink = linkToUnsubscribe + jwtUtils.generateEmailToken(email);
 		return String.format(EmailScheme.unsubscribeMessage, unsubscribeLink, adminEmail);
 	}
-	
+
 	public String getLinkToExtend(Davenfor davenfor) {
-		return String.format(client + linkToExtendClient, davenfor.getId(), URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8), jwtUtils.generateEmailToken(davenfor.getUserEmail()));
+		return String.format(client + linkToExtendClient, davenfor.getId(),
+				URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
+				jwtUtils.generateEmailToken(davenfor.getUserEmail()));
 	}
-	
+
 	public String getLinkToDelete(Davenfor davenfor) {
-		return String.format(client + linkToRemoveClient, davenfor.getId(), jwtUtils.generateEmailToken(davenfor.getUserEmail()));
+		return String.format(client + linkToRemoveClient, davenfor.getId(),
+				jwtUtils.generateEmailToken(davenfor.getUserEmail()));
 	}
 }

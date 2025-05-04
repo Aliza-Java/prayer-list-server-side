@@ -80,7 +80,7 @@ public class AdminService {
 
 	@Value("${admin.id}")
 	long adminId;
-	
+
 	@Value("${admin.email}")
 	String adminEmail;
 
@@ -159,7 +159,10 @@ public class AdminService {
 			throw new ObjectNotFoundException("Admin with email " + email);
 		}
 
-		return bCryptPasswordEncoder.matches(password, optionalAdmin.get().getPassword());
+		boolean answer = bCryptPasswordEncoder.matches(password, optionalAdmin.get().getPassword());
+		if (!answer)
+			System.out.println("Password is incorrect");
+		return answer;
 	}
 
 	// tested
@@ -501,31 +504,28 @@ public class AdminService {
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
 
 		Category category;
-		String parashaName;
-		
-		if (info == null) //came from direct, or other issue
+		String parashaNameEnglish;
+
+		if (info == null) // came from direct, or other issue
 		{
-			Optional<Category> optionalCategory = categoryRepository.getCurrent();
-			if (optionalCategory.isEmpty())
-				throw new ObjectNotFoundException("current category");
-			category = optionalCategory.get();
-			
-			Optional<Parasha> optionalParasha = parashaRepository.findCurrent();
-			if (optionalParasha.isEmpty())
-				throw new ObjectNotFoundException("current parasha");
-			parashaName = optionalParasha.get().getEnglishName();				
+			try {
+				category = inferCategory();
+				parashaNameEnglish = inferParashaName(false);
+			} catch (ObjectNotFoundException ex) {
+				throw ex;
+			}
 		}
-		
-		else //info came in
+
+		else // info came in
 		{
 			category = Category.getCategory(info.category);
 			if (category == null) {
 				throw new ObjectNotFoundException("category named " + info.category);
 			}
-			parashaName = info.parashaName;
+			parashaNameEnglish = info.parashaNameEnglish;
 		}
 
-		return utilities.createWeeklyHtml(category, parashaName, true);
+		return utilities.createWeeklyHtml(category, parashaNameEnglish, true);
 	}
 
 	// tested
@@ -533,18 +533,34 @@ public class AdminService {
 		Admin admin = findAdminByEmail(email);
 		return new AdminSettings(admin.getEmail(), admin.isNewNamePrompt(), admin.getWaitBeforeDeletion());
 	}
-	
-	//to test
-	public boolean checkTokenForDirect(String token, String email) { //verifying that email to be saved in frontend is good
+
+	// to test - also c
+	public boolean checkTokenForDirect(String token, String email) { // verifying that email to be saved in frontend is
+																		// good
 		String extractedEmail = jwtUtils.getUserNameFromJwtToken(token);
+		System.out.println("Extracted email is: " + extractedEmail);
 		if (extractedEmail == null)
 			return false;
-		if (!extractedEmail.equalsIgnoreCase(adminEmail) || !extractedEmail.equalsIgnoreCase(email))
-		{
+		if (!extractedEmail.equalsIgnoreCase(adminEmail) || !extractedEmail.equalsIgnoreCase(email)) {
 			System.out.println("The email doesn't match the registered admin email");
 			return false;
 		}
 		return true;
+	}
+
+	public Category inferCategory() throws ObjectNotFoundException {
+		Category category = categoryRepository.getCurrent()
+				.orElseThrow(() -> new ObjectNotFoundException("current category"));
+		return category;
+	}
+
+	public String inferParashaName(boolean full) throws ObjectNotFoundException {
+		Parasha parasha = parashaRepository.findCurrent()
+				.orElseThrow(() -> new ObjectNotFoundException("current Parasha"));
+		if (full)
+			return parasha.getEnglishName() + " - " + parasha.getHebrewName();
+		else
+			return parasha.getEnglishName();
 	}
 
 //	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)
