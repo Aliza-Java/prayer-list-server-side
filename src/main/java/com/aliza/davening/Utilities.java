@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
-import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
@@ -31,6 +30,8 @@ import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
+
+import io.github.bonigarcia.wdm.WebDriverManager;
 
 //A helper class for building long and winding messages and files
 
@@ -59,44 +60,47 @@ public class Utilities {
 
 	@Autowired
 	EmailSender emailSender;
-	
-	@Autowired 
+
+	@Autowired
 	JwtUtils jwtUtils;
 
 	@Value("${admin.email}")
 	String adminEmail;
 
-	String linkToExtendFromServer = server + EmailScheme.linkToExtendS;
-	String linkToDeleteFromClient = client + EmailScheme.linkToDeleteS;
-	String linkToLoginFromClient = client + EmailScheme.linkToLoginC;
-	String linkToSendListFromServer = server + EmailScheme.linkToSendListS;
-	String linkToReviewWeeklyFromClient = client + EmailScheme.linkToReviewWeeklyC;
+	String linkToExtend = client + EmailScheme.linkToExtend;
+	String linkToDelete = client + EmailScheme.linkToDelete;
+	String linkToLogin = client + EmailScheme.linkToLogin;
+	String linkToSendList = client + EmailScheme.linkToSendList;
+	String linkToReviewWeekly = client + EmailScheme.linkToReviewWeekly;
 
-	public File buildListImage(Category category, String weekName) throws EmptyInformationException, EmailException {
+	public File buildListImage(Category category, String weekName) throws EmptyInformationException {
 
 		String weeklyHtml = createWeeklyHtml(category, weekName, false);
 
 		String fileName = "builtFiles/" + getFileName(weekName);
 		Path filePath = Paths.get(fileName);
 
-		String driverPath = null;
-		try {
-			driverPath = ChromeDriverUtil.extractChromeDriver();
-		} catch (Exception e) {
-			System.out.println("There was a problem extracting ChromeDriver: " + e.getMessage());
-			throw new EmailException("There was a problem creating the list image");
-		}
-		System.setProperty("webdriver.chrome.driver", driverPath);
+		// moving from manual chrome extraction to automatic
+//		String driverPath = null;
+//		try {
+//			driverPath = ChromeDriverUtil.extractChromeDriver();
+//		} catch (Exception e) {
+//			System.out.println("There was a problem extracting ChromeDriver: " + e.getMessage());
+//			throw new EmailException("There was a problem creating the list image");
+//		}
+//		System.setProperty("webdriver.chrome.driver", driverPath);
 
 		// Set up headless Chrome
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
 
+		WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); // added version. supposed to detect version
+																			// automatically, but in this case didn't
+
 		WebDriver driver = new ChromeDriver(options);
 
 		// Load HTML and take a screenshot (JPEG)
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
-
 		try {
 			Thread.sleep(2000);
 		} catch (InterruptedException e) {
@@ -176,18 +180,20 @@ public class Utilities {
 
 	// Builds the long and complex email message that gets sent every week to Admin
 	// (to review and send list)
-	//todo* in future: use StringBuilder (and in all text concats in this program...)
+	// todo* in future: use StringBuilder (and in all text concats in this
+	// program...)
 	public String setWeeklyAdminReminderMessage() {
 
-		Date expiry = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000); //24 hours ahead
+		Date expiry = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000); // 24 hours ahead
 		String token = jwtUtils.generateDirectAdminToken(adminEmail, expiry);
-		
+
 		// Prepare buttons
-		String button1 = createButton(String.format(linkToReviewWeeklyFromClient, token, adminEmail.trim()), "#ffa200", "Review the list first");
+		String button1 = createButton(String.format(linkToReviewWeekly, token, adminEmail.trim()), "#ffa200",
+				"Review the list first");
 
 		// This button includes also a parasha id and needs to be built
-		String linkWithParasha = linkToSendListFromServer;
-		String button2 = createButton(linkWithParasha, "#32a842", "Send out the list");
+		String button2 = createButton(String.format(linkToSendList, token, adminEmail.trim()), "#32a842",
+				"Send out the list");
 
 		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
 				+ "</tr></tbody></table>";
@@ -198,7 +204,7 @@ public class Utilities {
 				// Inserting the button tds to an html table and connecting them to the bottom
 				// of the message
 				+ buttonArea + "<br> Please note: " + jwtUtils.getExpiryNotice(expiry);
-		
+
 		return message;
 	}
 
@@ -315,4 +321,3 @@ public class Utilities {
 				.collect(Collectors.joining(" "));
 	}
 }
-

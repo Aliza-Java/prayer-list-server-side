@@ -127,7 +127,7 @@ public class AdminWebService {
 	@PostMapping(path = "preview", produces = "text/plain")
 	public String previewWeekly(@RequestBody Weekly weeklyInfo)
 			throws EmptyInformationException, ObjectNotFoundException {
-		System.out.println("Generating preview for week: " + weeklyInfo.fullWeekName);
+		System.out.println("Generating preview for week: " + weeklyInfo.parashaNameFull);
 		return adminService.previewWeekly(weeklyInfo);
 	}
 

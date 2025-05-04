@@ -1,6 +1,10 @@
 package com.aliza.davening.rest;
 
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,11 +18,13 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.aliza.davening.SchemeValues;
 import com.aliza.davening.entities.Davenfor;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.security.JwtUtils;
-import com.aliza.davening.security.TokenRequest;
+import com.aliza.davening.security.TokenCheck;
 import com.aliza.davening.services.AdminService;
+import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.UserService;
 
 @Controller // special web service for all methods that redirect to a new response page.
@@ -35,6 +41,9 @@ public class PopupWebService {
 
 	@Autowired
 	AdminService adminService;
+
+	@Autowired
+	EmailSender emailSender;
 
 	@Autowired
 	JwtUtils jwtUtils;
@@ -99,11 +108,33 @@ public class PopupWebService {
 	// to test
 	@PostMapping("preview")
 	@ResponseBody
-	public String getDirectPreview(@RequestBody TokenRequest data)
+	public String producePreview(@RequestBody TokenCheck data)
 			throws ObjectNotFoundException, EmptyInformationException {
 		if (adminService.checkTokenForDirect(data.getToken(), data.getEmail()))
 			return adminService.previewWeekly(null);
 		else
 			return "There was a problem generating the preview";
+	}
+
+	// to test
+	@PostMapping("send")
+	@ResponseBody
+	public ResponseEntity<Map<String, String>> produceSend(@RequestBody TokenCheck data) throws ObjectNotFoundException {
+		if (!adminService.checkTokenForDirect(data.getToken(), data.getEmail())) {
+			return new ResponseEntity<>(Map.of("message","The token didn't match the email"), HttpStatus.FORBIDDEN);
 		}
+		if (!adminService.checkPassword(data.getPassword(), data.getEmail())) { 
+			//purposefully not 'UNAUTHORIZED' because that navigates to guest automatically
+			return new ResponseEntity<>(Map.of("message", "The password is incorrect"), HttpStatus.FORBIDDEN);
+		}
+		try {
+			emailSender.sendOutWeekly(null);
+		} catch (EmailException | EmptyInformationException e) {
+			System.out.println("There was an error sending out the list: ");
+			e.printStackTrace();
+			return new ResponseEntity<>(Map.of("message","There was an error sending out the list.  Please contact your website admin"),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<>(Map.of("message", "The list has been sent"), HttpStatus.OK);
+	}
 }

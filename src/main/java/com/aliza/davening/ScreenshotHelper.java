@@ -1,17 +1,14 @@
 package com.aliza.davening;
 
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
+import java.io.File;
+
+import javax.imageio.ImageIO;
+
 import org.openqa.selenium.WebDriver;
 
 import ru.yandex.qatools.ashot.AShot;
 import ru.yandex.qatools.ashot.Screenshot;
 import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
-
-import java.io.File;
-import java.nio.file.Files;
-
-import javax.imageio.ImageIO;
 
 public class ScreenshotHelper {
     public static void captureScreenshot(WebDriver driver, String filePath) throws Exception {

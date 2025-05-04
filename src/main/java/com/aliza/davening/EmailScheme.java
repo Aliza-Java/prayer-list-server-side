@@ -52,7 +52,7 @@ public class EmailScheme {
 	public static final String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='%s'>HERE</a>";
 
 	// Subject includes the category
-	public static final String weeklyEmailSubject = "Weekly davening list for %s";
+	public static final String weeklyEmailSubject = "Weekly davening list for week of: %s";
 
 	// Default subject in emails from admin
 	public static final String adminMessageSubject = "Message from davening list admin";
@@ -104,11 +104,11 @@ public class EmailScheme {
 
 	// Links inserted to email allowing submitters to extend or delete names. URL
 	// will change when uploaded to cloud
-	public static String linkToExtendS = "extend/%s?email=%s";
-	public static String linkToDeleteS = "/guest/delete?id=%d&token=%s";
-	public static String linkToLoginC = "admin";
-	public static String linkToSendListS = "/admin/direct?t=%s&redirect=sendbutneedtosee";
-	public static String linkToReviewWeeklyC = "/direct-preview?t=%s&email=%s";
+	public static String linkToExtend = "extend/%s?email=%s";
+	public static String linkToDelete = "/guest/delete?id=%d&token=%s";
+	public static String linkToLogin = "admin";
+	public static String linkToSendList = "/direct-send?t=%s&email=%s";
+	public static String linkToReviewWeekly = "/direct-preview?t=%s&email=%s";
 
 	public static final String unsubscribeMessage = "We are sorry to see you go. <br> Click <a href=%s>HERE</a> to complete the process. <br><br> If you ever wish to join again, email the list admin at %s.";
 }
