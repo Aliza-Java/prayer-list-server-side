@@ -48,7 +48,7 @@ public class JwtUtils {
 					.getSubject();
 
 		} catch (ExpiredJwtException e) {
-			System.err.println("JWT token is expired line 51: " + e.getMessage());
+			//ignore;
 		} catch (UnsupportedJwtException e) {
 			System.err.println("JWT token is unsupported: " + e.getMessage());
 		} catch (MalformedJwtException e) {
