@@ -37,3 +37,6 @@ build/
 # Ignore sensitive files
 /src/main/resources/application.properties
 
+### Logs ###
+application.log*
+
