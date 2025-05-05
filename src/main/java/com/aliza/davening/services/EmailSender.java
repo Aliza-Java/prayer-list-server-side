@@ -6,11 +6,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,7 +26,6 @@ import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
-import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.services.session.EmailSessionProvider;
@@ -57,9 +53,6 @@ public class EmailSender {
 
 	@Autowired
 	private CategoryRepository categoryRepository;
-
-	@Autowired
-	private ParashaRepository parashaRepository;
 
 	@Autowired
 	private DavenforRepository davenforRepository;
@@ -208,15 +201,12 @@ public class EmailSender {
 		String parashaNameFull;
 		String linkToUnsubscribe = client + "/unsubscribe";
 		String emailText = String.format(EmailScheme.weeklyEmailText, linkToUnsubscribe);
-		LocalDate date = LocalDate.now();
-		String todaysDate = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.ENGLISH).format(date);
 
 		if (info == null) {
 			category = adminService.inferCategory();
 			parashaNameEnglish = adminService.inferParashaName(false);
 			parashaNameFull = adminService.inferParashaName(true);
-		} 
-		else // info came in (but parts may be missing)
+		} else // info came in (but parts may be missing)
 		{
 			if (info.category != null && info.category.length() > 0)
 				category = Category.getCategory(info.category);
@@ -224,9 +214,10 @@ public class EmailSender {
 				category = categoryRepository.findById(info.categoryId)
 						.orElseThrow(() -> new ObjectNotFoundException("Category"));
 
-			parashaNameEnglish = (info.parashaNameEnglish != null && info.parashaNameEnglish.length() > 0) ? info.parashaNameEnglish
+			parashaNameEnglish = (info.parashaNameEnglish != null && info.parashaNameEnglish.length() > 0)
+					? info.parashaNameEnglish
 					: adminService.inferParashaName(false);
-			
+
 			parashaNameFull = info.parashaNameFull;
 
 			if (info.message != null)
@@ -239,10 +230,10 @@ public class EmailSender {
 		if (usersList.size() == 0)
 			throw new EmailException("There are no active users, cannot send list");
 
-		String fileName = String.format(EmailScheme.weeklyFileName, utilities.getFileName(parashaNameEnglish + "-" + todaysDate));
+		String fileName = String.format(EmailScheme.weeklyFileName, utilities.formatFileName(parashaNameEnglish));
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
-				utilities.buildListImage(category, parashaNameFull), fileName));
+				utilities.buildListImage(category, parashaNameFull, fileName), fileName));
 
 		return true;
 	}
@@ -342,7 +333,7 @@ public class EmailSender {
 		MimeMessage mimeMessage = createMimeMessage(sessionProvider.getSession(), EmailScheme.unsubscribeSubject,
 				setUnsubscribeMessage(email), email, null, null, null);
 		sendEmail(mimeMessage);
-		return String.format("Please check your email address: %s for an 'Unsubscribe' message", email);
+		return String.format("We sent you a link to complete the process. Please check your email address: %s for an 'Unsubscribe' message", email);
 	}
 
 	private String concatAdminMessage(String adminMessage, String emailText) {

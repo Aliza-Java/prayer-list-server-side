@@ -504,13 +504,13 @@ public class AdminService {
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
 
 		Category category;
-		String parashaNameEnglish;
+		String parashaNameFull;
 
 		if (info == null) // came from direct, or other issue
 		{
 			try {
 				category = inferCategory();
-				parashaNameEnglish = inferParashaName(false);
+				parashaNameFull = inferParashaName(true);
 			} catch (ObjectNotFoundException ex) {
 				throw ex;
 			}
@@ -522,10 +522,10 @@ public class AdminService {
 			if (category == null) {
 				throw new ObjectNotFoundException("category named " + info.category);
 			}
-			parashaNameEnglish = info.parashaNameEnglish;
+			parashaNameFull = info.parashaNameFull;
 		}
 
-		return utilities.createWeeklyHtml(category, parashaNameEnglish, true);
+		return utilities.createWeeklyHtml(category, parashaNameFull, true);
 	}
 
 	// tested

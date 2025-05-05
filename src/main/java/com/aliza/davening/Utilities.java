@@ -73,12 +73,12 @@ public class Utilities {
 	String linkToSendList = client + EmailScheme.linkToSendList;
 	String linkToReviewWeekly = client + EmailScheme.linkToReviewWeekly;
 
-	public File buildListImage(Category category, String weekName) throws EmptyInformationException {
+	public File buildListImage(Category category, String weekName, String fileName) throws EmptyInformationException {
 
 		String weeklyHtml = createWeeklyHtml(category, weekName, false);
 
-		String fileName = "builtFiles/" + getFileName(weekName);
-		Path filePath = Paths.get(fileName);
+		String fileNameInFolder = "builtFiles/" + fileName;
+		Path filePath = Paths.get(fileNameInFolder);
 
 		// moving from manual chrome extraction to automatic
 //		String driverPath = null;
@@ -120,7 +120,7 @@ public class Utilities {
 		}
 
 		try {
-			ScreenshotHelper.captureScreenshot(driver, fileName);
+			ScreenshotHelper.captureScreenshot(driver, fileNameInFolder);
 		} catch (Exception e) {
 			System.out.println("There was an error with capturing the screenshot: " + e.getMessage());
 		}
@@ -305,7 +305,7 @@ public class Utilities {
 
 	}
 
-	public String getFileName(String weekName) {
+	public String formatFileName(String weekName) {
 		LocalDateTime now = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 		String formattedNow = now.format(formatter);
