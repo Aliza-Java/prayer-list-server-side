@@ -94,11 +94,11 @@ public class Utilities {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
 
-		WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); // added version. supposed to detect version
-																			// automatically, but in this case didn't
-
+		//WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this version specification in case it doesn't detect version automatically
+		WebDriverManager.chromedriver().setup();
+		System.out.println("Inferring driver version automatically, should be at least 136");
 		WebDriver driver = new ChromeDriver(options);
-
+		
 		// Load HTML and take a screenshot (JPEG)
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
 		try {
