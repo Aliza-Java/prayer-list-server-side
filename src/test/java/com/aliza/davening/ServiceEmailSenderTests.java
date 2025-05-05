@@ -345,79 +345,79 @@ public class ServiceEmailSenderTests {
 
 	}
 
-	@Test
-	@Order(5)
-	public void sendSimplifiedWeeklyTest() {
-		// can't find current parasha throws exception
-		when(parashaRep.findCurrent()).thenReturn(Optional.empty());
-
-		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			emailSender.sendSimplifiedWeekly();
-		});
-		assertTrue(exception.getMessage().toLowerCase().contains("current parasha"));
-
-		// can't find current category throws exception
-		when(parashaRep.findCurrent()).thenReturn(Optional.of(parasha2));
-		when(categoryRep.getCurrent()).thenReturn(Optional.empty());
-
-		exception = assertThrows(ObjectNotFoundException.class, () -> {
-			emailSender.sendSimplifiedWeekly();
-		});
-		assertTrue(exception.getMessage().contains("current category"));
-
-		when(categoryRep.getCurrent()).thenReturn(Optional.of(catRefua));
-		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
-		when(categoryRep.findAll()).thenReturn(categories);
-
-		try {
-			when(davenforRep.findAllDavenforByCategory(REFUA.toString())).thenReturn(Arrays.asList(dfRefua));
-			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString()))
-					.thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
-			System.out.println(davenforRep.findAll());
-			emailSender.sendSimplifiedWeekly();
-
-			// Verify that the email was sent
-			greenMail.waitForIncomingEmail(5000, 3);
-
-			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
-
-			assertEquals(3, receivedMessages.length);
-			assertTrue(receivedMessages[2].getSubject().contains("Noach"));
-
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("To unsubscribe from the weekly"));
-
-			MimeMessage message = receivedMessages[0];
-			Object content = message.getContent();
-
-			assertTrue(message.getContentType().startsWith("multipart/"));
-
-			if (content instanceof MimeMultipart) {
-				MimeMultipart multipart = (MimeMultipart) content;
-
-				for (int i = 0; i < multipart.getCount(); i++) {
-					BodyPart bodyPart = multipart.getBodyPart(i);
-					if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
-						String fileName = bodyPart.getFileName();
-						assertNotNull(fileName);
-						assertTrue(fileName.contains("Davening List Parashat Noach"));
-
-						try (InputStream inputStream = bodyPart.getInputStream()) {
-							byte[] fileContent = inputStream.readAllBytes(); // Read binary data
-							assertNotNull(fileContent);
-							assertTrue(fileContent.length > 0);
-						}
-					}
-				}
-			}
-		} catch (Exception e) {// todo*: test what throws exception
-			e.printStackTrace();
-			System.out.println(UNEXPECTED_E + e.getStackTrace());
-		}
-
-		verify(parashaRep, times(3)).findCurrent();
-		verify(categoryRep, times(2)).getCurrent();
-		verify(userRep, times(1)).getAllUsersEmails();
-	}
+//	@Test //SimplifiedWeekly this is now replaced by sendOutWeely(null) 
+//	@Order(5)
+//	public void sendSimplifiedWeeklyTest() {
+//		// can't find current parasha throws exception
+//		when(parashaRep.findCurrent()).thenReturn(Optional.empty());
+//
+//		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
+//			emailSender.sendSimplifiedWeekly();
+//		});
+//		assertTrue(exception.getMessage().toLowerCase().contains("current parasha"));
+//
+//		// can't find current category throws exception
+//		when(parashaRep.findCurrent()).thenReturn(Optional.of(parasha2));
+//		when(categoryRep.getCurrent()).thenReturn(Optional.empty());
+//
+//		exception = assertThrows(ObjectNotFoundException.class, () -> {
+//			emailSender.sendSimplifiedWeekly();
+//		});
+//		assertTrue(exception.getMessage().contains("current category"));
+//
+//		when(categoryRep.getCurrent()).thenReturn(Optional.of(catRefua));
+//		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
+//		when(categoryRep.findAll()).thenReturn(categories);
+//
+//		try {
+//			when(davenforRep.findAllDavenforByCategory(REFUA.toString())).thenReturn(Arrays.asList(dfRefua));
+//			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString()))
+//					.thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
+//			System.out.println(davenforRep.findAll());
+//			emailSender.sendSimplifiedWeekly();
+//
+//			// Verify that the email was sent
+//			greenMail.waitForIncomingEmail(5000, 3);
+//
+//			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+//
+//			assertEquals(3, receivedMessages.length);
+//			assertTrue(receivedMessages[2].getSubject().contains("Noach"));
+//
+//			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("To unsubscribe from the weekly"));
+//
+//			MimeMessage message = receivedMessages[0];
+//			Object content = message.getContent();
+//
+//			assertTrue(message.getContentType().startsWith("multipart/"));
+//
+//			if (content instanceof MimeMultipart) {
+//				MimeMultipart multipart = (MimeMultipart) content;
+//
+//				for (int i = 0; i < multipart.getCount(); i++) {
+//					BodyPart bodyPart = multipart.getBodyPart(i);
+//					if (Part.ATTACHMENT.equalsIgnoreCase(bodyPart.getDisposition())) {
+//						String fileName = bodyPart.getFileName();
+//						assertNotNull(fileName);
+//						assertTrue(fileName.contains("Davening List Parashat Noach"));
+//
+//						try (InputStream inputStream = bodyPart.getInputStream()) {
+//							byte[] fileContent = inputStream.readAllBytes(); // Read binary data
+//							assertNotNull(fileContent);
+//							assertTrue(fileContent.length > 0);
+//						}
+//					}
+//				}
+//			}
+//		} catch (Exception e) {// todo*: test what throws exception
+//			e.printStackTrace();
+//			System.out.println(UNEXPECTED_E + e.getStackTrace());
+//		}
+//
+//		verify(parashaRep, times(3)).findCurrent();
+//		verify(categoryRep, times(2)).getCurrent();
+//		verify(userRep, times(1)).getAllUsersEmails();
+//	}
 
 	@Test
 	@Order(6)

@@ -541,28 +541,28 @@ public class ContAdminTests {
 	@Order(18)
 	public void testSendOutWeeklyFromEmail() {
 		try {
-			doNothing().when(emailSender).sendSimplifiedWeekly();
+			doNothing().when(emailSender).sendOutWeekly(null);
 			mockMvc.perform(put("/admin/weeklylist")).andDo(print()).andExpect(status().isOk())
 					.andExpect(content().string("true"));
 
-			doThrow(new ObjectNotFoundException("current Parasha")).when(emailSender).sendSimplifiedWeekly();
+			doThrow(new ObjectNotFoundException("current Parasha")).when(emailSender).sendOutWeekly(null);
 			mockMvc.perform(put("/admin/weeklylist")).andDo(print()).andExpect(status().isNotFound())
 					.andExpect(jsonPath("$.code").value("OBJECT_NOT_FOUND_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("current Parasha not found")));
 
 			doThrow(new EmptyInformationException("There are no names to daven for in this category."))
-					.when(emailSender).sendSimplifiedWeekly();
+					.when(emailSender).sendOutWeekly(null);
 			mockMvc.perform(put("/admin/weeklylist")).andDo(print()).andExpect(status().isNoContent())
 					.andExpect(jsonPath("$.code").value("EMPTY_INFORMATION"))
 					.andExpect(jsonPath("$.messages[0]", containsString("no names to daven for")));
 
 			doThrow(new IOException("We are sorry, but something wrong happened. Please contact the admin."))
-					.when(emailSender).sendSimplifiedWeekly();
+					.when(emailSender).sendOutWeekly(null);
 			mockMvc.perform(put("/admin/weeklylist")).andDo(print()).andExpect(status().isInternalServerError())
 					.andExpect(jsonPath("$.code").value("SERVER_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("something wrong")));
 
-			verify(emailSender, times(4)).sendSimplifiedWeekly();
+			verify(emailSender, times(4)).sendOutWeekly(null);
 
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());

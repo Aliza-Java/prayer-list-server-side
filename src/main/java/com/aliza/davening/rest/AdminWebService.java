@@ -132,15 +132,6 @@ public class AdminWebService {
 	}
 
 	// tested
-	// A simplified sendOutWeekly which takes a GET request (for the one sent
-	// through Admin's email link)
-	@RequestMapping(path = "weeklylist")
-	public boolean sendOutWeeklyFromEmail() throws Exception {
-		emailSender.sendSimplifiedWeekly();
-		return true;
-	}
-
-	// tested
 	@PutMapping(path = "updatedavenfor")
 	public List<Davenfor> updateNameByAdmin(@RequestBody Davenfor davenfor)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {

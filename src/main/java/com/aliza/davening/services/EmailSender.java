@@ -182,17 +182,6 @@ public class EmailSender {
 	}
 
 	// tested
-	public void sendSimplifiedWeekly() throws Exception {
-		Weekly simplified = new Weekly();
-
-		simplified.parashaNameEnglish = adminService.inferParashaName(false);
-		simplified.parashaNameFull = adminService.inferParashaName(true);
-		simplified.category = adminService.inferCategory().getCname().toString();
-
-		sendOutWeekly(simplified);
-	}
-
-	// tested
 	public boolean sendOutWeekly(Weekly info)
 			throws EmailException, EmptyInformationException, ObjectNotFoundException {
 
