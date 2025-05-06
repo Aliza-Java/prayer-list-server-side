@@ -27,6 +27,8 @@ import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.UserService;
 
+import io.jsonwebtoken.ExpiredJwtException;
+
 @Controller // special web service for all methods that redirect to a new response page.
 			// @Controller (vs. @RestController) - vital for Thymeleaf
 @RequestMapping("direct")
@@ -110,21 +112,39 @@ public class PopupWebService {
 	@ResponseBody
 	public String producePreview(@RequestBody TokenCheck data)
 			throws ObjectNotFoundException, EmptyInformationException {
-		if (adminService.checkTokenForDirect(data.getToken(), data.getEmail()))
+
+		try {
+			boolean tokenValid = adminService.checkTokenForDirect(data.getToken(), data.getEmail());
+			if (!tokenValid)
+				return "There was a problem generating the preview";
 			return adminService.previewWeekly(null);
-		else
-			return "There was a problem generating the preview";
+
+		} catch (ExpiredJwtException e) {
+			System.out.println("User used an expired email. " + e.getMessage());
+			return "The email link appears to be expired.  Please use a recent email or log into the website.";
+		}
 	}
 
 	// to test
 	@PostMapping("send")
 	@ResponseBody
-	public ResponseEntity<Map<String, String>> produceSend(@RequestBody TokenCheck data) throws ObjectNotFoundException {
-		if (!adminService.checkTokenForDirect(data.getToken(), data.getEmail())) {
-			return new ResponseEntity<>(Map.of("message","The token didn't match the email"), HttpStatus.FORBIDDEN);
+	public ResponseEntity<Map<String, String>> produceSend(@RequestBody TokenCheck data)
+			throws ObjectNotFoundException {
+		try {
+			boolean tokenValid = adminService.checkTokenForDirect(data.getToken(), data.getEmail());
+			if (!tokenValid)
+				return new ResponseEntity<>(Map.of("message", "The token didn't match the email"),
+						HttpStatus.FORBIDDEN);
+		} catch (ExpiredJwtException e) {
+			System.out.println("User used an expired email. " + e.getMessage());
+			return new ResponseEntity<>(
+					Map.of("message",
+							"This email link appears to be expired.  Please use a recent email or log into the website."),
+					HttpStatus.FORBIDDEN);
 		}
-		if (!adminService.checkPassword(data.getPassword(), data.getEmail())) { 
-			//purposefully not 'UNAUTHORIZED' because that navigates to guest automatically
+
+		if (!adminService.checkPassword(data.getPassword(), data.getEmail())) {
+			// purposefully not 'UNAUTHORIZED' because that navigates to guest automatically
 			return new ResponseEntity<>(Map.of("message", "The password is incorrect"), HttpStatus.FORBIDDEN);
 		}
 		try {
@@ -132,7 +152,8 @@ public class PopupWebService {
 		} catch (EmailException | EmptyInformationException e) {
 			System.out.println("There was an error sending out the list: ");
 			e.printStackTrace();
-			return new ResponseEntity<>(Map.of("message","There was an error sending out the list.  Please contact your website admin"),
+			return new ResponseEntity<>(
+					Map.of("message", "There was an error sending out the list.  Please contact your website admin"),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		return new ResponseEntity<>(Map.of("message", "The list has been sent"), HttpStatus.OK);
