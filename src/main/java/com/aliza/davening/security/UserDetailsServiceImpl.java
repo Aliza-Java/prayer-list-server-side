@@ -19,7 +19,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	@Transactional
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		Admin admin = adminRepository.getAdminByEmail(email)
-				.orElseThrow(() -> new UsernameNotFoundException("Admin not Found with email: " + email));
+				.orElseThrow(() -> new UsernameNotFoundException("Admin not found with email: " + email));
 
 		return UserDetailsImpl.build(admin);
 	}

@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -322,7 +323,9 @@ public class EmailSender {
 		MimeMessage mimeMessage = createMimeMessage(sessionProvider.getSession(), EmailScheme.unsubscribeSubject,
 				setUnsubscribeMessage(email), email, null, null, null);
 		sendEmail(mimeMessage);
-		return String.format("We sent you a link to complete the process. Please check your email address: %s for an 'Unsubscribe' message", email);
+		return String.format(
+				"We sent you a link to complete the process. Please check your email address: %s for an 'Unsubscribe' message",
+				email);
 	}
 
 	private String concatAdminMessage(String adminMessage, String emailText) {
@@ -338,18 +341,25 @@ public class EmailSender {
 	}
 
 	private String setUnsubscribeMessage(String email) {
-		String unsubscribeLink = linkToUnsubscribe + jwtUtils.generateEmailToken(email);
+		long halfHour = 1000 * 60 * 30;
+		Date expiration = new Date(new Date().getTime() + halfHour);
+
+		String unsubscribeLink = linkToUnsubscribe + jwtUtils.generateEmailToken(email, expiration);
 		return String.format(EmailScheme.unsubscribeMessage, unsubscribeLink, adminEmail);
 	}
 
 	public String getLinkToExtend(Davenfor davenfor) {
+		long week = utilities.getDaysInMs(7);
+		Date expiration = new Date(new Date().getTime() + week);
 		return String.format(client + linkToExtendClient, davenfor.getId(),
 				URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
-				jwtUtils.generateEmailToken(davenfor.getUserEmail()));
+				jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration));
 	}
 
 	public String getLinkToDelete(Davenfor davenfor) {
+		long week = utilities.getDaysInMs(7);
+		Date expiration = new Date(new Date().getTime() + week);
 		return String.format(client + linkToRemoveClient, davenfor.getId(),
-				jwtUtils.generateEmailToken(davenfor.getUserEmail()));
+				jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration));
 	}
 }

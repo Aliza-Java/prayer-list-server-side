@@ -537,7 +537,7 @@ public class AdminService {
 	// to test - also c
 	public boolean checkTokenForDirect(String token, String email) { // verifying that email to be saved in frontend is
 																		// good
-		String extractedEmail = jwtUtils.getUserNameFromJwtToken(token);
+		String extractedEmail = jwtUtils.extractEmailFromToken(token);
 		System.out.println("Extracted email is: " + extractedEmail);
 		if (extractedEmail == null)
 			return false;

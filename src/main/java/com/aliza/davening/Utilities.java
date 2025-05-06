@@ -320,4 +320,8 @@ public class Utilities {
 				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
 				.collect(Collectors.joining(" "));
 	}
+	
+	public long getDaysInMs(int daysNumber) {
+		return daysNumber*24*60*60*1000;
+	}
 }

@@ -216,8 +216,9 @@ public class UserService {
 
 		Davenfor davenforToExtend = optionalDavenfor.get();
 
-		String email = jwtUtils.getUserNameFromJwtToken(token);
-		
+		// todo* in future - validity checks on email
+		String email = jwtUtils.extractEmailFromToken(token);
+
 		if (!davenforToExtend.getUserEmail().equalsIgnoreCase(email)) {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to update it.");
@@ -240,22 +241,23 @@ public class UserService {
 		}
 
 		Davenfor davenforToDelete = optionalDavenfor.get();
-		String email = viaEmail? jwtUtils.getUserNameFromJwtToken(auth) : auth;
+		String email = viaEmail ? jwtUtils.extractEmailFromToken(auth) : auth;
 		if (davenforToDelete.getUserEmail().equalsIgnoreCase(email)) {
 			davenforRepository.delete(davenforToDelete);
 		} else {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
-		
+
 		String adminSubject = String.format(EmailScheme.deleteNameSubject, davenforToDelete.getNameEnglish());
-		String adminMessage = String.format(EmailScheme.deleteNameMessage, davenforToDelete.getNameEnglish(), davenforToDelete.getCategory(), davenforToDelete.getUserEmail());
+		String adminMessage = String.format(EmailScheme.deleteNameMessage, davenforToDelete.getNameEnglish(),
+				davenforToDelete.getCategory(), davenforToDelete.getUserEmail());
 		emailSender.informAdmin(adminSubject, adminMessage);
 
 		if (viaEmail)
-			return List.of(davenforToDelete); //return one so that can extract it in the confirmation message
+			return List.of(davenforToDelete); // return one so that can extract it in the confirmation message
 		else
-			return davenforRepository.findAllDavenforByUserEmail(email); //return all to show on website remaining ones		
+			return davenforRepository.findAllDavenforByUserEmail(email); // return all to show on website remaining ones
 	}
 
 	// tested
@@ -292,7 +294,7 @@ public class UserService {
 	// TODO* test
 	// similar to admin's disactivate
 	public String unsubscribe(String token) throws EmptyInformationException {
-		String email = jwtUtils.getUserNameFromJwtToken(token);
+		String email = jwtUtils.extractEmailFromToken(token);
 		Optional<User> userToUnsubscribe = userRepository.findByEmail(email);
 		if (userToUnsubscribe.isEmpty()) {
 			System.out.println(String.format(

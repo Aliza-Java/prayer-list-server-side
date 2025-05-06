@@ -42,13 +42,13 @@ public class JwtUtils {
 				.setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(getSigningKey()).compact();
 	}
 
-	public String getUserNameFromJwtToken(String token) {
+	public String extractEmailFromToken(String authToken) {
 		try {
-			return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token).getBody()
+			return Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(authToken).getBody()
 					.getSubject();
 
 		} catch (ExpiredJwtException e) {
-			//ignore;
+			// ignore;
 		} catch (UnsupportedJwtException e) {
 			System.err.println("JWT token is unsupported: " + e.getMessage());
 		} catch (MalformedJwtException e) {
@@ -61,8 +61,8 @@ public class JwtUtils {
 		return null; // Return null if the token is invalid or expired
 	}
 
-	public String generateEmailToken(String email) {
-		return Jwts.builder().setSubject(email).signWith(getSigningKey()).compact();
+	public String generateEmailToken(String email, Date expiration) {
+		return Jwts.builder().setSubject(email).setExpiration(expiration).signWith(getSigningKey()).compact();
 	}
 
 	public boolean validateJwtToken(String authToken) {
