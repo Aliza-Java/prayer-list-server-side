@@ -101,8 +101,10 @@ public class UserService {
 
 		if (Category.isBanim(category.getCname().toString())) {
 			if (davenfor.noSpouseInfo()) {
-				throw new EmptyInformationException(
-						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
+				System.out.println("No spouse information was entered.  This is okay, but user may not be aware of the option");
+				// throw new EmptyInformationException(
+				// "This category requires also a spouse name (English and Hebrew) to be
+				// submitted. ");
 			} else {
 				davenfor.setNameEnglishSpouse(davenfor.getNameEnglishSpouse().trim());
 				davenfor.setNameHebrewSpouse(davenfor.getNameHebrewSpouse().trim());
