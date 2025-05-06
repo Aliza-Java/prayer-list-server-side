@@ -44,8 +44,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 		// direct preview and direct send handle their own token check in their
 		// controller.
 		List<String> noCheckPaths = List.of("/dlist/auth/signin", "/dlist/auth/signup", "/dlist/direct/preview",
-				"/dlist/direct/send");
-		if (!noCheckPaths.contains(path)) {
+				"/dlist/direct/send"); //todo* in future - maybe just allow all direct, auth and user?
+		if (!noCheckPaths.contains(path) && !path.contains("/dlist/user/")) {
 			try {
 				String jwt = parseJwt(request);
 				if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
