@@ -48,7 +48,7 @@ public class JwtUtils {
 					.getSubject();
 
 		} catch (ExpiredJwtException e) {
-			// ignore;
+			throw e;
 		} catch (UnsupportedJwtException e) {
 			System.err.println("JWT token is unsupported: " + e.getMessage());
 		} catch (MalformedJwtException e) {
@@ -58,7 +58,7 @@ public class JwtUtils {
 		} catch (IllegalArgumentException e) {
 			System.err.println("JWT claims string is empty: " + e.getMessage());
 		}
-		return null; // Return null if the token is invalid or expired
+		return null; // Return null if the token is invalid
 	}
 
 	public String generateEmailToken(String email, Date expiration) {
@@ -75,6 +75,7 @@ public class JwtUtils {
 			logger.error("Invalid JWT token: {}", e.getMessage());
 		} catch (ExpiredJwtException e) {
 			logger.error("JWT token is expired line 77: {}", e.getMessage());
+			throw e;
 		} catch (UnsupportedJwtException e) {
 			logger.error("JWT token is unsupported: {}", e.getMessage());
 		} catch (IllegalArgumentException e) {

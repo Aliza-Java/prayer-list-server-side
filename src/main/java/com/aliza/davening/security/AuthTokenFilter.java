@@ -1,6 +1,7 @@
 package com.aliza.davening.security;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,6 +18,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import io.jsonwebtoken.ExpiredJwtException;
+
 public class AuthTokenFilter extends OncePerRequestFilter {
 	@Autowired
 	private JwtUtils jwtUtils;
@@ -29,10 +32,20 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
 
+		String path = request.getRequestURI();
+
+		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
 			response.setStatus(HttpServletResponse.SC_OK);
-		} else {
+			return;
+		}
+
+		// login and new signup don't need a token check - they create it.
+		// direct preview and direct send handle their own token check in their
+		// controller.
+		List<String> noCheckPaths = List.of("/dlist/auth/signin", "/dlist/auth/signup", "/dlist/direct/preview",
+				"/dlist/direct/send");
+		if (!noCheckPaths.contains(path)) {
 			try {
 				String jwt = parseJwt(request);
 				if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
@@ -45,9 +58,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
-
+			} catch (ExpiredJwtException e) {
+				logger.warn("JWT token is expired: {}", e.getMessage());
+				// avoiding using UNAUTHORIZED because it redirects in the frontend
+				response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED, "Token expired");
+				return;
 			} catch (Exception e) {
-				logger.error("Cannot set user authentication: {}", e);
+				logger.error("Cannot set user authentication: {}", e.getMessage());
+				response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+				return;
 			}
 		}
 

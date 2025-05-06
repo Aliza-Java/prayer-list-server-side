@@ -41,6 +41,8 @@ import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
 import com.aliza.davening.util_classes.Weekly;
 
+import io.jsonwebtoken.ExpiredJwtException;
+
 @Service("adminService")
 @EnableTransactionManagement
 @Transactional
@@ -72,7 +74,7 @@ public class AdminService {
 
 	@Autowired
 	EntityManager entityManager;
-	
+
 	@Autowired
 	JwtUtils jwtUtils;
 
@@ -534,17 +536,22 @@ public class AdminService {
 		return new AdminSettings(admin.getEmail(), admin.isNewNamePrompt(), admin.getWaitBeforeDeletion());
 	}
 
-	// to test - also c
-	public boolean checkTokenForDirect(String token, String email) { // verifying that email to be saved in frontend is
-																		// good
-		String extractedEmail = jwtUtils.extractEmailFromToken(token);
-		System.out.println("Extracted email is: " + extractedEmail);
-		if (extractedEmail == null)
-			return false;
-		if (!extractedEmail.equalsIgnoreCase(adminEmail) || !extractedEmail.equalsIgnoreCase(email)) {
-			System.out.println("The email doesn't match the registered admin email");
-			return false;
+	// to test
+	// verifying that email to be saved in frontend is good
+	public boolean checkTokenForDirect(String token, String email) {
+		try {
+			String extractedEmail = jwtUtils.extractEmailFromToken(token);
+			System.out.println("Extracted email is: " + extractedEmail);
+			if (extractedEmail == null)
+				return false;
+			if (!extractedEmail.equalsIgnoreCase(adminEmail) || !extractedEmail.equalsIgnoreCase(email)) {
+				System.out.println("The email doesn't match the registered admin email");
+				return false;
+			}
+		} catch (ExpiredJwtException e) {
+			throw e;
 		}
+
 		return true;
 	}
 
