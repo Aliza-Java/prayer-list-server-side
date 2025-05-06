@@ -54,14 +54,16 @@ public class MaintainList { //TODO*: tests for all these
 
 	// Sends email to davenfor's submitter to let them know the expiring name will
 	// be deleted.
-	// Fires at 1 a.m. every day
-	@Scheduled(cron = "0 0 1 * * ?")
+	// Fires at 1:15 a.m. every day
+	@Scheduled(cron = "0 15 1 * * ?")
 	public void offerExtensionOrDelete() {
-		System.out.println("Begin offerExtensionOrDelete().  Davenfors in question:");
+		System.out.println("Begin offerExtensionOrDelete()");
 		List<Davenfor> expiredDavenfors = davenforRepository.findByExpireAtLessThan(LocalDate.now());
+		System.out.println("Davenfors in question: " + expiredDavenfors.size());
 		System.out.println(expiredDavenfors);
 		for (Davenfor d : expiredDavenfors) {
 			emailSender.offerExtensionOrDelete(d);
+			System.out.println("emailed " + d.getUserEmail() + " to offerExtensionOrDelete for df id " + d.getId());
 		}
 		System.out.println("End offerExtensionOrDelete()");
 	}

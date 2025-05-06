@@ -93,13 +93,13 @@ public class AdminService {
 			categoryRepository.save(new Category(REFUA, false, 180, 1));
 			categoryRepository.save(new Category(SHIDDUCHIM, true, 40, 2));
 			categoryRepository.save(new Category(BANIM, false, 50, 3));
-			categoryRepository.save(new Category(SOLDIERS, false, 180, 4));
+			categoryRepository.save(new Category(SOLDIERS, false, 30, 4));
 			categoryRepository.save(new Category(YESHUAH, false, 180, 5));
 		}
 
 		Category.categories = Arrays.asList(new Category(REFUA, false, 180, 1), new Category(SHIDDUCHIM, true, 40, 2),
-				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 180, 4),
-				new Category(YESHUAH, false, 180, 5));
+				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 30, 4),
+				new Category(YESHUAH, false, 180, 5)); //todo* in future - why twice? make more efficient
 	}
 
 	/*

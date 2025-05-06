@@ -27,7 +27,7 @@ public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 	@Query("update Davenfor d set d.lastConfirmedAt=?1 where id=?2")
 	public void setLastConfirmedAt(LocalDate today, long davenforId);
 
-	public List<Davenfor> findByExpireAtLessThan(LocalDate expireAt);
+	public List<Davenfor> findByExpireAtLessThan(LocalDate expireAt); //this doesn't include the date itself
 
 	@Transactional
 	@Modifying
