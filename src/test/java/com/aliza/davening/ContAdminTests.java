@@ -46,9 +46,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.aliza.davening.entities.Category;
-import com.aliza.davening.entities.User;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
+import com.aliza.davening.entities.User;
 import com.aliza.davening.exceptions.DatabaseException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
@@ -378,9 +378,9 @@ public class ContAdminTests {
 			when(adminService.deleteUser(1L)).thenReturn(Arrays.asList(user2, user3));
 
 			mockMvc.perform(delete("/admin/user/{id}", 1L)).andDo(print()).andExpect(status().isOk())
-			.andExpect(jsonPath("$.length()").value(2))
-			.andExpect(jsonPath("$[0].email").value("user2@gmail.com"))
-			.andExpect(jsonPath("$[1].email").value("user3@gmail.com"));
+					.andExpect(jsonPath("$.length()").value(2))
+					.andExpect(jsonPath("$[0].email").value("user2@gmail.com"))
+					.andExpect(jsonPath("$[1].email").value("user3@gmail.com"));
 
 			when(adminService.deleteUser(2L)).thenThrow(new ObjectNotFoundException("Name with id: 2"));
 
@@ -453,6 +453,7 @@ public class ContAdminTests {
 		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 5, \"cName\": \"yeshuah\", \"message\" : null}";
 
 		try {
+			when(emailSender.sendOutWeekly(any())).thenReturn(true);
 			mockMvc.perform(post("/admin/weekly").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isOk()).andExpect(content().string("true"));
 

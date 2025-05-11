@@ -123,6 +123,7 @@ public class ContUserTests {
 	@Test
 	@Order(2)
 	public void testAddDavenfor() throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {//TODO*: add tests for last 3 exceptions
+		//todo* - fix.  check if still true: This exception should no longer be thrown. 
 		when(userService.addDavenfor(any(), eq("user1@gmail.com"))).thenThrow(new EmptyInformationException(
 				"This category requires also a spouse name (English and Hebrew) to be submitted. "));
 
@@ -133,15 +134,14 @@ public class ContUserTests {
 					.andExpect(jsonPath("$.code").value("EMPTY_INFORMATION"))
 					.andExpect(jsonPath("$.messages[0]", containsString("spouse name (English and Hebrew)")));
 
-			when(userService.addDavenfor(any(), eq("user2@gmail.com"))).thenReturn(true);
+			when(userService.addDavenfor(any(), eq("user3@gmail.com"))).thenReturn(true);
 			String requestBodyGood = "{ \"email\": \"user3@gmail.com\", \"category\": \"YESHUAH\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
-			mockMvc.perform(post("/user/{email}", "user2@gmail.com").content(requestBodyGood)
+			mockMvc.perform(post("/user/{email}", "user3@gmail.com").content(requestBodyGood)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
-					.andExpect(jsonPath("$.id").value(4)).andExpect(jsonPath("$.nameEnglish").value("Amram ben Shira"));
+					.andExpect(jsonPath("$").value("true"));
 
 			verify(userService, times(2)).addDavenfor(any(), any());
-
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}

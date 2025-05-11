@@ -51,6 +51,8 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.repositories.UserRepository;
+import com.aliza.davening.security.JwtUtils;
+import com.aliza.davening.services.AdminService;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.session.EmailSessionProvider;
 import com.aliza.davening.util_classes.Weekly;
@@ -96,6 +98,12 @@ public class ServiceEmailSenderTests {
 
 	@MockBean
 	private UserRepository userRep;
+	
+	@MockBean
+	private AdminService adminService;
+	
+	@MockBean
+	private JwtUtils jwtUtils;
 
 	static BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -191,7 +199,7 @@ public class ServiceEmailSenderTests {
 		assertTrue(exception.getMessage().contains("address missing"));
 
 		try {
-			emailSender.sendEmailFromAdmin("recip@gmail.com", "test", "subject test");
+			emailSender.sendEmailFromAdmin("recip@gmail.com", "test", "");
 
 			// Verify that the email was sent
 			greenMail.waitForIncomingEmail(5000, 1);
@@ -207,7 +215,29 @@ public class ServiceEmailSenderTests {
 			assertEquals("recip@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("test"));
-			//TODO*: test subject too
+			greenMail.stop(); //so that this email doesn't get added to emails array in next part of test
+		} catch (EmptyInformationException | MessagingException e) {
+			System.out.println(UNEXPECTED_E + e.getStackTrace());
+		}
+		
+		try {
+			greenMail.start();
+			emailSender.sendEmailFromAdmin("recip@gmail.com", "test", "subject test");
+
+			// Verify that the email was sent
+			greenMail.waitForIncomingEmail(5000, 1);
+
+			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
+
+			// since BCC is purposefully stripped off the headers, can only verify that 2
+			// emails were sent. Both will have the same to field and no bcc.
+			// Bcc can be added as a separate header and checked in the test but I think
+			// that defies the purpose
+			assertEquals(1, receivedMessages.length); 
+			assertEquals("subject test", receivedMessages[0].getSubject());
+			assertEquals("recip@gmail.com",
+					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("test"));
 		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -216,6 +246,12 @@ public class ServiceEmailSenderTests {
 	@Test
 	@Order(3)
 	public void sendOutWeeklyTest() {
+		
+		//In prod, gets initialized upon first initialization of the program
+		Category.categories = Arrays.asList(new Category(REFUA, false, 180, 1), new Category(SHIDDUCHIM, true, 40, 2),
+				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 30, 4),
+				new Category(YESHUAH, false, 180, 5)); 
+		
 		when(categoryRep.findById(2L)).thenReturn(Optional.empty());
 
 		Weekly infoNoCategory = new Weekly();
@@ -226,7 +262,6 @@ public class ServiceEmailSenderTests {
 		assertTrue(exception.getMessage().contains("Category"));
 
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
-
 		when(categoryRep.findAll()).thenReturn(categories);
 
 		Weekly info = new Weekly("Vayeshev", "Vayeshev - וישב", 5L, "yeshuah", "special information");
@@ -272,7 +307,7 @@ public class ServiceEmailSenderTests {
 						// Read the attachment content
 						String fileName = bodyPart.getFileName();
 						assertNotNull(fileName);
-						assertTrue(fileName.contains("Davening List Parashat Vayeshev"));
+						assertTrue(fileName.contains("Davening List Vayeshev"));
 
 						try (InputStream inputStream = bodyPart.getInputStream()) {
 							byte[] fileContent = inputStream.readAllBytes(); // Read binary data
@@ -295,7 +330,11 @@ public class ServiceEmailSenderTests {
 	@Test
 	@Order(4)
 	public void sendOutWeeklyNoParashaTest() {
-
+		try {
+			when(adminService.inferParashaName(false)).thenReturn("Toldot");
+		} catch (ObjectNotFoundException e1) {
+			//ignore, not testing this
+		}
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
 		when(davenforRep.findAllDavenforByCategory("YESHUAH")).thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
@@ -303,7 +342,6 @@ public class ServiceEmailSenderTests {
 		Weekly info = new Weekly(null, null, 5L, "yeshuah", "special information");
 
 		try {
-			System.out.println(davenforRep.findAll());
 			emailSender.sendOutWeekly(info);
 
 			greenMail.waitForIncomingEmail(5000, 4);
@@ -311,8 +349,7 @@ public class ServiceEmailSenderTests {
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
 			assertEquals(3, receivedMessages.length);
-			assertTrue(receivedMessages[2].getSubject().contains("-"));
-			assertEquals(35, receivedMessages[2].getSubject().length());
+			assertTrue(receivedMessages[2].getSubject().contains("Weekly davening list for week of: Toldot"));
 
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("special information"));
 
@@ -331,7 +368,7 @@ public class ServiceEmailSenderTests {
 						assertNotNull(fileName);
 						assertTrue(fileName.contains("Davening List"));
 						assertTrue(fileName.contains("-"));
-						assertEquals(48, fileName.length());
+						assertEquals(44, fileName.length());
 					}
 				}
 			}
@@ -498,7 +535,7 @@ public class ServiceEmailSenderTests {
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
 			assertEquals(1, receivedMessages.length);
-			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
+			assertEquals("You have been unsubscribed", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("You will no longer receive"));
 
 		} catch (MessagingException | EmptyInformationException e) {
@@ -522,8 +559,8 @@ public class ServiceEmailSenderTests {
 
 			// one for recipient, one for admin as Bcc
 			assertEquals(1, receivedMessages.length);
-			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("now be receiving emails"));
+			assertEquals("Welcome to the Davening List", receivedMessages[0].getSubject());
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("has been activated"));
 
 		} catch (MessagingException | EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
@@ -534,6 +571,7 @@ public class ServiceEmailSenderTests {
 	@Order(10)
 	public void offerExtensionOrDelete() {
 		try {
+			when(jwtUtils.generateEmailToken(any(), any())).thenReturn("ABCdef");
 			emailSender.offerExtensionOrDelete(dfYeshuah1);
 
 			greenMail.waitForIncomingEmail(5000, 1);
@@ -543,11 +581,13 @@ public class ServiceEmailSenderTests {
 			assertEquals(1, receivedMessages.length);
 			assertEquals("user1@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
-			assertEquals("Davening List Confirmation", receivedMessages[0].getSubject());
+			assertEquals("Action required - Is this name still relevant?", receivedMessages[0].getSubject());
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]).toString());
 
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("the name on the list"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Remove this name"));
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("the name on the list")); 	//extend button
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Remove this name")); 	 	//delete button
+			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("te?id=3D4&token=3DABCdef"));//token info.  3D is escaping literal for '='
 
 		} catch (MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());

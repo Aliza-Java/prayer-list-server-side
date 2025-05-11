@@ -481,7 +481,7 @@ public class ServiceAdminTests {
 	@Test
 	@Order(21)
 	public void previewWeeklyTest() {
-		when(categoryRep.findById(3L)).thenReturn(Optional.empty());
+		//when(categoryRep.findById(3L)).thenReturn(Optional.empty());
 		when(categoryRep.findById(2L)).thenReturn(Optional.of(catShidduchim));
 		when(categoryRep.findById(5L)).thenReturn(Optional.of(catYeshuah));
 		when(categoryRep.findAll()).thenReturn(categories);
@@ -491,9 +491,9 @@ public class ServiceAdminTests {
 				.thenReturn(Arrays.asList(dfYeshuah1, dfYeshuah2));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
-			adminService.previewWeekly(new Weekly("Vayera", "Vayera - וירא", 3L, "banim", "message"));
+			adminService.previewWeekly(new Weekly("Vayera", "Vayera - וירא", 3L, "nonexistent", "message"));
 		});
-		assertTrue(exception.getMessage().contains("id"));
+		assertTrue(exception.getMessage().contains("category named nonexistent"));
 
 		try {
 			exception = assertThrows(EmptyInformationException.class, () -> {
@@ -507,8 +507,7 @@ public class ServiceAdminTests {
 			assertTrue(html.contains("YESHUAH"));
 			assertTrue(html.contains("Next week:  REFUA"));
 
-			verify(categoryRep, times(3)).findById(anyLong());
-			verify(categoryRep, times(1)).findAll();
+			verify(categoryRep, times(1)).findAll(); //when printing good weekly, finds category of next week
 			verify(davenforRep, times(2)).findAllDavenforByCategory(any());
 
 		} catch (ObjectNotFoundException | EmptyInformationException e) {
