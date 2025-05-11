@@ -504,7 +504,7 @@ public class AdminService {
 
 	// todo* in future: test now that changed
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
-
+		//TODO* in future - test if came in null
 		Category category;
 		String parashaNameFull;
 

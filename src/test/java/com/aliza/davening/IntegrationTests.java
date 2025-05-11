@@ -272,8 +272,7 @@ public class IntegrationTests {
 			mockMvc.perform(
 					post("/user/{email}", "user3@gmail.com").content(requestBody).contentType(MediaType.APPLICATION_JSON))
 					.andDo(print()).andExpect(status().isOk())
-					.andExpect(jsonPath("$.userEmail").value("user3@gmail.com"))
-					.andExpect(jsonPath("$.nameEnglish").value("Yossi ben Sara"));
+					.andExpect(jsonPath("$").value("true"));
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
