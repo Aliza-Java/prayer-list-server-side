@@ -34,6 +34,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 			throws ServletException, IOException {
 
 		String path = request.getRequestURI();
+		System.out.println(path);
 
 		if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
 			response.setStatus(HttpServletResponse.SC_OK);
@@ -41,13 +42,14 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 		}
 
 		// login and new signup don't need a token check - they create it.
-		// all 'direct/' apis handle their own token check in their controller. and user(=guest) doesn't need to validate it
-		List<String> noCheckPaths = List.of("/dlist/auth/signin", "/dlist/auth/signup"); 
-		//todo* in future - maybe just allow all direct, auth and user?
+		// all 'direct/' apis handle their own token check in their controller. and
+		// user(=guest) doesn't need to validate it
+		List<String> noCheckPaths = List.of("/dlist/auth/signin", "/dlist/auth/signup", "/dlist/auth/refresh");
+		// todo* in future - maybe just allow all direct, auth and user?
 		if (!noCheckPaths.contains(path) && !path.contains("/dlist/user/") && !path.contains("/dlist/direct/")) {
 			try {
 				String jwt = parseJwt(request);
-				if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+				if (jwt != null && jwtUtils.validateJwtToken(jwt, "Access token")) {
 					String username = jwtUtils.extractEmailFromToken(jwt);
 
 					UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -58,9 +60,8 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 					SecurityContextHolder.getContext().setAuthentication(authentication);
 				}
 			} catch (ExpiredJwtException e) {
-				logger.warn("JWT token is expired: {}", e.getMessage());
-				// avoiding using UNAUTHORIZED because it redirects in the frontend
-				response.sendError(HttpServletResponse.SC_EXPECTATION_FAILED, "Token expired");
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				response.setHeader("Token-Expired", "true");
 				return;
 			} catch (Exception e) {
 				logger.error("Cannot set user authentication: {}", e.getMessage());

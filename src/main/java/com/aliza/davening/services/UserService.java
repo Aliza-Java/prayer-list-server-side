@@ -101,7 +101,8 @@ public class UserService {
 
 		if (Category.isBanim(category.getCname().toString())) {
 			if (davenfor.noSpouseInfo()) {
-				System.out.println("No spouse information was entered.  This is okay, but user may not be aware of the option");
+				System.out.println(
+						"No spouse information was entered.  This is okay, but user may not be aware of the option");
 				// throw new EmptyInformationException(
 				// "This category requires also a spouse name (English and Hebrew) to be
 				// submitted. ");
@@ -218,7 +219,7 @@ public class UserService {
 
 		Davenfor davenforToExtend = optionalDavenfor.get();
 
-		// todo* in future - validity checks on email
+		// todo* in future - validity checks on email. How long is it valid for?
 		String email = jwtUtils.extractEmailFromToken(token);
 
 		if (!davenforToExtend.getUserEmail().equalsIgnoreCase(email)) {
