@@ -13,7 +13,7 @@ public class SchemeValues {
 	public static int waitBeforeDeletion = 7;
 	public static boolean adminNewNamePrompt = false;
 
-	public final static String banimName = "Zera Shel Kayama";
+	public final static String banimName = "Banim";
 
 	public static int adminId = 10;
 
