@@ -3,6 +3,7 @@ package com.aliza.davening.services;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +27,7 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.JwtUtils;
+import com.aliza.davening.util_classes.CategoryComparator;
 
 @Service
 @Transactional
@@ -80,7 +82,9 @@ public class UserService {
 		if (userRepository.findByEmail(email) == null) {
 			return new ArrayList<Davenfor>();
 		}
-		return davenforRepository.findAllDavenforByUserEmail(email);
+		List<Davenfor> allUserDavenfors = davenforRepository.findAllDavenforByUserEmail(email);
+		Collections.sort(allUserDavenfors, new CategoryComparator());
+		return allUserDavenfors;
 	}
 
 	// tested
@@ -260,7 +264,11 @@ public class UserService {
 		if (viaEmail)
 			return List.of(davenforToDelete); // return one so that can extract it in the confirmation message
 		else
-			return davenforRepository.findAllDavenforByUserEmail(email); // return all to show on website remaining ones
+		{
+			List<Davenfor> allUserDavenfors = davenforRepository.findAllDavenforByUserEmail(email);
+			Collections.sort(allUserDavenfors, new CategoryComparator());
+			return allUserDavenfors;// return all to show on website remaining ones
+		}
 	}
 
 	// tested

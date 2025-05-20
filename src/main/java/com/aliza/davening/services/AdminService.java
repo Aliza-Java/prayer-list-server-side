@@ -7,6 +7,7 @@ import static com.aliza.davening.entities.CategoryName.SOLDIERS;
 import static com.aliza.davening.entities.CategoryName.YESHUAH;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +40,7 @@ import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
+import com.aliza.davening.util_classes.CategoryComparator;
 import com.aliza.davening.util_classes.Weekly;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -248,7 +250,9 @@ public class AdminService {
 
 	// tested
 	public List<Davenfor> getAllDavenfors() {
-		return davenforRepository.findAll();
+		List<Davenfor> allDavenfors = davenforRepository.findAll();
+		Collections.sort(allDavenfors, new CategoryComparator());
+		return allDavenfors;
 	}
 
 	// tested
