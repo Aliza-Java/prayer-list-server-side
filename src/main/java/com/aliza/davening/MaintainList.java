@@ -70,7 +70,7 @@ public class MaintainList { //TODO*: tests for all these
 
 	// Every Thursday at 8 a.m. an email will be sent to Admin with a link to see
 	// list and send out, with link to his login page.
-	@Scheduled(cron = "0 0 8 * * THU")
+	@Scheduled(cron = "0 0 7 * * WED")
 	public void remindAdmin() {
 		System.out.println("Begin remindAdmin()");
 		emailSender.informAdmin(EmailScheme.weeklyAdminReminderSubject, utilities.setWeeklyAdminReminderMessage());
