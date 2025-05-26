@@ -9,7 +9,7 @@ import com.aliza.davening.entities.Davenfor;
 public class CategoryComparator implements Comparator<Davenfor> {
 
 	private static final List<String> CUSTOM_ORDER = Arrays.asList("refua", "shidduchim", "banim", "soldiers",
-			"yeshuah");
+			"yeshua_and_parnassa");
 
 	@Override
 	public int compare(Davenfor d1, Davenfor d2) {

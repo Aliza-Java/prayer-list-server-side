@@ -4,12 +4,12 @@ import static com.aliza.davening.entities.CategoryName.BANIM;
 import static com.aliza.davening.entities.CategoryName.REFUA;
 import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUAH;
+import static com.aliza.davening.entities.CategoryName.YESHUA_AND_PARNASSA;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -88,28 +88,29 @@ public class ContUserTests {
 	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-	public static Category catYeshuah = new Category(YESHUAH, false, 180, 5);
+	public static Category catYeshua = new Category(YESHUA_AND_PARNASSA, false, 180, 5);
 
 	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshuah1 = new Davenfor(2, "user1@gmail.com", "Yeshuah", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfYeshua1 = new Davenfor(2, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshuah2 = new Davenfor(4, "user2@gmail.com", "Yeshuah", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
-	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshuah1, dfBanim, dfYeshuah2);
+	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @Submitter controller test unexpected Exception: ";
 
 	@Test
 	@Order(1)
 	public void testGetSubmitterDavenfors() {
-		when(userService.getAllUserDavenfors("user1@gmail.com")).thenReturn(Arrays.asList(dfRefua, dfYeshuah1));
+		when(userService.getAllUserDavenfors("user1@gmail.com")).thenReturn(Arrays.asList(dfRefua, dfYeshua1));
 
 		try {
-			mockMvc.perform(get("/user/getmynames/{email}", "user1@gmail.com")).andDo(print()).andExpect(status().isOk())
-					.andExpect(jsonPath("$.length()").value(2)).andExpect(jsonPath("$[0].id").value(1))
+			mockMvc.perform(get("/user/getmynames/{email}", "user1@gmail.com")).andDo(print())
+					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
+					.andExpect(jsonPath("$[0].id").value(1))
 					.andExpect(jsonPath("$[0].nameEnglish").value("Avraham ben Sara"))
 					.andExpect(jsonPath("$[1].id").value(2))
 					.andExpect(jsonPath("$[1].nameEnglish").value("Moshe ben Sara"));
@@ -122,8 +123,11 @@ public class ContUserTests {
 
 	@Test
 	@Order(2)
-	public void testAddDavenfor() throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {//TODO*: add tests for last 3 exceptions
-		//todo* - fix.  check if still true: This exception should no longer be thrown. 
+	public void testAddDavenfor()
+			throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {// TODO*: add tests
+																									// for last 3
+																									// exceptions
+		// todo* - fix. check if still true: This exception should no longer be thrown.
 		when(userService.addDavenfor(any(), eq("user1@gmail.com"))).thenThrow(new EmptyInformationException(
 				"This category requires also a spouse name (English and Hebrew) to be submitted. "));
 
@@ -135,7 +139,7 @@ public class ContUserTests {
 					.andExpect(jsonPath("$.messages[0]", containsString("spouse name (English and Hebrew)")));
 
 			when(userService.addDavenfor(any(), eq("user3@gmail.com"))).thenReturn(true);
-			String requestBodyGood = "{ \"email\": \"user3@gmail.com\", \"category\": \"YESHUAH\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+			String requestBodyGood = "{ \"email\": \"user3@gmail.com\", \"category\": \"YESHUA_AND_PARNASSA\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 			mockMvc.perform(post("/user/{email}", "user3@gmail.com").content(requestBodyGood)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
@@ -150,7 +154,7 @@ public class ContUserTests {
 	@Test
 	@Order(3)
 	public void testUpdateDavenfor() {
-		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\" :\"YESHUAH\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\" :\"YESHUA_AND_PARNASSA\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			when(userService.updateDavenfor(any(), eq("user1@gmail.com"), eq(false))).thenReturn(dfRefua);
@@ -190,8 +194,8 @@ public class ContUserTests {
 	@Order(4)
 	public void testExtendDavenfor() {
 		try {
-			mockMvc.perform(get("/user/extend/{davenforId}/{email}", 3L).param("email", "user1@gmail.com").param("davenforId", "1")).andDo(print())
-					.andExpect(status().isOk());
+			mockMvc.perform(get("/user/extend/{davenforId}/{email}", 3L).param("email", "user1@gmail.com")
+					.param("davenforId", "1")).andDo(print()).andExpect(status().isOk());
 
 			when(userService.extendDavenfor(anyLong(), eq("user2@gmail.com")))
 					.thenThrow(new EmptyInformationException("No associated email address was received. "));
@@ -223,7 +227,7 @@ public class ContUserTests {
 	public void testDeleteDavenfor() {
 		try {
 			when(userService.deleteDavenfor(1L, "user1@gmail.com", false))
-					.thenReturn(Arrays.asList(dfYeshuah1, dfBanim, dfYeshuah2));
+					.thenReturn(Arrays.asList(dfYeshua1, dfBanim, dfYeshua2));
 
 			mockMvc.perform(delete("/user/delete/{id}/{email}", "1", "user1@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(3))
@@ -258,11 +262,11 @@ public class ContUserTests {
 	public void testFindAllCategories() {
 		try {
 			when(userService.getAllCategories())
-					.thenReturn(Arrays.asList(catRefua, catBanim, catShidduchim, catSoldiers, catYeshuah));
+					.thenReturn(Arrays.asList(catRefua, catBanim, catShidduchim, catSoldiers, catYeshua));
 
 			mockMvc.perform(get("/user/categories")).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.length()").value(5)).andExpect(jsonPath("$[0]").value("refua"))
-					.andExpect(jsonPath("$[1]").value("banim")).andExpect(jsonPath("$[4]").value("yeshuah"));
+					.andExpect(jsonPath("$[1]").value("banim")).andExpect(jsonPath("$[4]").value("yeshua_and_parnassa"));
 
 			when(userService.getAllCategories()).thenThrow(new ObjectNotFoundException("System categories"));
 

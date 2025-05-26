@@ -247,7 +247,7 @@ public class Utilities {
 		// building headlines and starting table
 		stringBuilder.append(String.format(EmailScheme.h5Header, EmailScheme.inMemory));
 
-		stringBuilder.append(String.format(EmailScheme.categoryAndParashaHeader, weekName, category.getCname(),
+		stringBuilder.append(String.format(EmailScheme.categoryAndParashaHeader, weekName, category.getCname().getVisual(),
 				category.getCname().getHebName()));
 
 		stringBuilder.append(EmailScheme.tableStart);
@@ -282,7 +282,7 @@ public class Utilities {
 
 		// Adding line about next week's category
 		Category nextCategory = getNextCategory(category);
-		stringBuilder.append(String.format(EmailScheme.nextWeekCategory, nextCategory.getCname(),
+		stringBuilder.append(String.format(EmailScheme.nextWeekCategory, nextCategory.getCname().getVisual(),
 				nextCategory.getCname().getHebName()));
 
 		// Adding line to email with name and good news.

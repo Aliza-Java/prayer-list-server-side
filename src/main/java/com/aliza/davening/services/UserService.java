@@ -138,7 +138,7 @@ public class UserService {
 		// (getMyGroupSettings(adminId).isNewNamePrompt())...
 		String subject = EmailScheme.informAdminOfNewNameSubject;
 		String message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
-				davenfor.getNameHebrew(), category.getCname().toString(), userEmail, client + "/admin");
+				davenfor.getNameHebrew(), category.getCname().getVisual(), userEmail, client + "/admin");
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
 

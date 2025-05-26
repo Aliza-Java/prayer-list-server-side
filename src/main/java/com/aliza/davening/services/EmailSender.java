@@ -286,7 +286,7 @@ public class EmailSender {
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
-				confirmedDavenfor.getCategory(), getLinkToExtend(confirmedDavenfor),
+				Category.getCategory(confirmedDavenfor.getCategory()).getCname().getVisual(), getLinkToExtend(confirmedDavenfor),
 				getLinkToDelete(confirmedDavenfor));
 
 		try {
