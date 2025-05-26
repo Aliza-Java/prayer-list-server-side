@@ -2,6 +2,8 @@
 package com.aliza.davening;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -73,9 +75,10 @@ public class Utilities {
 	String linkToSendList = client + EmailScheme.linkToSendList;
 	String linkToReviewWeekly = client + EmailScheme.linkToReviewWeekly;
 
-	public File buildListImage(Category category, String weekName, String fileName) throws EmptyInformationException {
+	public File buildListImage(Category category, String pEnglish, String pHebrew, String fileName)
+			throws EmptyInformationException {
 
-		String weeklyHtml = createWeeklyHtml(category, weekName, false);
+		String weeklyHtml = createWeeklyHtml(category, pEnglish, pHebrew, false);
 
 		String fileNameInFolder = "builtFiles/" + fileName;
 		Path filePath = Paths.get(fileNameInFolder);
@@ -94,11 +97,12 @@ public class Utilities {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
 
-		//WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this version specification in case it doesn't detect version automatically
+		// WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this
+		// version specification in case it doesn't detect version automatically
 		WebDriverManager.chromedriver().setup();
 		System.out.println("Inferring driver version automatically, should be at least 136");
 		WebDriver driver = new ChromeDriver(options);
-		
+
 		// Load HTML and take a screenshot (JPEG)
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
 		try {
@@ -126,6 +130,25 @@ public class Utilities {
 		}
 
 		driver.quit();
+
+		return filePath.toFile();
+	}
+
+	public File buildListHtml(Category category, String pEnglish, String pHebrew, String fileName)
+			throws EmptyInformationException {
+
+		String weeklyHtml = createWeeklyHtml(category, pEnglish, pHebrew, false);
+
+		String fileNameInFolder = "builtFiles/" + fileName;
+		Path filePath = Paths.get(fileNameInFolder);
+
+		try {
+			Files.write(filePath, weeklyHtml.getBytes(StandardCharsets.UTF_8));
+			System.out.println("File path: " + filePath.toAbsolutePath());
+			System.out.println("Exists? " + Files.exists(filePath));
+		} catch (Exception e) {
+			System.out.println("There was an error creating the html file: " + e.getMessage());
+		}
 
 		return filePath.toFile();
 	}
@@ -228,7 +251,7 @@ public class Utilities {
 		return message;
 	}
 
-	public String createWeeklyHtml(Category category, String weekName, boolean preview)
+	public String createWeeklyHtml(Category category, String pEnglish, String pHebrew, boolean preview)
 			throws EmptyInformationException {
 		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
@@ -244,13 +267,19 @@ public class Utilities {
 		stringBuilder.append(String.format(EmailScheme.htmlHead, allowOverflow));
 		stringBuilder.append(EmailScheme.htmlBodyStart);
 
-		// building headlines and starting table
-		stringBuilder.append(String.format(EmailScheme.h5Header, EmailScheme.inMemory));
-
-		stringBuilder.append(String.format(EmailScheme.categoryAndParashaHeader, weekName, category.getCname().getVisual(),
-				category.getCname().getHebName()));
-
 		stringBuilder.append(EmailScheme.tableStart);
+
+		stringBuilder.append(
+				String.format(EmailScheme.htmlNameRowInList, EmailScheme.inMemoryEnglish, EmailScheme.inMemoryHebrew));
+
+		stringBuilder.append(String.format(EmailScheme.htmlNameRowInList, EmailScheme.hostagesAndSoldiersEnglish,
+				EmailScheme.hostagesAndSoldiersHebrew));
+
+		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, EmailScheme.hafrashatChallahEnglish,
+				EmailScheme.hafrashatChallahHebrew));
+
+		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, category.getCname().getListName(),
+				category.getCname().getHebName()));
 
 		// Running through names, adding them in columns - English and Hebrew
 
@@ -277,16 +306,17 @@ public class Utilities {
 			}
 		}
 
-		// Closing table
-		stringBuilder.append(EmailScheme.tableClose);
-
 		// Adding line about next week's category
 		Category nextCategory = getNextCategory(category);
-		stringBuilder.append(String.format(EmailScheme.nextWeekCategory, nextCategory.getCname().getVisual(),
-				nextCategory.getCname().getHebName()));
+		String nextWeekEng = String.format(EmailScheme.nextWeekEnglish, nextCategory.getCname().getListName());
+		String nextWeekHeb = String.format(EmailScheme.nextWeekHebrew, nextCategory.getCname().getHebName());
+		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, nextWeekEng, nextWeekHeb));
 
 		// Adding line to email with name and good news.
 		stringBuilder.append(String.format(EmailScheme.sendGoodNewsMessage, adminEmail));
+
+		// Closing table
+		stringBuilder.append(EmailScheme.tableClose);
 
 		// Closing <body> tag
 		stringBuilder.append(EmailScheme.htmlBodyEnd);
@@ -305,11 +335,11 @@ public class Utilities {
 
 	}
 
-	public String formatFileName(String weekName) {
+	public String formatFileName(String weekName, String suffix) {
 		LocalDateTime now = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 		String formattedNow = now.format(formatter);
-		return weekName + "_" + formattedNow + ".png";
+		return weekName + "_" + formattedNow + "." + suffix;
 	}
 
 	public String toTitlecase(String input) {
@@ -320,8 +350,8 @@ public class Utilities {
 				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
 				.collect(Collectors.joining(" "));
 	}
-	
+
 	public long getDaysInMs(int daysNumber) {
-		return daysNumber*24*60*60*1000;
+		return daysNumber * 24 * 60 * 60 * 1000;
 	}
 }

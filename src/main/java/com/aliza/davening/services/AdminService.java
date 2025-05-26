@@ -506,13 +506,15 @@ public class AdminService {
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
 		//TODO* in future - test if came in null
 		Category category;
-		String parashaNameFull;
+		String pEnglish;
+		String pHebrew;
 
 		if (info == null) // came from direct, or other issue
 		{
 			try {
 				category = inferCategory();
-				parashaNameFull = inferParashaName(true);
+				pEnglish = inferParashaName(true, false);
+				pHebrew = inferParashaName(false, true);
 			} catch (ObjectNotFoundException ex) {
 				throw ex;
 			}
@@ -524,10 +526,11 @@ public class AdminService {
 			if (category == null) {
 				throw new ObjectNotFoundException("category named " + info.category);
 			}
-			parashaNameFull = info.parashaNameFull;
+			pEnglish = info.parashaNameEnglish;
+			pHebrew = info.parashaNameHebrew;
 		}
 
-		return utilities.createWeeklyHtml(category, parashaNameFull, true);
+		return utilities.createWeeklyHtml(category, pEnglish, pHebrew, true);
 	}
 
 	// tested
@@ -561,13 +564,17 @@ public class AdminService {
 		return category;
 	}
 
-	public String inferParashaName(boolean full) throws ObjectNotFoundException {
+	public String inferParashaName(boolean english, boolean hebrew) throws ObjectNotFoundException {
 		Parasha parasha = parashaRepository.findCurrent()
 				.orElseThrow(() -> new ObjectNotFoundException("current Parasha"));
-		if (full)
-			return parasha.getEnglishName() + " - " + parasha.getHebrewName();
-		else
+		if (english && !hebrew)
 			return parasha.getEnglishName();
+		if (hebrew && !english)
+			return parasha.getHebrewName();
+		if (hebrew && english)
+			return parasha.getEnglishName() + " - " + parasha.getHebrewName();
+
+		return "";
 	}
 
 //	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)

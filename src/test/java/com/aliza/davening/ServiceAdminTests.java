@@ -497,12 +497,12 @@ public class ServiceAdminTests {
 
 		try {
 			exception = assertThrows(EmptyInformationException.class, () -> {
-				adminService.previewWeekly(new Weekly("Vayera", "Vayera - וירא", 2L, "shidduchim", "message"));
+				adminService.previewWeekly(new Weekly("Vayera", "וירא", 2L, "shidduchim", "message"));
 			});
 			assertTrue(exception.getMessage().contains("no names"));
 
 			String html = adminService
-					.previewWeekly(new Weekly("Vayechi", "Vayechi - ויחי", 5L, "YESHUA_AND_PARNASSA", "message 2"));
+					.previewWeekly(new Weekly("Vayechi", "ויחי", 5L, "YESHUA_AND_PARNASSA", "message 2"));
 
 			assertTrue(html.contains("Vayechi"));
 			assertTrue(html.contains("Yeshua and Parnassa"));

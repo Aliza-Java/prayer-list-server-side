@@ -18,10 +18,18 @@ public class EmailScheme {
 
 	public static final String h5Header = "<h5>%s</h5>";
 
-	public static final String categoryAndParashaHeader = "<h4>%s <br>%s   %s</h4>";
-
-	public static final String inMemory = "לעילוי נשמת אסתר נעמי בת יעקב ע\"ה <br> L\'iluy Nishmat Esther Naomi Bat Yaakov";
-
+	public static final String inMemoryEnglish = "L\'iluy Nishmat Esther Naomi Bat Yaakov";
+	
+	public static final String inMemoryHebrew ="לעילוי נשמת אסתר נעמי בת יעקב ע\"ה";
+	
+	public static final String hostagesAndSoldiersEnglish = "For the hostages' and soldiers' safe return";
+	
+	public static final String hostagesAndSoldiersHebrew = "לשובם לשלום של החטופים והחיילים";
+	
+	public static final String hafrashatChallahEnglish = "Hafrashat Challah";
+	
+	public static final String hafrashatChallahHebrew = "הפרשת חלה";
+;
 	public static final String banimLineEnglish = "Yehi ratzon she_____ yipakdu b'zera chaya v'kayama";
 
 	public static final String banimLineHebrew = "יהי רצון ש___ יפקדו בזרע חיא וקימא";
@@ -31,21 +39,25 @@ public class EmailScheme {
 	public static final String pageDivider = "<script>document.addEventListener(\"DOMContentLoaded\", function () { const rows = Array.from(document.querySelectorAll(\"table tr\")); const pageHeight = 900; let currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); let currentHeight = 0; rows.forEach(row => { const rowHeight = row.offsetHeight; if (currentHeight + rowHeight > pageHeight) { currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); currentHeight = 0; } currentPage.appendChild(row); currentHeight += rowHeight; }); });</script>";
 	
 //TODO*: move to separate file, to make editing easier.  All long htmls should be read from files
-	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Weekly Davening List</title><style>.container {width: 630px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 630px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 630px; font-size: 12pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
+	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Weekly Davening List</title><style>.container {height:100%%; width: 650px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s ; height: 100%%; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 650px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 650px; height: 100%%; font-size: 14.5pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
 
 	public static final String htmlBodyStart = "<body><div class='container'><div class='page'>";
 
-	public static final String tableStart = "<table style='width:100%'>";
+	public static final String tableStart = "<table style='height:100%;width:100%;border-collapse:collapse;'>";
 
 	public static final String htmlNameRowInList = "<tr><td style='text-align:left'>%s</td><td style='text-align:right'>%s</td></tr>";
 
 	public static final String htmlBanimRowInList = "<tr><td style='text-align:left'>%s<br>%s</td><td style='text-align:right'>%s<br>%s</td></tr>";
 
+	public static final String boldHtmlRow = "<tr style='font-weight:bold'><td style='text-align:left'>%s</td><td style='text-align:right'>%s</td></tr>";
+	
 	public static final String tableClose = "</table>";
 
-	public static final String nextWeekCategory = "<h3>Next week:  %s                שבוע הבא: %s</h3>";
-
-	public static final String sendGoodNewsMessage = "Please email %s with name and good news!";
+	public static final String nextWeekEnglish = "Next week %s";
+	
+	public static final String nextWeekHebrew = "שבוע הבא %s";	
+	
+	public static final String sendGoodNewsMessage = "<tr><td colspan='2' style='text-align:center; vertical-align:bottom; height:100%%;'>Please email %s with names and good news!</td></tr>";
 
 	public static final String htmlBodyEnd = "</div></div></body></html>";
 

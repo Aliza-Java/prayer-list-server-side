@@ -264,7 +264,7 @@ public class ServiceEmailSenderTests {
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
 
-		Weekly info = new Weekly("Vayeshev", "Vayeshev - וישב", 5L, "YESHUA_AND_PARNASSA", "special information");
+		Weekly info = new Weekly("Vayeshev", "וישב", 5L, "YESHUA_AND_PARNASSA", "special information");
 
 		try {
 			when(davenforRep.findAllDavenforByCategory(YESHUA_AND_PARNASSA.toString())).thenReturn(Collections.emptyList());
@@ -331,7 +331,7 @@ public class ServiceEmailSenderTests {
 	@Order(4)
 	public void sendOutWeeklyNoParashaTest() {
 		try {
-			when(adminService.inferParashaName(false)).thenReturn("Toldot");
+			when(adminService.inferParashaName(true, false)).thenReturn("Toldot");
 		} catch (ObjectNotFoundException e1) {
 			// ignore, not testing this
 		}

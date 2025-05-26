@@ -106,13 +106,13 @@ public class EmailSender {
 
 			MimeBodyPart textPart = new MimeBodyPart();
 			textPart.setContent(text, "text/html; charset=UTF-8");
-			multipart.addBodyPart(textPart);
+			multipart.addBodyPart(textPart); // email body
 
 			if (attachment != null) {
 				MimeBodyPart attachmentPart = new MimeBodyPart();
 				attachmentPart.attachFile(attachment);
 				attachmentPart.setFileName(attachmentName);
-				multipart.addBodyPart(attachmentPart);
+				multipart.addBodyPart(attachmentPart); // the attachment
 			}
 
 			message.setContent(multipart);
@@ -187,15 +187,15 @@ public class EmailSender {
 			throws EmailException, EmptyInformationException, ObjectNotFoundException {
 
 		Category category;
-		String parashaNameEnglish;
-		String parashaNameFull;
+		String pEnglish;
+		String pHebrew;
 		String linkToUnsubscribe = client + "/unsubscribe";
 		String emailText = String.format(EmailScheme.weeklyEmailText, linkToUnsubscribe);
 
 		if (info == null) {
 			category = adminService.inferCategory();
-			parashaNameEnglish = adminService.inferParashaName(false);
-			parashaNameFull = adminService.inferParashaName(true);
+			pEnglish = adminService.inferParashaName(true, false);
+			pHebrew = adminService.inferParashaName(false, true);
 		} else // info came in (but parts may be missing)
 		{
 			if (info.category != null && info.category.length() > 0)
@@ -204,26 +204,32 @@ public class EmailSender {
 				category = categoryRepository.findById(info.categoryId)
 						.orElseThrow(() -> new ObjectNotFoundException("Category"));
 
-			parashaNameEnglish = (info.parashaNameEnglish != null && info.parashaNameEnglish.length() > 0)
+			pEnglish = (info.parashaNameEnglish != null && info.parashaNameEnglish.length() > 0)
 					? info.parashaNameEnglish
-					: adminService.inferParashaName(false);
+					: adminService.inferParashaName(true, false);
 
-			parashaNameFull = info.parashaNameFull;
+			pHebrew = info.parashaNameHebrew;
 
 			if (info.message != null)
 				emailText = concatAdminMessage(info.message, emailText);
 		}
 
-		String subject = String.format(EmailScheme.weeklyEmailSubject, parashaNameEnglish);
+		String subject = String.format(EmailScheme.weeklyEmailSubject, pEnglish);
 
 		List<String> usersList = userRepository.getAllUsersEmails();
 		if (usersList.size() == 0)
 			throw new EmailException("There are no active users, cannot send list");
 
-		String fileName = String.format(EmailScheme.weeklyFileName, utilities.formatFileName(parashaNameEnglish));
+		 String fileNamePng = String.format(EmailScheme.weeklyFileName,
+		 utilities.formatFileName(pEnglish, "png"));
+		//String fileNameHtml = String.format(EmailScheme.weeklyFileName, utilities.formatFileName(pEnglish, "html"));
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
-				utilities.buildListImage(category, parashaNameFull, fileName), fileName));
+		 sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList, utilities.buildListImage(category, pEnglish, pHebrew, fileNamePng),
+		 fileNamePng));
+		
+		//todo* in future - if want to send as html
+		//sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
+			//	utilities.buildListHtml(category, pEnglish, pHebrew, fileNamePng), fileNamePng));
 
 		return true;
 	}
@@ -286,8 +292,8 @@ public class EmailSender {
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
 		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
-				Category.getCategory(confirmedDavenfor.getCategory()).getCname().getVisual(), getLinkToExtend(confirmedDavenfor),
-				getLinkToDelete(confirmedDavenfor));
+				Category.getCategory(confirmedDavenfor.getCategory()).getCname().getVisual(),
+				getLinkToExtend(confirmedDavenfor), getLinkToDelete(confirmedDavenfor));
 
 		try {
 			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, emailAddress,
