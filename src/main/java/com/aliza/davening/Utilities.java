@@ -275,8 +275,15 @@ public class Utilities {
 		stringBuilder.append(String.format(EmailScheme.htmlNameRowInList, EmailScheme.hostagesAndSoldiersEnglish,
 				EmailScheme.hostagesAndSoldiersHebrew));
 
-		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, EmailScheme.hafrashatChallahEnglish,
-				EmailScheme.hafrashatChallahHebrew));
+		String hafrashatChallahEng = EmailScheme.hafrashatChallahEnglish;
+		if (pEnglish != null && pEnglish.length() > 0)
+			hafrashatChallahEng += " - ".concat(pEnglish);
+		
+		String hafrashatChallahHeb = EmailScheme.hafrashatChallahHebrew;
+		if (pHebrew != null && pHebrew.length() > 0)
+			hafrashatChallahHeb += " - ".concat(pHebrew);
+		
+		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, hafrashatChallahEng, hafrashatChallahHeb));
 
 		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, category.getCname().getListName(),
 				category.getCname().getHebName()));
