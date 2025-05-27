@@ -61,6 +61,8 @@ public class EmailScheme {
 
 	public static final String htmlBodyEnd = "</div></div></body></html>";
 
+	public static final String emailBodyStyle = "<div style='font-family: Arial, sans-serif; font-size: 18px; color: #000000; line-height: 2;'>%s</div>";
+
 	public static final String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='%s'>HERE</a>";
 
 	// Subject includes the category

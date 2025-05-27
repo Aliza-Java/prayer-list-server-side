@@ -105,7 +105,8 @@ public class EmailSender {
 			Multipart multipart = new MimeMultipart();
 
 			MimeBodyPart textPart = new MimeBodyPart();
-			textPart.setContent(text, "text/html; charset=UTF-8");
+			String formattedText = String.format(EmailScheme.emailBodyStyle, text);
+			textPart.setContent(formattedText, "text/html; charset=UTF-8");
 			multipart.addBodyPart(textPart); // email body
 
 			if (attachment != null) {
@@ -260,11 +261,11 @@ public class EmailSender {
 
 		else {
 			urgentMessage = String.format(EmailScheme.urgentDavenforEmailText, davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), utilities.toTitlecase(davenfor.getCategory()));
+					davenfor.getNameHebrew(), (Category.getCategory(davenfor.getCategory()).getCname().getVisual()));
 		}
 
 		if (davenfor.getNote() != null) {
-			urgentMessage = concatAdminMessageAfter(davenfor.getNote(), urgentMessage);
+			urgentMessage = urgentMessage + utilities.toTitlecase(davenfor.getNote());
 		}
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, null, davenersList, null,
@@ -338,12 +339,6 @@ public class EmailSender {
 		// adding admin message before name and bolding it according to settings in
 		// EmailScheme.
 		return String.format(EmailScheme.boldFirstMessage, adminMessage, emailText);
-	}
-
-	private String concatAdminMessageAfter(String adminMessage, String emailText) {
-		// adding admin message after name and bolding it according to settings in
-		// EmailScheme.
-		return String.format(EmailScheme.boldSecondMessage, emailText, adminMessage);
 	}
 
 	private String setUnsubscribeMessage(String email) {
