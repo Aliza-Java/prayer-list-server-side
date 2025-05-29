@@ -103,16 +103,16 @@ public class UserService {
 		// If davenfor needs 2 names (e.g. Zera shel Kayama), validate that second name
 		// is in too, and if indeed exist - trim them.
 
-		if (Category.isBanim(category.getCname().toString())) {
+		if (Category.isBanim(davenfor.getCategory())) {
 			if (davenfor.noSpouseInfo()) {
-				System.out.println(
-						"No spouse information was entered.  This is okay, but user may not be aware of the option");
-				// throw new EmptyInformationException(
-				// "This category requires also a spouse name (English and Hebrew) to be
-				// submitted. ");
+				String message = "Banim category requires also a spouse name to be submitted. ";
+				System.out.println(message);
+				throw new EmptyInformationException(message);
 			} else {
-				davenfor.setNameEnglishSpouse(davenfor.getNameEnglishSpouse().trim());
-				davenfor.setNameHebrewSpouse(davenfor.getNameHebrewSpouse().trim());
+				if (davenfor.getNameEnglishSpouse() != null)
+					davenfor.setNameEnglishSpouse(davenfor.getNameEnglishSpouse().trim());
+				if (davenfor.getNameHebrewSpouse() != null)
+					davenfor.setNameHebrewSpouse(davenfor.getNameHebrewSpouse().trim());
 			}
 		}
 
@@ -178,11 +178,14 @@ public class UserService {
 		// too, and if indeed exist - trim them.
 		if (Category.isBanim(davenforToUpdate.getCategory())) {
 			if (davenforToUpdate.noSpouseInfo()) {
-				throw new EmptyInformationException(
-						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
+				String message = "Banim category requires also a spouse name to be submitted. ";
+				System.out.println(message);
+				throw new EmptyInformationException(message);
 			} else {
-				davenforToUpdate.setNameEnglishSpouse(davenforToUpdate.getNameEnglishSpouse().trim());
-				davenforToUpdate.setNameHebrewSpouse(davenforToUpdate.getNameHebrewSpouse().trim());
+				if (davenforToUpdate.getNameEnglishSpouse() != null)
+					davenforToUpdate.setNameEnglishSpouse(davenforToUpdate.getNameEnglishSpouse().trim());
+				if (davenforToUpdate.getNameHebrewSpouse() != null)
+					davenforToUpdate.setNameHebrewSpouse(davenforToUpdate.getNameHebrewSpouse().trim());
 			}
 		}
 
@@ -263,8 +266,7 @@ public class UserService {
 
 		if (viaEmail)
 			return List.of(davenforToDelete); // return one so that can extract it in the confirmation message
-		else
-		{
+		else {
 			List<Davenfor> allUserDavenfors = davenforRepository.findAllDavenforByUserEmail(email);
 			Collections.sort(allUserDavenfors, new CategoryComparator());
 			return allUserDavenfors;// return all to show on website remaining ones
