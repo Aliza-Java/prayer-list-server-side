@@ -79,7 +79,7 @@ public class Davenfor {
 	}
 
 	public boolean noSpouseInfo() {
-		return this.nameEnglishSpouse == null || this.nameEnglishSpouse.trim().length() == 0
-				|| this.nameHebrewSpouse == null || this.nameHebrewSpouse.trim().length() == 0;
+		return (this.nameEnglishSpouse == null || this.nameEnglishSpouse.trim().length() == 0)
+				&& (this.nameHebrewSpouse == null || this.nameHebrewSpouse.trim().length() == 0);
 	}
 }
