@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
+import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.ParashaRepository;
 import com.aliza.davening.services.AdminService;
@@ -32,6 +34,9 @@ public class MaintainList { //TODO*: tests for all these
 
 	@Autowired
 	ParashaRepository parashaRepository;
+	
+	@Autowired
+	CategoryRepository categoryRepository;
 
 	@Value("${admin.id}")
 	private long adminId;
@@ -52,22 +57,6 @@ public class MaintainList { //TODO*: tests for all these
 		System.out.println("End deleteExpired().  Amount of davenfors currently: " + davenforRepository.count());
 	}
 
-	// Sends email to davenfor's submitter to let them know the expiring name will
-	// be deleted.
-	// Fires at 1:15 a.m. every day
-	@Scheduled(cron = "0 15 1 * * ?")
-	public void offerExtensionOrDelete() {
-		System.out.println("Begin offerExtensionOrDelete()");
-		List<Davenfor> expiredDavenfors = davenforRepository.findByExpireAtLessThan(LocalDate.now());
-		System.out.println("Davenfors in question: " + expiredDavenfors.size());
-		System.out.println(expiredDavenfors);
-		for (Davenfor d : expiredDavenfors) {
-			emailSender.offerExtensionOrDelete(d);
-			System.out.println("emailed " + d.getUserEmail() + " to offerExtensionOrDelete for df id " + d.getId());
-		}
-		System.out.println("End offerExtensionOrDelete()");
-	}
-
 	// Every Thursday at 8 a.m. an email will be sent to Admin with a link to see
 	// list and send out, with link to his login page.
 	@Scheduled(cron = "0 0 7 * * WED")
@@ -85,5 +74,24 @@ public class MaintainList { //TODO*: tests for all these
 		adminService.updateParasha();
 		System.out.println("End updateNewWeek().  New category: " + adminService.findCurrentCategory() + ", new parasha: " + adminService.findCurrentParasha());
 	}
+	
+	// for each category going to be sent out, Sends email to davenfor's submitter to ask if name in category is still relevant,
+		// Fires at 1:15 a.m. every day
+		@Scheduled(cron = "0 0 7 * * SUN")
+		public void offerExtensionOrDelete() {
+			System.out.println("Begin offerExtensionOrDelete()");
+			//List<Davenfor> expiredDavenfors = davenforRepository.findByExpireAtLessThan(LocalDate.now());
+			Category currentCategory = categoryRepository.getCurrent().get();
+			List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(currentCategory.getCname().toString());
+			
+			System.out.println("Davenfors in question: " + relevantDavenfors.size());
+			System.out.println(relevantDavenfors);
+			for (Davenfor d : relevantDavenfors) {
+				emailSender.offerExtensionOrDelete(d);
+				System.out.println("emailed " + d.getUserEmail() + " to offerExtensionOrDelete for df id " + d.getId());
+			}
+			System.out.println("End offerExtensionOrDelete()");
+		}
+
 
 }

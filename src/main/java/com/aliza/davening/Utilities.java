@@ -234,18 +234,17 @@ public class Utilities {
 	public String setExpiringNameMessage(Davenfor davenfor) {
 
 		// Creating the button 'components' as html tds
-		String button1 = createButton(emailSender.getLinkToExtend(davenfor), "#32a842", "Keep the name on the list");
-		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "Remove this name");
+		String button1 = createButton(emailSender.getLinkToExtend(davenfor), "#32a842", "Yes");
+		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "No");
 
 		// Inserting the button tds to an html table
 		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
 				+ "</tr></tbody></table>";
 
 		// building the email message with the button area as a table at the bottom
-		String message = String.format("We've been davening for %s for %s.", davenfor.getNameEnglish(),
+		String message = String.format("We've been davening for <b>%s</b> for <b>%s</b>.", davenfor.getNameEnglish(),
 				davenfor.getCategory())
-				+ "  In order to keep our lists relevant, please confirm that the davening is still relevant. "
-				+ "<br><br>  If the davening is no longer relevant for this list either simply ignore this email or click the big red remove button."
+				+ String.format("  <br> In order to keep our lists relevant, please confirm: Should we continue davening for <%s>?", davenfor.getNameEnglish())
 				+ buttonArea;
 
 		return message;
