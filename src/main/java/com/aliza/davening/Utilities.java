@@ -238,13 +238,13 @@ public class Utilities {
 		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "No");
 
 		// Inserting the button tds to an html table
-		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+		String buttonArea = "<table cellspacing='6' cellpadding='2'> <tbody>	<tr> " + button1 + button2
 				+ "</tr></tbody></table>";
 
 		// building the email message with the button area as a table at the bottom
 		String message = String.format("We've been davening for <b>%s</b> for <b>%s</b>.", davenfor.getNameEnglish(),
 				davenfor.getCategory())
-				+ String.format("  <br> In order to keep our lists relevant, please confirm: Should we continue davening for <%s>?", davenfor.getNameEnglish())
+				+ String.format(" <br>This week, the list being sent out will include names under the %s category.  In order to keep our list relevant, please confirm: Should we continue davening for <b>%s</b>?", davenfor.getCategory(), davenfor.getNameEnglish())
 				+ buttonArea;
 
 		return message;
@@ -336,7 +336,7 @@ public class Utilities {
 	private String createButton(String link, String buttonColor, String buttonText) {
 
 		return String.format(
-				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;' align='center' bgcolor=%s width='300' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
+				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
 				buttonColor, link, buttonText);
 
 	}

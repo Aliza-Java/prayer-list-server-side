@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.aliza.davening.entities.Category;
+import static com.aliza.davening.entities.CategoryName.*;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
@@ -82,7 +83,11 @@ public class MaintainList { //TODO*: tests for all these
 			System.out.println("Begin offerExtensionOrDelete()");
 			//List<Davenfor> expiredDavenfors = davenforRepository.findByExpireAtLessThan(LocalDate.now());
 			Category currentCategory = categoryRepository.getCurrent().get();
-			List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(currentCategory.getCname().toString());
+			String categoryName = currentCategory.getCname().getVisual();
+			if (categoryName.equalsIgnoreCase(SHIDDUCHIM.toString()) || categoryName.equalsIgnoreCase(BANIM.toString()))
+				return;
+			
+			List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(categoryName);
 			
 			System.out.println("Davenfors in question: " + relevantDavenfors.size());
 			System.out.println(relevantDavenfors);
