@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,10 +16,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.aliza.davening.SchemeValues;
+import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
+import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.security.TokenCheck;
 import com.aliza.davening.services.AdminService;
@@ -45,6 +46,9 @@ public class PopupWebService {
 	AdminService adminService;
 
 	@Autowired
+	DavenforRepository davenforRepository;
+
+	@Autowired
 	EmailSender emailSender;
 
 	@Autowired
@@ -61,17 +65,22 @@ public class PopupWebService {
 	}
 
 	// todo*: test sending via token, with errors and good
-	@DeleteMapping("delete/{id}/{token}")
+	@GetMapping("delete/{id}/{token}")
 	public String deleteDavenforViaEmail(@PathVariable long id, @PathVariable String token, Model model) {
 		Davenfor deletedDf;
 		model.addAttribute("client", client);
 
-		try {
-			deletedDf = userService.deleteDavenfor(id, token, true).get(0);
-		} catch (ObjectNotFoundException e) {
-			model.addAttribute("status", "This name may have been deleted already");
-			model.addAttribute("action", "Take me to the website");
-			return "delete-problem";
+		try {// todo* - this checks DF status without authenticating token. should be
+				// corrected
+			deletedDf = davenforRepository.findByIdIncludingDeleted(id).get();
+			if (deletedDf.getDeletedAt() != null) {
+				model.addAttribute("status",
+						String.format("The name %s has been removed already", deletedDf.getNameEnglish()));
+				model.addAttribute("action", "Take me to the website");
+				return "delete-problem";
+			}
+
+			userService.deleteDavenfor(id, token, true).get(0);
 		} catch (Exception e) {
 			model.addAttribute("status", "There was a problem deleting this name");
 			model.addAttribute("action", "Delete directly from the website");
@@ -88,20 +97,20 @@ public class PopupWebService {
 	@GetMapping("extend/{id}/{token}")
 	public String extendDavenfor(@PathVariable long id, @PathVariable String token, Model model) {
 
-		Davenfor extendedDf = null;
-
+		Davenfor extendedDf;
 		model.addAttribute("client", client);
 
 		try {
-			extendedDf = userService.extendDavenfor(id, token);
+			extendedDf = davenforRepository.findByIdIncludingDeleted(id).get();
+			userService.extendDavenfor(id, token);
 		} catch (Exception e) {
 			model.addAttribute("message", "There was a problem confirming this name");
 			model.addAttribute("reason", e.getMessage());
 			return "extend-problem"; // maps to `src/main/resources/templates/extend-problem.html` due to Thymeleaf
 		}
 
-		model.addAttribute("response", String.format("Thank you for confirming %s in the category: %s",
-				extendedDf.getNameEnglish(), extendedDf.getCategory()));
+		model.addAttribute("response", String.format("Thank you for confirming %s in the %s category!",
+				extendedDf.getNameEnglish(), Category.getCategory(extendedDf.getCategory()).getCname().getVisual()));
 		return "extend-confirmation"; // maps to `src/main/resources/templates/extend-confirmation.html` due to
 										// Thymeleaf
 
@@ -137,9 +146,8 @@ public class PopupWebService {
 						HttpStatus.FORBIDDEN);
 		} catch (ExpiredJwtException e) {
 			System.out.println("User used an expired email. " + e.getMessage());
-			return new ResponseEntity<>(
-					Map.of("message",
-							"This email link appears to be expired.  Please use a recent email or log into the website."),
+			return new ResponseEntity<>(Map.of("message",
+					"This email link appears to be expired.  Please use a recent email or log into the website."),
 					HttpStatus.FORBIDDEN);
 		}
 

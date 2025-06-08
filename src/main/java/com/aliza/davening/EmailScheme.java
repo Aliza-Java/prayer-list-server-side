@@ -1,8 +1,12 @@
 //Variables needed for email-related actions
 package com.aliza.davening;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import com.aliza.davening.entities.Davenfor;
 
 @Component
 public class EmailScheme {
@@ -112,10 +116,20 @@ public class EmailScheme {
 
 	public static final String unsubscribeSubject = "Unsubscribe - action required";
 	
-	public static final String deleteNameSubject = "Name deleted: %s";
+	public static final String deleteNameAdminSubject = "Name deleted: %s";
 	
-	public static final String deleteNameMessage = "We want to let you know that the name <b>%s</b> from category <b>%s</b> has been deleted from the davening list by <b>%s</b>.";
+	public static final String deleteNameAdminMessage = "We want to let you know that the name <b>%s</b> from the <b>%s</b> category has been removed from the davening list by <b>%s</b>.";
 
+	public static final String nameAutoDeletedUserSubject = "Missed Our Alerts? You Can Still Repost Your Davening Name";
+			
+	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, your davening name <b>%s</b> has been removed as part of our cleanup process. <br> "
+			+ "No worries though — if you'd like to repost this name (although it might not be included in this week's list), you can do so easily by clicking the button below: <br>" 
+			+ "<div>%s </div>"
+			+ "Let us know if you need any help! <br>"
+			+ "The Davening List team";
+	
+	public static final String unconfirmedSubject = "Names automatically deleted this week";
+	
 	// Links inserted to email allowing submitters to extend or delete names. URL
 	// will change when uploaded to cloud
 	public static String linkToExtend = "extend/%s?email=%s";
@@ -125,4 +139,14 @@ public class EmailScheme {
 	public static String linkToReviewWeekly = "/direct-preview?t=%s&email=%s";
 
 	public static final String unsubscribeMessage = "We are sorry to see you go. <br> Click <a href=%s>HERE</a> to complete the process. <br><br> If you ever wish to join again, email the list admin at %s.";
+
+	public static String createUnconfirmedMessage(String category, List<Davenfor> names) {
+		StringBuilder sb = new StringBuilder();
+		sb.append("The following names in the ");
+		sb.append(category);
+		sb.append(" have been automatically removed this week, as they were not confirmed by users: <br>");
+		names.forEach(n -> sb.append(n.getNameEnglish() + "<br>"));
+		
+		return sb.toString();
+	}
 }

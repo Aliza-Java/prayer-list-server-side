@@ -257,7 +257,7 @@ public class AdminService {
 		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
-		davenforRepository.delete(optionalDavenfor.get());
+		davenforRepository.softDeleteById(optionalDavenfor.get().getId());
 		return davenforRepository.findAll();
 	}
 

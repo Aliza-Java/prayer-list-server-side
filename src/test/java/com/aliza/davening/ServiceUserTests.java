@@ -24,6 +24,7 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
@@ -45,6 +46,7 @@ import com.aliza.davening.repositories.AdminRepository;
 import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.UserRepository;
+import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.UserService;
 
@@ -76,6 +78,9 @@ public class ServiceUserTests {
 	@MockBean
 	private EmailSender emailSender;
 
+	@MockBean
+	private JwtUtils jwtUtils;
+
 	static String submitterEmail = "sub.email@gmail.com";
 
 	public static Category catRefua = new Category(REFUA, true, 180, 1);
@@ -98,7 +103,9 @@ public class ServiceUserTests {
 	}
 
 	@Test
+	@Order(1)
 	public void getAllSubmitterDavenforsTest() {
+		System.out.println("Test 1");
 		// service returns davenfors fetched from repository
 		when(davenforRep.findAllDavenforByUserEmail(submitterEmail)).thenReturn(getDfList());
 		List<Davenfor> dfs = (userService.getAllUserDavenfors(submitterEmail));
@@ -115,7 +122,9 @@ public class ServiceUserTests {
 	}
 
 	@Test
+	@Order(2)
 	public void addDavenforTest() {
+		System.out.println("Test 2");
 		Davenfor dfShidduchim = getDf(catShidduchim);
 		Davenfor dfRefua = getDf(catRefua);
 		Davenfor dfBanim = getDf(catBanim);
@@ -149,7 +158,9 @@ public class ServiceUserTests {
 	}
 
 	@Test
+	@Order(3)
 	public void updateDavenforTest() {
+		System.out.println("Test 3");
 		try {
 			// no davenfor throws exception
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
@@ -176,15 +187,16 @@ public class ServiceUserTests {
 			});
 			assertTrue(exception.getMessage().contains("different"));
 
-			// empty spouse info throws exception
+			// No spouse info throws exception
 			Davenfor missingBanimDf = getDf(catBanim);
 			missingBanimDf.setNameEnglishSpouse("");
+			missingBanimDf.setNameHebrewSpouse("");
 			missingBanimDf.setId(7L);
 			when(davenforRep.findById(7L)).thenReturn(Optional.of(missingBanimDf));
 			exception = assertThrows(EmptyInformationException.class, () -> {
 				userService.updateDavenfor(missingBanimDf, submitterEmail, false);
 			});
-			assertTrue(exception.getMessage().contains("spouse"));
+			assert (exception.getMessage().contains("spouse"));
 
 			// works - is admin but other email
 			Davenfor banimDf = getDf(catBanim);
@@ -211,7 +223,10 @@ public class ServiceUserTests {
 	}
 
 	@Test
+	@Order(4)
 	public void extendDavenforTest() {
+		System.out.println("Test 4");
+
 		try {
 			// no email throws exception
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
@@ -221,6 +236,7 @@ public class ServiceUserTests {
 
 			// davenforToExtend not found throws exception
 			when(davenforRep.findById(2L)).thenReturn(Optional.empty());
+			when(jwtUtils.extractEmailFromToken(any())).thenReturn(submitterEmail);
 			exception = assertThrows(ObjectNotFoundException.class, () -> {
 				userService.extendDavenfor(2L, submitterEmail);
 			});
@@ -235,13 +251,13 @@ public class ServiceUserTests {
 			});
 
 			// all okay goes through
-			doNothing().when(davenforRep).extendExpiryDate(anyLong(), any(), any());
+			// doNothing().when(davenforRep).extendExpiryDate(anyLong(), any(), any());
 			when(davenforRep.findById(any())).thenReturn(Optional.of(getDf(catRefua)));
 			Davenfor result = userService.extendDavenfor(4L, submitterEmail);
 			// assertTrue(result); TODO*: fix. what need to assert?
 
 			verify(davenforRep, times(3)).findById(anyLong());
-			verify(davenforRep, times(1)).extendExpiryDate(anyLong(), any(), any());
+			// verify(davenforRep, times(1)).extendExpiryDate(anyLong(), any(), any());
 
 		} catch (ObjectNotFoundException | PermissionException | EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
@@ -251,7 +267,10 @@ public class ServiceUserTests {
 	}
 
 	@Test
+	@Order(5)
 	public void deleteDavenforTest() {
+		System.out.println("Test 5");
+
 		// davenfor not found in repository throws exception
 		Davenfor refua = getDf(catRefua);
 		refua.setId(9L);
@@ -263,14 +282,14 @@ public class ServiceUserTests {
 
 		// other non-admin submitter can't delete davenfor
 		Davenfor dfToDelete = getDf(catRefua);
-		when(davenforRep.findById(6L)).thenReturn(Optional.of(dfToDelete));
+		when(davenforRep.findByIdIncludingDeleted(6L)).thenReturn(Optional.of(dfToDelete));
 		exception = assertThrows(PermissionException.class, () -> {
 			userService.deleteDavenfor(6L, "otherEmail@gmail.com", false);
 		});
 		assertTrue(exception.getMessage().contains("different"));
 
 		// works and returns List as expected
-		when(davenforRep.findById(anyLong())).thenReturn(Optional.of(getDf(catShidduchim)));
+		when(davenforRep.findByIdIncludingDeleted(anyLong())).thenReturn(Optional.of(getDf(catShidduchim)));
 		when(davenforRep.findAllDavenforByUserEmail(submitterEmail)).thenReturn(getDfList());
 		List<Davenfor> returnValue = null;
 		try {
@@ -279,13 +298,16 @@ public class ServiceUserTests {
 		} catch (ObjectNotFoundException | PermissionException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
-		verify(davenforRep, times(3)).findById(anyLong());
-		verify(davenforRep, times(1)).delete(any());
+		verify(davenforRep, times(3)).findByIdIncludingDeleted(anyLong());
+		verify(davenforRep, times(1)).softDeleteById(any());
 		verify(davenforRep, times(1)).findAllDavenforByUserEmail(any());
 	}
 
 	@Test
+	@Order(6)
 	public void getAllCategoriesTest() {
+		System.out.println("Test 6");
+
 		// no categories throws error
 		when(categoryRep.findAllOrderById()).thenReturn(Collections.emptyList());
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
@@ -302,7 +324,10 @@ public class ServiceUserTests {
 	}
 
 	@Test
+	@Order(7)
 	public void existingOrNewSubmitterTest() {
+		System.out.println("Test 7");
+
 		// once new
 		when(userRep.findByEmail(submitterEmail)).thenReturn(Optional.empty());
 		assertEquals(submitterEmail, userService.existingOrNewUser(submitterEmail));
@@ -319,7 +344,9 @@ public class ServiceUserTests {
 	}
 
 	@Test
+	@Order(8)
 	public void getCategoryTest() {
+		System.out.println("Test 8");
 
 		Category existingCategory = new Category();
 		existingCategory.setCname(SOLDIERS);

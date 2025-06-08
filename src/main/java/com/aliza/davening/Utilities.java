@@ -241,11 +241,14 @@ public class Utilities {
 		String buttonArea = "<table cellspacing='6' cellpadding='2'> <tbody>	<tr> " + button1 + button2
 				+ "</tr></tbody></table>";
 
+		String categoryName = Category.getCategory(davenfor.getCategory()).getCname().getVisual();
+		
 		// building the email message with the button area as a table at the bottom
 		String message = String.format("We've been davening for <b>%s</b> for <b>%s</b>.", davenfor.getNameEnglish(),
-				davenfor.getCategory())
-				+ String.format(" <br>This week, the list being sent out will include names under the %s category.  In order to keep our list relevant, please confirm: Should we continue davening for <b>%s</b>?", davenfor.getCategory(), davenfor.getNameEnglish())
-				+ buttonArea;
+				categoryName)
+				+ String.format(" <br>This week, the list being sent out will include names under the %s category.  In order to keep our list relevant, please confirm: Should we continue davening for <b>%s</b>?", categoryName, davenfor.getNameEnglish())
+				+ buttonArea
+				+ "<br> <b>Important: If we receive no response, the name will automatically be removed from the list.</b>";
 
 		return message;
 	}
@@ -332,14 +335,19 @@ public class Utilities {
 
 	}
 
-	// Creates a button according to varying parameters sent in
-	private String createButton(String link, String buttonColor, String buttonText) {
-
+	// Creates a button in a table (like 2 side by side) according to varying parameters sent in
+	public String createButton(String link, String buttonColor, String buttonText) {
 		return String.format(
-				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
+				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s target='_blank'><span style='color: #ffffff;'>%s</span></a></td>",
 				buttonColor, link, buttonText);
-
 	}
+	
+	// Creates a single button in a wider format according to varying parameters sent in
+		public String createSingleButton(String link, String buttonColor, String buttonText) {
+			return String.format(
+					"<div style='text-align: center; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; background-color:%s; padding: 0px 20px; width: fit-content;'><a style='color: white; font-size: 20px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;' href=%s target='_blank'>%s</a></div>",
+					buttonColor, link, buttonText);
+		}
 
 	public String formatFileName(String weekName, String suffix) {
 		LocalDateTime now = LocalDateTime.now();

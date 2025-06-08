@@ -119,10 +119,9 @@ public class UserService {
 		davenfor.setUserEmail(existingOrNewUser(userEmail));
 
 		davenfor.setCreatedAt(LocalDate.now());
-		davenfor.setLastConfirmedAt(LocalDate.now());
+		davenfor.setConfirmedAt(LocalDate.now());
 
-		// Davenfor will expire in future according to its category's settings.
-		davenfor.setExpireAt(LocalDate.now().plusDays(category.getUpdateRate()));
+		davenfor.setDeletedAt(null);
 
 		Davenfor savedDavenfor;
 		try {
@@ -193,11 +192,11 @@ public class UserService {
 			davenforToUpdate.setUserEmail(existingOrNewUser(submitterEmail));
 		}
 		davenforToUpdate.setUpdatedAt(LocalDate.now());
-		davenforToUpdate.setLastConfirmedAt(LocalDate.now());
+		davenforToUpdate.setConfirmedAt(LocalDate.now());
 
 		// Davenfor will expire in future according to it's category's settings.
-		Category categoryObj = Category.getCategory(davenforToUpdate.getCategory());
-		davenforToUpdate.setExpireAt(LocalDate.now().plusDays(categoryObj.getUpdateRate()));
+		// Category categoryObj = Category.getCategory(davenforToUpdate.getCategory());
+		// davenforToUpdate.setExpireAt(LocalDate.now().plusDays(categoryObj.getUpdateRate()));
 
 		davenforRepository.save(davenforToUpdate);
 
@@ -236,16 +235,24 @@ public class UserService {
 
 		// Extending the davenfor's expiration date according to the defined length in
 		// its category.
-		Category categoryObj = Category.getCategory(davenforToExtend.getCategory());
-		LocalDate extendedDate = LocalDate.now().plusDays(categoryObj.getUpdateRate());
-		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());
+		// Category categoryObj = Category.getCategory(davenforToExtend.getCategory());
+		// LocalDate extendedDate =
+		// LocalDate.now().plusDays(categoryObj.getUpdateRate());
+		// davenforRepository.extendExpiryDate(davenforId, extendedDate,
+		// LocalDate.now());
+		
+		if (davenforToExtend.wasDeleted())
+			davenforRepository.reviveDavenfor(davenforId);
+		
+		davenforRepository.setConfirmedAt(LocalDate.now(), davenforId);
+		 
 		return davenforToExtend;
 	}
 
 	// tested
 	public List<Davenfor> deleteDavenfor(long davenforId, String auth, boolean viaEmail)
 			throws ObjectNotFoundException, PermissionException {
-		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
+		Optional<Davenfor> optionalDavenfor = davenforRepository.findByIdIncludingDeleted(davenforId);
 		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
@@ -253,14 +260,14 @@ public class UserService {
 		Davenfor davenforToDelete = optionalDavenfor.get();
 		String email = viaEmail ? jwtUtils.extractEmailFromToken(auth) : auth;
 		if (davenforToDelete.getUserEmail().equalsIgnoreCase(email)) {
-			davenforRepository.delete(davenforToDelete);
+			davenforRepository.softDeleteById(davenforToDelete.getId());
 		} else {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
 
-		String adminSubject = String.format(EmailScheme.deleteNameSubject, davenforToDelete.getNameEnglish());
-		String adminMessage = String.format(EmailScheme.deleteNameMessage, davenforToDelete.getNameEnglish(),
+		String adminSubject = String.format(EmailScheme.deleteNameAdminSubject, davenforToDelete.getNameEnglish());
+		String adminMessage = String.format(EmailScheme.deleteNameAdminMessage, davenforToDelete.getNameEnglish(),
 				davenforToDelete.getCategory(), davenforToDelete.getUserEmail());
 		emailSender.informAdmin(adminSubject, adminMessage);
 

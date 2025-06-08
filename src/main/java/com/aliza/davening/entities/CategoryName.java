@@ -29,4 +29,8 @@ public enum CategoryName {
 	public String getVisual() {
 		return visual;
 	}
+
+	public String toString() {
+		return name();
+	}
 }

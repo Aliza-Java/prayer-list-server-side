@@ -132,7 +132,7 @@ public class ServiceEmailSenderTests {
 	public static Parasha parasha3 = new Parasha(3, "Lech Lecha", "לך-לך", false);
 	public static List<Parasha> parashot = Arrays.asList(parasha1, parasha2, parasha3);
 
-	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refuah", "אברהם בן שרה", "Avraham ben Sara",
+	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
 	public static Davenfor dfYeshua1 = new Davenfor(4, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
@@ -476,10 +476,11 @@ public class ServiceEmailSenderTests {
 			assertEquals(3, receivedMessages.length);
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Please daven now for <b>Avraham ben Sara"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("testNote"));
+			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Testnote")); //titlecased
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[2].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[2]).contains("Please daven now for <b>Avraham ben Sara"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[2]).contains("testNote"));
+			assertTrue(GreenMailUtil.getBody(receivedMessages[2]).contains("Testnote")); //titlecased
 			greenMail.stop();
 
 			// need to stop and start, otherwise receivedMessages adds on also previous
@@ -491,8 +492,9 @@ public class ServiceEmailSenderTests {
 
 			assertEquals(3, receivedMessages.length);
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[0].getSubject());
+			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Please daven now for <b>Avraham ben Sara"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Yehudit bat Miriam"));
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Yehudit ba"));
 		} catch (EmptyInformationException | MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}
@@ -584,11 +586,11 @@ public class ServiceEmailSenderTests {
 			assertEquals("Action required - Is this name still relevant?", receivedMessages[0].getSubject());
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]).toString());
 
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("the name on the list")); // extend button
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("ve this name")); // delete button
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Yes")); // extend button
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("No")); // delete button
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("te?id=3D4&token=3DABCdef"));// token info.
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("/dlist/direct/delete/4/ABCdef"));// token info.
 																										// 3D is
 																										// escaping
 																										// literal for

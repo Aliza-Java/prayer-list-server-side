@@ -2,7 +2,6 @@ package com.aliza.davening.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -71,16 +70,17 @@ public class EmailSender {
 	String adminEmail;
 
 	public final String client = SchemeValues.client;
+	public final String server = SchemeValues.server;
 
 	// @Value("${admin.id}")
 	long adminId = 1;
 
 	@Value("${link.to.extend}")
-	String linkToExtendClient;
+	String linkToExtendServer;
 
 	@Value("${link.to.remove}")
-	String linkToRemoveClient;
-
+	String linkToRemoveServer;
+	
 	@Value("${link.to.unsubscribe}")
 	String linkToUnsubscribe;
 
@@ -221,16 +221,18 @@ public class EmailSender {
 		if (usersList.size() == 0)
 			throw new EmailException("There are no active users, cannot send list");
 
-		 String fileNamePng = String.format(EmailScheme.weeklyFileName,
-		 utilities.formatFileName(pEnglish, "png"));
-		//String fileNameHtml = String.format(EmailScheme.weeklyFileName, utilities.formatFileName(pEnglish, "html"));
+		String fileNamePng = String.format(EmailScheme.weeklyFileName, utilities.formatFileName(pEnglish, "png"));
+		// String fileNameHtml = String.format(EmailScheme.weeklyFileName,
+		// utilities.formatFileName(pEnglish, "html"));
 
-		 sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList, utilities.buildListImage(category, pEnglish, pHebrew, fileNamePng),
-		 fileNamePng));
-		
-		//todo* in future - if want to send as html
-		//sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
-			//	utilities.buildListHtml(category, pEnglish, pHebrew, fileNamePng), fileNamePng));
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
+				utilities.buildListImage(category, pEnglish, pHebrew, fileNamePng), fileNamePng));
+
+		// todo* in future - if want to send as html
+		// sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText,
+		// null, usersList,
+		// utilities.buildListHtml(category, pEnglish, pHebrew, fileNamePng),
+		// fileNamePng));
 
 		return true;
 	}
@@ -270,6 +272,13 @@ public class EmailSender {
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, null, davenersList, null,
 				null));
+	}
+	
+	public void notifyUserDeletedName(Davenfor davenfor) {
+		String link = getLinkToExtend(davenfor);
+		String button = utilities.createSingleButton(link, "#32a842", "This name is still relevant");
+		String message = String.format(EmailScheme.nameAutoDeletedUserMessage, davenfor.getNameEnglish(), button);
+		sendEmail(createMimeMessage(sessionProvider.getSession(), EmailScheme.nameAutoDeletedUserSubject, message, davenfor.getUserEmail(), null, null, null));
 	}
 
 	// tested
@@ -350,17 +359,26 @@ public class EmailSender {
 	}
 
 	public String getLinkToExtend(Davenfor davenfor) {
-		long week = utilities.getDaysInMs(7);
-		Date expiration = new Date(new Date().getTime() + week);
-		return String.format(client + linkToExtendClient, davenfor.getId(),
-				URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
-				jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration));
+		long fiveDays = utilities.getDaysInMs(5);
+		Date expiration = new Date(new Date().getTime() + fiveDays);
+		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
+		return String.format(server + linkToExtendServer, davenfor.getId(), token);
+		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
 
 	public String getLinkToDelete(Davenfor davenfor) {
-		long week = utilities.getDaysInMs(7);
-		Date expiration = new Date(new Date().getTime() + week);
-		return String.format(client + linkToRemoveClient, davenfor.getId(),
-				jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration));
+		long fiveDays = utilities.getDaysInMs(5);
+		Date expiration = new Date(new Date().getTime() + fiveDays);
+		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
+		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
+		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
+	}
+	
+	public String getLinkToRepost(Davenfor davenfor) {
+		long twoWeeks = utilities.getDaysInMs(14);
+		Date expiration = new Date(new Date().getTime() + twoWeeks);
+		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
+		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
+		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
 }

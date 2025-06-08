@@ -506,7 +506,7 @@ public class ServiceAdminTests {
 
 			assertTrue(html.contains("Vayechi"));
 			assertTrue(html.contains("Yeshua and Parnassa"));
-			assertTrue(html.contains("Next week:  Refua"));
+			assertTrue(html.contains("Next week Refua"));
 
 			verify(categoryRep, times(1)).findAll(); // when printing good weekly, finds category of next week
 			verify(davenforRep, times(2)).findAllDavenforByCategory(any());
