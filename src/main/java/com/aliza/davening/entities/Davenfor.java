@@ -1,6 +1,5 @@
 package com.aliza.davening.entities;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
@@ -61,16 +60,16 @@ public class Davenfor {
 	// Will user himself receive this name on his list?
 	private boolean submitterToReceive = true;
 
-	private LocalDate confirmedAt = LocalDate.now();
+	private LocalDateTime confirmedAt = LocalDateTime.now();
 
 	@NotNull(message = "The name does not have an expiration date. ")
 	private LocalDateTime deletedAt;
 
 	@NotNull(message = "The name does not have a creation date. ")
-	private LocalDate createdAt = LocalDate.now();
+	private LocalDateTime createdAt = LocalDateTime.now();
 
 	// When this database record was last updated (if at all)
-	private LocalDate updatedAt;
+	private LocalDateTime updatedAt;
 
 	private String note;
 

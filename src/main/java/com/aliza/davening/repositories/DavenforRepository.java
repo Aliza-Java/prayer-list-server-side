@@ -1,6 +1,6 @@
 package com.aliza.davening.repositories;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,25 +21,25 @@ public interface DavenforRepository extends JpaRepository<Davenfor, Long> {
 //	@Transactional
 //	@Modifying
 //	@Query("update Davenfor d set confirmedAt=?2, updatedAt=?2 where id=?1")
-//	public void extendExpiryDate(long davenforId, LocalDate today);
+//	public void extendExpiryDate(long davenforId, LocalDateTime today);
 
 	// Changing the lastConfirmed to today's date (sent in as parameter)
 	@Transactional
 	@Modifying
 	@Query("update Davenfor d set d.confirmedAt=?1 where id=?2")
-	public void setConfirmedAt(LocalDate today, long davenforId);
+	public void setConfirmedAt(LocalDateTime today, long davenforId);
 	
 	@Transactional
 	@Modifying
 	@Query("update Davenfor d set d.deletedAt=null where id=?1")
 	public void reviveDavenfor(long davenforId);
 
-	// public List<Davenfor> findByExpireAtLessThan(LocalDate expireAt); //this
+	// public List<Davenfor> findByExpireAtLessThan(LocalDateTime expireAt); //this
 	// doesn't include the date itself
 
 //	@Transactional
 //	@Modifying
-//	public void deleteByExpireAtLessThan(LocalDate expireAt);
+//	public void deleteByExpireAtLessThan(LocalDateTime expireAt);
 
 	public List<Davenfor> findAllDavenforByUserEmail(String email);
 

@@ -3,7 +3,8 @@ package com.aliza.davening;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,17 +72,18 @@ public class RepDavenforTests {
 	public void setConfirmedAtTest() {
 		Davenfor dfYeshua = new Davenfor(2L, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
 				null, null, true, null, null, null, null, null);
-		dfYeshua.setConfirmedAt(LocalDate.now().minusDays(3));
+		dfYeshua.setConfirmedAt(LocalDateTime.now().minusDays(3));
 		davenforRep.save(dfYeshua);
 
-		assertTrue(dfYeshua.getConfirmedAt().isBefore(LocalDate.now()));
+		assertTrue(dfYeshua.getConfirmedAt().isBefore(LocalDateTime.now()));
 		Long savedId = davenforRep.findAll().get(0).getId();
-		davenforRep.setConfirmedAt(LocalDate.now(), savedId);
+		LocalDateTime now = LocalDateTime.now();
+		davenforRep.setConfirmedAt(now, savedId);
 		testEntityManager.refresh(davenforRep.findByIdIncludingDeleted(savedId).get());
 
 		Optional<Davenfor> retrieved = davenforRep.findById(savedId);
 		assertTrue(retrieved.isPresent());
-		assertEquals(LocalDate.now(), retrieved.get().getConfirmedAt());
+		assertEquals(now.truncatedTo(ChronoUnit.SECONDS), retrieved.get().getConfirmedAt().truncatedTo(ChronoUnit.SECONDS));
 	}
 
 //	@Test

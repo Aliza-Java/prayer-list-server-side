@@ -1,7 +1,7 @@
 package com.aliza.davening.services;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -118,8 +118,8 @@ public class UserService {
 
 		davenfor.setUserEmail(existingOrNewUser(userEmail));
 
-		davenfor.setCreatedAt(LocalDate.now());
-		davenfor.setConfirmedAt(LocalDate.now());
+		davenfor.setCreatedAt(LocalDateTime.now());
+		davenfor.setConfirmedAt(LocalDateTime.now());
 
 		davenfor.setDeletedAt(null);
 
@@ -191,8 +191,8 @@ public class UserService {
 		if (!isAdmin) {
 			davenforToUpdate.setUserEmail(existingOrNewUser(submitterEmail));
 		}
-		davenforToUpdate.setUpdatedAt(LocalDate.now());
-		davenforToUpdate.setConfirmedAt(LocalDate.now());
+		davenforToUpdate.setUpdatedAt(LocalDateTime.now());
+		davenforToUpdate.setConfirmedAt(LocalDateTime.now());
 
 		// Davenfor will expire in future according to it's category's settings.
 		// Category categoryObj = Category.getCategory(davenforToUpdate.getCategory());
@@ -240,12 +240,12 @@ public class UserService {
 		// LocalDate.now().plusDays(categoryObj.getUpdateRate());
 		// davenforRepository.extendExpiryDate(davenforId, extendedDate,
 		// LocalDate.now());
-		
+
 		if (davenforToExtend.wasDeleted())
 			davenforRepository.reviveDavenfor(davenforId);
-		
-		davenforRepository.setConfirmedAt(LocalDate.now(), davenforId);
-		 
+
+		davenforRepository.setConfirmedAt(LocalDateTime.now(), davenforId);
+
 		return davenforToExtend;
 	}
 
