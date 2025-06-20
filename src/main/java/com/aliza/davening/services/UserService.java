@@ -135,9 +135,29 @@ public class UserService {
 
 		// TODO*: in future, adjust that admin can choose if to get prompts: if
 		// (getMyGroupSettings(adminId).isNewNamePrompt())...
-		String subject = EmailScheme.informAdminOfNewNameSubject;
-		String message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
-				davenfor.getNameHebrew(), category.getCname().getVisual(), userEmail, client + "/admin");
+		String subject;
+		String message;
+
+		if (Category.isBanim(davenfor.getCategory())
+				&& (davenfor.getNameEnglishSpouse().isEmpty() || davenfor.getNameHebrewSpouse().isEmpty())) {
+			subject = EmailScheme.informAdminOfPartialNewNameSubject;
+			message = String.format(EmailScheme.informAdminOfPartialBanimNewName, davenfor.getNameEnglish(),
+					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
+					client + "/admin");
+		}
+
+		else if (davenfor.getNameEnglish().isEmpty() || davenfor.getNameHebrew().isEmpty()) {
+			subject = EmailScheme.informAdminOfPartialNewNameSubject;
+			message = String.format(EmailScheme.informAdminOfPartialNewName, category.getCname().getVisual(),
+					davenfor.getNameEnglish(), davenfor.getNameHebrew(), client + "/admin");
+		}
+
+		else {
+			subject = EmailScheme.informAdminOfNewNameSubject;
+
+			message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
+					davenfor.getNameHebrew(), category.getCname().getVisual(), userEmail, client + "/admin");
+		}
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
 
@@ -145,15 +165,16 @@ public class UserService {
 	}
 
 	// tested
-	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail, boolean isAdmin)
+	@Transactional
+	public Davenfor updateDavenfor(Davenfor updatedInfo, String submitterEmail, boolean isAdmin)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
 
-		if (davenforToUpdate == null) {
+		if (updatedInfo == null) {
 			throw new EmptyInformationException("No information submitted regarding the name you wish to update. ");
 		}
 
 		// Extracting id since it may be used more than once.
-		long id = davenforToUpdate.getId();
+		long id = updatedInfo.getId();
 
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
 		if (!optionalDavenfor.isPresent()) {
@@ -169,45 +190,77 @@ public class UserService {
 			}
 		}
 
+		// before changes are saved in the DB, comparing old and new to see if anything
+		// was erased (and inform admin)
+		Davenfor existingInfo = optionalDavenfor.get();
+		boolean infoRemoved = false;
+		String subject = "";
+		String message = "";
+
+		// informing admin if edited name erased an important piece of the name
+		if ((existingInfo.getNameEnglish().length() > 0 && updatedInfo.getNameEnglish().length() == 0)
+				|| (existingInfo.getNameHebrew().length() > 0 && updatedInfo.getNameHebrew().length() == 0)
+				|| (Category.isBanim(updatedInfo.getCategory()) && existingInfo.getNameEnglishSpouse().length() > 0
+						&& updatedInfo.getNameEnglishSpouse().length() == 0)
+				|| (Category.isBanim(updatedInfo.getCategory()) && existingInfo.getNameHebrewSpouse().length() > 0
+						&& updatedInfo.getNameHebrewSpouse().length() == 0)) {
+			infoRemoved = true;
+			subject = EmailScheme.informAdminOfPartialEditNameSubject;
+			if (Category.isBanim(updatedInfo.getCategory()))
+				message = String.format(EmailScheme.informAdminOfPartialBanimEditName, updatedInfo.getNameEnglish(),
+						updatedInfo.getNameHebrew(), updatedInfo.getNameEnglishSpouse(),
+						updatedInfo.getNameHebrewSpouse(), client + "/admin");
+			else
+				message = String.format(EmailScheme.informAdminOfPartialEditName,
+						Category.getCategory(updatedInfo.getCategory()).getCname().getVisual(),
+						updatedInfo.getNameEnglish(), updatedInfo.getNameHebrew(), client + "/admin");
+		}
+
 		// Trim all names nicely
-		davenforToUpdate.setNameEnglish(davenforToUpdate.getNameEnglish().trim());
-		davenforToUpdate.setNameHebrew(davenforToUpdate.getNameHebrew().trim());
+		existingInfo.setNameEnglish(updatedInfo.getNameEnglish().trim());
+		existingInfo.setNameHebrew(updatedInfo.getNameHebrew().trim());
+		if (existingInfo.getCategory() != updatedInfo.getCategory())
+			existingInfo.setCategory(updatedInfo.getCategory());
 
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
-		if (Category.isBanim(davenforToUpdate.getCategory())) {
-			if (davenforToUpdate.noSpouseInfo()) {
-				String message = "Banim category requires also a spouse name to be submitted. ";
-				System.out.println(message);
-				throw new EmptyInformationException(message);
+		if (Category.isBanim(updatedInfo.getCategory())) {
+			if (updatedInfo.noSpouseInfo()) {
+				String errorMessage = "Banim category requires also a spouse name to be submitted. ";
+				System.out.println(errorMessage);
+				throw new EmptyInformationException(errorMessage);
 			} else {
-				if (davenforToUpdate.getNameEnglishSpouse() != null)
-					davenforToUpdate.setNameEnglishSpouse(davenforToUpdate.getNameEnglishSpouse().trim());
-				if (davenforToUpdate.getNameHebrewSpouse() != null)
-					davenforToUpdate.setNameHebrewSpouse(davenforToUpdate.getNameHebrewSpouse().trim());
+				if (updatedInfo.getNameEnglishSpouse() != null)
+					existingInfo.setNameEnglishSpouse(updatedInfo.getNameEnglishSpouse().trim());
+				if (updatedInfo.getNameHebrewSpouse() != null)
+					existingInfo.setNameHebrewSpouse(updatedInfo.getNameHebrewSpouse().trim());
 			}
 		}
 
 		if (!isAdmin) {
-			davenforToUpdate.setUserEmail(existingOrNewUser(submitterEmail));
+			existingInfo.setUserEmail(existingOrNewUser(submitterEmail));
 		}
-		davenforToUpdate.setUpdatedAt(LocalDateTime.now());
-		davenforToUpdate.setConfirmedAt(LocalDateTime.now());
+		existingInfo.setUpdatedAt(LocalDateTime.now());
+		existingInfo.setConfirmedAt(LocalDateTime.now());
 
 		// Davenfor will expire in future according to it's category's settings.
 		// Category categoryObj = Category.getCategory(davenforToUpdate.getCategory());
 		// davenforToUpdate.setExpireAt(LocalDate.now().plusDays(categoryObj.getUpdateRate()));
 
-		davenforRepository.save(davenforToUpdate);
+		davenforRepository.save(existingInfo);
+		entityManager.flush();
+		entityManager.clear();
 
+		// for now I don't think it's necessary to inform admin on every update
 		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
-		String subject = EmailScheme.informAdminOfUpdateSubject;
-		String message = String.format(EmailScheme.informAdminOfUpdate, davenforToUpdate.getUserEmail(),
-				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
-		emailSender.informAdmin(subject, message);
-		// }
+//		String subject = EmailScheme.informAdminOfUpdateSubject;
+//		String message = String.format(EmailScheme.informAdminOfUpdate, davenforToUpdate.getUserEmail(),
+//				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
 
-		return davenforToUpdate;
+		if (infoRemoved)
+			emailSender.informAdmin(subject, message);
+
+		return existingInfo;
 	}
 
 	// TODO* need to test after adjustments

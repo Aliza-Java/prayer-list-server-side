@@ -299,9 +299,11 @@ public class EmailSender {
 
 		// todo* in future - make these a method (used twice)
 
+		String name = confirmedDavenfor.getNameEnglish().isEmpty() ? confirmedDavenfor.getNameHebrew() : confirmedDavenfor.getNameEnglish();
+		
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
-		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
+		String personalizedEmailText = String.format(emailText, name,
 				Category.getCategory(confirmedDavenfor.getCategory()).getCname().getVisual(),
 				getLinkToExtend(confirmedDavenfor), getLinkToDelete(confirmedDavenfor));
 

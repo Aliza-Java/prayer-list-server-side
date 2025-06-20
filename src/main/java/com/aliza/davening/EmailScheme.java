@@ -23,25 +23,24 @@ public class EmailScheme {
 	public static final String h5Header = "<h5>%s</h5>";
 
 	public static final String inMemoryEnglish = "L\'iluy Nishmat Esther Naomi Bat Yaakov";
-	
-	public static final String inMemoryHebrew ="לעילוי נשמת אסתר נעמי בת יעקב ע\"ה";
-	
+
+	public static final String inMemoryHebrew = "לעילוי נשמת אסתר נעמי בת יעקב ע\"ה";
+
 	public static final String hostagesAndSoldiersEnglish = "For the hostages' and soldiers' safe return";
-	
+
 	public static final String hostagesAndSoldiersHebrew = "לשובם לשלום של החטופים והחיילים";
-	
+
 	public static final String hafrashatChallahEnglish = "Hafrashat Challah";
-	
-	public static final String hafrashatChallahHebrew = "הפרשת חלה";
-;
+
+	public static final String hafrashatChallahHebrew = "הפרשת חלה";;
 	public static final String banimLineEnglish = "Yehi ratzon she_____ yipakdu b'zera chaya v'kayama";
 
 	public static final String banimLineHebrew = "יהי רצון ש___ יפקדו בזרע חיא וקימא";
 
 	public static final String confirmationEmailTextLocation = "src/main/resources/static/confirmationEmailText.html";
-	
+
 	public static final String pageDivider = "<script>document.addEventListener(\"DOMContentLoaded\", function () { const rows = Array.from(document.querySelectorAll(\"table tr\")); const pageHeight = 900; let currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); let currentHeight = 0; rows.forEach(row => { const rowHeight = row.offsetHeight; if (currentHeight + rowHeight > pageHeight) { currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); currentHeight = 0; } currentPage.appendChild(row); currentHeight += rowHeight; }); });</script>";
-	
+
 //TODO*: move to separate file, to make editing easier.  All long htmls should be read from files
 	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Weekly Davening List</title><style>.container {height:100%%; width: 650px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s ; height: 100%%; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 650px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 650px; height: 100%%; font-size: 14.5pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
 
@@ -54,13 +53,13 @@ public class EmailScheme {
 	public static final String htmlBanimRowInList = "<tr><td style='text-align:left'>%s<br>%s</td><td style='text-align:right'>%s<br>%s</td></tr>";
 
 	public static final String boldHtmlRow = "<tr style='font-weight:bold'><td style='text-align:left'>%s</td><td style='text-align:right'>%s</td></tr>";
-	
+
 	public static final String tableClose = "</table>";
 
 	public static final String nextWeekEnglish = "Next week %s";
-	
-	public static final String nextWeekHebrew = "שבוע הבא %s";	
-	
+
+	public static final String nextWeekHebrew = "שבוע הבא %s";
+
 	public static final String sendGoodNewsMessage = "<tr><td colspan='2' style='text-align:center; vertical-align:bottom; height:100%%;'>Please email %s with names and good news!</td></tr>";
 
 	public static final String htmlBodyEnd = "</div></div></body></html>";
@@ -80,9 +79,9 @@ public class EmailScheme {
 	public static final String userActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
 
 	public static final String userDisactivatedSubject = "You have been unsubscribed";
-	
+
 	public static final String userActivatedSubject = "Welcome to the Davening List";
-	
+
 	// Text appearing in Admin's email requesting to daven urgently (can be Banim or
 	// any category)
 	public static final String urgentDavenforEmailBanim = "Please daven now for <b>%s - %s</b> and <b>%s - %s</b>, for: <b>%s</b>. <br>";
@@ -104,7 +103,38 @@ public class EmailScheme {
 
 	public static final String confirmationEmailSubject = "Davening list submission";
 
+	public static final String informAdminOfPartialNewName = "A new name was added to your davening list in the <b>%s</b> category.  <br>"
+			+ "However, it is partial. <br>" + "<b>English Name: \"%s\". <br>" + "Hebrew Name: \"%s\". </b> <br>"
+			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
 
+	public static final String informAdminOfPartialBanimNewName = "A new name was added to your davening list in the Banim category.  <br>"
+			+ "However, it is partial. <br>" 
+			+ "<b>English Name: \"%s\" <br>" 
+			+ "Hebrew Name: \"%s\" <br>"
+			+ "English Spouse Name: \"%s\" <br>" 
+			+ "Hebrew Spouse Name: \"%s\" <br> </b>"
+			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
+
+	public static final String informAdminOfPartialEditName = "A new name was edited on your davening list in the %s category.  <br>"
+			+ "However, the edits removed some important information. Currently, it has:<br>" 
+			+ "<b>English Name: \"%s\" <br>" 
+			+ "Hebrew Name: \"%s\" <br>"
+			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
+
+	
+	public static final String informAdminOfPartialBanimEditName = "A new name was edited on your davening list in the Banim category.  <br>"
+			+ "However, the edits removed some important information. Currently, it has:<br>" 
+			+ "<b>English Name: \"%s\" <br>" 
+			+ "Hebrew Name: \"%s\" <br>"
+			+ "English Spouse Name: \"%s\" <br>" 
+			+ "Hebrew Spouse Name: \"%s\" <br> </b>"
+			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
+
+	
+	public static final String informAdminOfPartialNewNameSubject = "Action Required: A partial new name has been added to your davening list";
+
+	public static final String informAdminOfPartialEditNameSubject = "Action Required: A name has been edited, some info was removed";
+	
 	public static final String informAdminOfNewName = "The name: <br><b>%s <br> %s </b><br> has been added to the category: <br> <b>%s. </b><br> by <b>%s</b>"
 			+ "<br><br> You might want to check that it was properly entered.  <br> <a href=\"%s\">Take me to the website</a> ";
 
@@ -115,21 +145,19 @@ public class EmailScheme {
 	public static final String expiringNameSubject = "Action required - Is this name still relevant?";
 
 	public static final String unsubscribeSubject = "Unsubscribe - action required";
-	
+
 	public static final String deleteNameAdminSubject = "Name deleted: %s";
-	
+
 	public static final String deleteNameAdminMessage = "We want to let you know that the name <b>%s</b> from the <b>%s</b> category has been removed from the davening list by <b>%s</b>.";
 
 	public static final String nameAutoDeletedUserSubject = "Missed Our Alerts? You Can Still Repost Your Davening Name";
-			
+
 	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, your davening name <b>%s</b> has been removed as part of our cleanup process. <br> "
-			+ "No worries though — if you'd like to repost this name (although it might not be included in this week's list), you can do so easily by clicking the button below: <br>" 
-			+ "<div>%s </div>"
-			+ "Let us know if you need any help! <br>"
-			+ "The Davening List team";
-	
+			+ "No worries though — if you'd like to repost this name (although it might not be included in this week's list), you can do so easily by clicking the button below: <br>"
+			+ "<div>%s </div>" + "Let us know if you need any help! <br>" + "The Davening List team";
+
 	public static final String unconfirmedSubject = "Names automatically deleted this week";
-	
+
 	// Links inserted to email allowing submitters to extend or delete names. URL
 	// will change when uploaded to cloud
 	public static String linkToExtend = "extend/%s?email=%s";
@@ -146,7 +174,7 @@ public class EmailScheme {
 		sb.append(category);
 		sb.append(" have been automatically removed this week, as they were not confirmed by users: <br>");
 		names.forEach(n -> sb.append(n.getNameEnglish() + "<br>"));
-		
+
 		return sb.toString();
 	}
 }
