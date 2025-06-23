@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 
 @Component
@@ -103,42 +104,14 @@ public class EmailScheme {
 
 	public static final String confirmationEmailSubject = "Davening list submission";
 
-	public static final String informAdminOfPartialNewName = "A new name was added to your davening list in the <b>%s</b> category.  <br>"
-			+ "However, it is partial. <br>" + "<b>English Name: \"%s\". <br>" + "Hebrew Name: \"%s\". </b> <br>"
-			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
+	public static final String informAdminOfPartialNewNameSubject = "Action Required: A partial new name has been added: '%s'";
 
-	public static final String informAdminOfPartialBanimNewName = "A new name was added to your davening list in the Banim category.  <br>"
-			+ "However, it is partial. <br>" 
-			+ "<b>English Name: \"%s\" <br>" 
-			+ "Hebrew Name: \"%s\" <br>"
-			+ "English Spouse Name: \"%s\" <br>" 
-			+ "Hebrew Spouse Name: \"%s\" <br> </b>"
-			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
+	public static final String informAdminOfPartialEditNameSubject = "Action Required: The name '%s' has been edited, some info was removed";
 
-	public static final String informAdminOfPartialEditName = "A new name was edited on your davening list in the %s category.  <br>"
-			+ "However, the edits removed some important information. Currently, it has:<br>" 
-			+ "<b>English Name: \"%s\" <br>" 
-			+ "Hebrew Name: \"%s\" <br>"
-			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
-
-	
-	public static final String informAdminOfPartialBanimEditName = "A new name was edited on your davening list in the Banim category.  <br>"
-			+ "However, the edits removed some important information. Currently, it has:<br>" 
-			+ "<b>English Name: \"%s\" <br>" 
-			+ "Hebrew Name: \"%s\" <br>"
-			+ "English Spouse Name: \"%s\" <br>" 
-			+ "Hebrew Spouse Name: \"%s\" <br> </b>"
-			+ "<br><br> You might want to fix it on the website.   <br> <a href=\"%s\">Take me to the website</a> ";
-
-	
-	public static final String informAdminOfPartialNewNameSubject = "Action Required: A partial new name has been added to your davening list";
-
-	public static final String informAdminOfPartialEditNameSubject = "Action Required: A name has been edited, some info was removed";
-	
 	public static final String informAdminOfNewName = "The name: <br><b>%s <br> %s </b><br> has been added to the category: <br> <b>%s. </b><br> by <b>%s</b>"
 			+ "<br><br> You might want to check that it was properly entered.  <br> <a href=\"%s\">Take me to the website</a> ";
 
-	public static final String informAdminOfNewNameSubject = "A new name has been added to your davening list. ";
+	public static final String informAdminOfNewNameSubject = "A new name: %s has been added to your davening list. ";
 
 	public static final String weeklyAdminReminderSubject = "Davening list reminder: Send out the weekly list!";
 
@@ -176,5 +149,40 @@ public class EmailScheme {
 		names.forEach(n -> sb.append(n.getNameEnglish() + "<br>"));
 
 		return sb.toString();
+	}
+
+	public static String setAdminAlertMessage(boolean isAdd, Davenfor df, String url) {
+
+		StringBuffer sb = new StringBuffer("");
+		sb.append("A name was ");
+		sb.append(isAdd ? "added to " : "edited on ");
+		sb.append("your davening list in the ");
+		sb.append("<b>").append(Category.getCategory(df.getCategory()).getCname().getVisual()).append("</b> category.")
+				.append("<br>");
+
+		sb.append("However, ");
+		sb.append(isAdd ? "it is partial. " : "the edits removed some important information.");
+		sb.append("Current, it has: ").append("<br>");
+		sb.append("English name: <b>").append(getNameValue(df.getNameEnglish())).append("</b>").append("<br>");
+		sb.append("Hebrew name: <b>").append(getNameValue(df.getNameHebrew())).append("</b>").append("<br>");
+		if (Category.isBanim(df.getCategory())) {
+			sb.append("English spouse name: <b>").append(getNameValue(df.getNameEnglishSpouse())).append("</b>")
+					.append("<br>");
+			sb.append("Hebrew spouse name: <b>").append(getNameValue(df.getNameHebrewSpouse())).append("</b>")
+					.append("<br>");
+		}
+
+		sb.append("<br>");
+		sb.append("You might want to fix it on the website.").append("<br>");
+		sb.append("<a href=\"").append(url).append("\">Take me to the website</a>");
+
+		return sb.toString();
+	}
+	
+	private static String getNameValue(String name) {
+		if (name.trim() == "")
+			return "(blank)";
+			else 
+				return name;
 	}
 }

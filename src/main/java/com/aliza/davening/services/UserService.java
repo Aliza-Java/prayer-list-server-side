@@ -138,23 +138,17 @@ public class UserService {
 		String subject;
 		String message;
 
-		if (Category.isBanim(davenfor.getCategory())
-				&& (davenfor.getNameEnglishSpouse().isEmpty() || davenfor.getNameHebrewSpouse().isEmpty())) {
-			subject = EmailScheme.informAdminOfPartialNewNameSubject;
-			message = String.format(EmailScheme.informAdminOfPartialBanimNewName, davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), davenfor.getNameEnglishSpouse(), davenfor.getNameHebrewSpouse(),
-					client + "/admin");
-		}
-
-		else if (davenfor.getNameEnglish().isEmpty() || davenfor.getNameHebrew().isEmpty()) {
-			subject = EmailScheme.informAdminOfPartialNewNameSubject;
-			message = String.format(EmailScheme.informAdminOfPartialNewName, category.getCname().getVisual(),
-					davenfor.getNameEnglish(), davenfor.getNameHebrew(), client + "/admin");
+		//something is empty
+		if (davenfor.getNameEnglish().isEmpty() || davenfor.getNameHebrew().isEmpty()
+				|| (Category.isBanim(davenfor.getCategory())
+						&& (davenfor.getNameEnglishSpouse().isEmpty() || davenfor.getNameHebrewSpouse().isEmpty()))) {
+			String name = davenfor.getNameEnglish().isEmpty() ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
+			subject = String.format(EmailScheme.informAdminOfPartialNewNameSubject, name);
+			message = EmailScheme.setAdminAlertMessage(true,  davenfor, client + "/admin");
 		}
 
 		else {
 			subject = EmailScheme.informAdminOfNewNameSubject;
-
 			message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), category.getCname().getVisual(), userEmail, client + "/admin");
 		}
@@ -205,15 +199,9 @@ public class UserService {
 				|| (Category.isBanim(updatedInfo.getCategory()) && existingInfo.getNameHebrewSpouse().length() > 0
 						&& updatedInfo.getNameHebrewSpouse().length() == 0)) {
 			infoRemoved = true;
-			subject = EmailScheme.informAdminOfPartialEditNameSubject;
-			if (Category.isBanim(updatedInfo.getCategory()))
-				message = String.format(EmailScheme.informAdminOfPartialBanimEditName, updatedInfo.getNameEnglish(),
-						updatedInfo.getNameHebrew(), updatedInfo.getNameEnglishSpouse(),
-						updatedInfo.getNameHebrewSpouse(), client + "/admin");
-			else
-				message = String.format(EmailScheme.informAdminOfPartialEditName,
-						Category.getCategory(updatedInfo.getCategory()).getCname().getVisual(),
-						updatedInfo.getNameEnglish(), updatedInfo.getNameHebrew(), client + "/admin");
+			String name = updatedInfo.getNameEnglish().isEmpty() ? updatedInfo.getNameHebrew() : updatedInfo.getNameEnglish();
+			subject = String.format(EmailScheme.informAdminOfPartialEditNameSubject, name);
+			message = EmailScheme.setAdminAlertMessage(false, updatedInfo, client + "/admin");
 		}
 
 		// Trim all names nicely
