@@ -104,7 +104,7 @@ public class ContUserTests {
 
 	@Test
 	@Order(1)
-	public void testGetSubmitterDavenfors() {
+	public void testGetSubmitterDavenfors() throws ObjectNotFoundException {
 		when(userService.getAllUserDavenfors("user1@gmail.com")).thenReturn(Arrays.asList(dfRefua, dfYeshua1));
 
 		try {

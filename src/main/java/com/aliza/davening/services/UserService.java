@@ -2,7 +2,6 @@ package com.aliza.davening.services;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -75,12 +74,13 @@ public class UserService {
 
 	// According to email address user can see all names he submitted.
 	// tested
-	public List<Davenfor> getAllUserDavenfors(String email) {
+	public List<Davenfor> getAllUserDavenfors(String email) throws ObjectNotFoundException {
 
+		
 		// differentiating between non-existing email (this if) and empty list (which
 		// will return fine and will be discerned)
-		if (userRepository.findByEmail(email) == null) {
-			return new ArrayList<Davenfor>();
+		if (userRepository.findByEmail(email).isEmpty()){
+			throw new ObjectNotFoundException("User with email " + email);
 		}
 		List<Davenfor> allUserDavenfors = davenforRepository.findAllDavenforByUserEmail(email);
 		Collections.sort(allUserDavenfors, new CategoryComparator());

@@ -104,7 +104,7 @@ public class ServiceUserTests {
 
 	@Test
 	@Order(1)
-	public void getAllSubmitterDavenforsTest() {
+	public void getAllSubmitterDavenforsTest() throws ObjectNotFoundException {
 		System.out.println("Test 1");
 		// service returns davenfors fetched from repository
 		when(davenforRep.findAllDavenforByUserEmail(submitterEmail)).thenReturn(getDfList());

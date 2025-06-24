@@ -47,7 +47,7 @@ public class UserWebService {
 
 	// tested
 	@RequestMapping(path = "getmynames/{email}")
-	public List<Davenfor> getUserDavenfors(@PathVariable String email) {
+	public List<Davenfor> getUserDavenfors(@PathVariable String email) throws ObjectNotFoundException {
 		return userService.getAllUserDavenfors(email);
 	}
 
