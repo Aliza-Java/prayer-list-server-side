@@ -39,9 +39,9 @@ public class RepUserTests {
 	@Order(1)
 	public void getAllUserEmailsTest() {
 
-		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true);
-		User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
-		User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true, "");
+		User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false, "");
+		User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true, "");
 
 		userRep.save(user1);
 		userRep.save(user2);
@@ -110,9 +110,9 @@ public class RepUserTests {
 	@Test
 	@Order(4)
 	public void findByEmailTest() {
-		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
-		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false);
-		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true);
+		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false, "");
+		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false, "");
+		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true, "");
 
 		userRep.save(user1);
 		userRep.save(user2);
@@ -128,9 +128,9 @@ public class RepUserTests {
 	@Test
 	@Order(5)
 	public void findAllTest() {
-		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true);
-		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false);
-		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true);
+		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true, "");
+		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false, "");
+		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true, "");
 
 		userRep.save(user1);
 		userRep.save(user2);

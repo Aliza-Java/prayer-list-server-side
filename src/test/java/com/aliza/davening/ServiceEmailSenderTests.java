@@ -122,9 +122,9 @@ public class ServiceEmailSenderTests {
 	public static Admin admin2 = new Admin(2, "admin2@gmail.com", null, false, 7);
 	public static Admin admin3 = new Admin(3, "admin3@gmail.com", null, false, 7);
 
-	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
-	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
-	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false, "");
+	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false, "");
+	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true, "");
 	public static List<User> users = Arrays.asList(user1, user2, user3);
 
 	public static Parasha parasha1 = new Parasha(1, "Bereshit", "בראשית", true);

@@ -273,12 +273,13 @@ public class EmailSender {
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, null, davenersList, null,
 				null));
 	}
-	
+
 	public void notifyUserDeletedName(Davenfor davenfor) {
 		String link = getLinkToExtend(davenfor);
 		String button = utilities.createSingleButton(link, "#32a842", "This name is still relevant");
 		String message = String.format(EmailScheme.nameAutoDeletedUserMessage, davenfor.getNameEnglish(), button);
-		sendEmail(createMimeMessage(sessionProvider.getSession(), EmailScheme.nameAutoDeletedUserSubject, message, davenfor.getUserEmail(), null, null, null));
+		sendEmail(createMimeMessage(sessionProvider.getSession(), EmailScheme.nameAutoDeletedUserSubject, message,
+				davenfor.getUserEmail(), null, null, null));
 	}
 
 	// tested
@@ -299,8 +300,9 @@ public class EmailSender {
 
 		// todo* in future - make these a method (used twice)
 
-		String name = confirmedDavenfor.getNameEnglish().isEmpty() ? confirmedDavenfor.getNameHebrew() : confirmedDavenfor.getNameEnglish();
-		
+		String name = confirmedDavenfor.getNameEnglish().isEmpty() ? confirmedDavenfor.getNameHebrew()
+				: confirmedDavenfor.getNameEnglish();
+
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
 		String personalizedEmailText = String.format(emailText, name,
@@ -346,6 +348,23 @@ public class EmailSender {
 				email);
 	}
 
+	public boolean sendOtp(String email, String otp) throws EmailException {
+
+		String subject = "Your login code";// put into EmailScheme
+
+		String emailText = "Welcome! <br> Your Code is: <b>" + otp + "</b>. Please enter it on the website page.";
+		// put this into a file and make much nicer!
+
+		try {
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, email, null, null, null));
+		} catch (Exception e) {
+			throw new EmailException(String.format("Could not send otp email to %s", email));
+		}
+
+		return true;
+
+	}
+
 	private String concatAdminMessage(String adminMessage, String emailText) {
 		// adding admin message before name and bolding it according to settings in
 		// EmailScheme.
@@ -375,7 +394,7 @@ public class EmailSender {
 		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
 		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
-	
+
 	public String getLinkToRepost(Davenfor davenfor) {
 		long twoWeeks = utilities.getDaysInMs(14);
 		Date expiration = new Date(new Date().getTime() + twoWeeks);

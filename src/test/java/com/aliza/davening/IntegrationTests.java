@@ -112,9 +112,9 @@ public class IntegrationTests {
 			null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
 
-	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
-	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
-	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false, "");
+	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false, "");
+	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true, "");
 	public static List<User> users = Arrays.asList(user1, user2, user3);
 	
 	public static Parasha parasha1 = new Parasha(1, "Bereshit", "בראשית", true);

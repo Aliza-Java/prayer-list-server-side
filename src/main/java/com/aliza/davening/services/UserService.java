@@ -307,8 +307,9 @@ public class UserService {
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
 
-		String adminSubject = String.format(EmailScheme.deleteNameAdminSubject, davenforToDelete.getNameEnglish());
-		String adminMessage = String.format(EmailScheme.deleteNameAdminMessage, davenforToDelete.getNameEnglish(),
+		String name = davenforToDelete.getNameEnglish().trim().length() == 0 ? davenforToDelete.getNameHebrew() : davenforToDelete.getNameEnglish();
+		String adminSubject = String.format(EmailScheme.deleteNameAdminSubject, name);
+		String adminMessage = String.format(EmailScheme.deleteNameAdminMessage, name,
 				davenforToDelete.getCategory(), davenforToDelete.getUserEmail());
 		emailSender.informAdmin(adminSubject, adminMessage);
 
@@ -375,4 +376,33 @@ public class UserService {
 		String response = String.format(SchemeValues.unsubscribeText, email);
 		return response;
 	}
+	
+	public boolean setNewOtp(String email) throws EmailException, ObjectNotFoundException {
+		Optional<User> optionalUser = userRepository.findByEmail(email);
+
+	    if (optionalUser.isEmpty()) {
+	        throw new ObjectNotFoundException("user with email " + email);
+	    }
+		
+		String otp = jwtUtils.generateOtp();
+
+	    int rowsUpdated = userRepository.setOtp(otp, email);
+	    System.out.println("Rows updated: " + rowsUpdated);
+
+	    return emailSender.sendOtp(email, otp); // Send email with code
+	}
+	
+	public boolean verifyOtp(String email, String otp) throws PermissionException {
+	    // Retrieve the OTP from DB (and check expiration, e.g. 5 min)
+	    Optional<User> optionalUser = userRepository.findByEmail(email);
+	    	    
+	    if (!otp.equals(optionalUser.get().getOtp())) {
+	    	throw new PermissionException("Invalid or expired code");
+	    }
+
+	    userRepository.setOtp("", email);
+
+	    return true;
+	}
+	
 }

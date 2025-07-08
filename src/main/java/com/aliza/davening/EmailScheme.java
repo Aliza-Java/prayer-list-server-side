@@ -161,8 +161,8 @@ public class EmailScheme {
 				.append("<br>");
 
 		sb.append("However, ");
-		sb.append(isAdd ? "it is partial. " : "the edits removed some important information.");
-		sb.append("Current, it has: ").append("<br>");
+		sb.append(isAdd ? "it is partial. " : "the edits removed some important information.").append("<br>");
+		sb.append("Currently, it has: ").append("<br>");
 		sb.append("English name: <b>").append(getNameValue(df.getNameEnglish())).append("</b>").append("<br>");
 		sb.append("Hebrew name: <b>").append(getNameValue(df.getNameHebrew())).append("</b>").append("<br>");
 		if (Category.isBanim(df.getCategory())) {
