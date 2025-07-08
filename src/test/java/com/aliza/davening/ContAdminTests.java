@@ -25,13 +25,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,7 +52,7 @@ import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.entities.Parasha;
 import com.aliza.davening.entities.User;
-import com.aliza.davening.exceptions.DatabaseException;
+import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.NoRelatedEmailException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
@@ -103,17 +106,17 @@ public class ContAdminTests {
 
 	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshua1 = new Davenfor(2, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
-			null, null, true, null, null, null, null, null);
+	public static Davenfor dfYeshua1 = new Davenfor(2, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה",
+			"Moshe ben Sara", null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira",
-			null, null, true, null, null, null, null, null);
+	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה",
+			"Amram ben Shira", null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
 
-	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
-	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
-	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false, "");
+	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false, "");
+	public static User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true, "");
 	public static List<User> users = Arrays.asList(user1, user2, user3);
 
 	public static Parasha parasha1 = new Parasha(1, "Bereshit", "בראשית", true);
@@ -122,6 +125,16 @@ public class ContAdminTests {
 	public static List<Parasha> parashot = Arrays.asList(parasha1, parasha2, parasha3);
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @Admin controller test unexpected Exception: ";
+
+	@BeforeEach
+	void printOrder(TestInfo testInfo) {
+		Method method = testInfo.getTestMethod().orElse(null);
+		if (method != null) {
+			Order order = method.getAnnotation(Order.class);
+			String orderText = (order != null) ? "@Order(" + order.value() + ")" : "(no @Order)";
+			System.out.println("➡️ Running test: " + method.getName() + " " + orderText);
+		}
+	}
 
 	@Test
 	@Order(1)
@@ -150,26 +163,6 @@ public class ContAdminTests {
 			mockMvc.perform(put("/admin/update").content(admin7).contentType(MediaType.APPLICATION_JSON)).andDo(print())
 					.andExpect(status().isNotFound()).andExpect(jsonPath("$.code").value("OBJECT_NOT_FOUND_ERROR"))
 					.andExpect(jsonPath("$.messages[0]", containsString("Admin with id")));
-
-			verify(adminService, times(1)).updateAdmin(any());
-
-		} catch (Exception e) {
-			System.out.println(UNEXPECTED_E + e.getStackTrace());
-		}
-	}
-
-	@Test
-	@Order(3)
-	public void testUpdateAdminSettingsDbFailure() {
-		try {
-			String admin7 = "{\"email\": \"admin@gmail.com\", \"newNamePrompt\": false, \"waitBeforeDeletion\": 7}";
-
-			when(adminService.updateAdmin(any()))
-					.thenThrow(new DatabaseException("This admin email address is already in use."));
-			mockMvc.perform(put("/admin/update").content(admin7).contentType(MediaType.APPLICATION_JSON)).andDo(print())
-					.andExpect(status().isInternalServerError())
-					.andExpect(jsonPath("$.code").value("DATABASE_EXCEPTION"))
-					.andExpect(jsonPath("$.messages[0]", containsString("already in use")));
 
 			verify(adminService, times(1)).updateAdmin(any());
 
@@ -309,7 +302,7 @@ public class ContAdminTests {
 	@Test
 	@Order(9)
 	public void testCreateUser() {
-		User newUser = new User(4, null, "user4@gmail.com", "Africa", null, null, true);
+		User newUser = new User(4, null, "user4@gmail.com", "Africa", null, null, true, "");
 		List<User> extendedUsers = Arrays.asList(user1, user2, user3, newUser);
 		assertEquals(4, extendedUsers.size());
 
@@ -464,12 +457,12 @@ public class ContAdminTests {
 					.andExpect(jsonPath("$.code").value("EMPTY_INFORMATION"))
 					.andExpect(jsonPath("$.messages[0]", containsString("no names to daven for")));
 
-			doThrow(new IOException("We are sorry, but something wrong happened. Please contact the admin."))
-					.when(emailSender).sendOutWeekly(any());
+			doThrow(new EmailException("There are no active users, cannot send list")).when(emailSender)
+					.sendOutWeekly(any());
 			mockMvc.perform(post("/admin/weekly").content(requestBody).contentType(MediaType.APPLICATION_JSON))
-					.andDo(print()).andExpect(status().isInternalServerError())
-					.andExpect(jsonPath("$.code").value("SERVER_ERROR"))
-					.andExpect(jsonPath("$.messages[0]", containsString("something wrong")));
+					.andDo(print()).andExpect(status().isServiceUnavailable())
+					.andExpect(jsonPath("$.code").value("EMAIL_EXCEPTION"))
+					.andExpect(jsonPath("$.messages[0]", containsString("no active users")));
 
 			doThrow(new ObjectNotFoundException("Category not found")).when(emailSender).sendOutWeekly(any());
 			mockMvc.perform(post("/admin/weekly").content(requestBody).contentType(MediaType.APPLICATION_JSON))

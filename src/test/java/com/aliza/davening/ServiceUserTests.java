@@ -17,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -112,12 +113,14 @@ public class ServiceUserTests {
 		assertTrue(dfs.size() == 3);
 
 		// if no davenfors for email, service returns empty List
-		when(userRep.findByEmail(any())).thenReturn(null);
+		when(userRep.findByEmail(any())).thenReturn(Optional.of(new User(submitterEmail)));
+		when(davenforRep.findAllDavenforByUserEmail(any())).thenReturn(new ArrayList<Davenfor>());
+		
 		dfs = (userService.getAllUserDavenfors(submitterEmail));
 		assertTrue(dfs.size() == 0);
 
 		verify(userRep, times(2)).findByEmail(any());
-		verify(davenforRep, times(1)).findAllDavenforByUserEmail(any());
+		verify(davenforRep, times(2)).findAllDavenforByUserEmail(any());
 
 	}
 
