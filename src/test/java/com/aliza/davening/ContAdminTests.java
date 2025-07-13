@@ -389,25 +389,25 @@ public class ContAdminTests {
 
 	@Test
 	@Order(12)
-	public void testDisactivateUser() {
+	public void testdeactivateUser() {
 		try {
 			user3.setActive(false);
-			when(adminService.disactivateUser("user3@gmail.com")).thenReturn(users);
+			when(adminService.deactivateUser("user3@gmail.com")).thenReturn(users);
 
-			mockMvc.perform(post("/admin/disactivate/{userEmail}", "user3@gmail.com")).andDo(print())
+			mockMvc.perform(post("/admin/deactivate/{userEmail}", "user3@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(3))
 					.andExpect(jsonPath("$[0].email").value("user1@gmail.com"))
 					.andExpect(jsonPath("$[1].email").value("user2@gmail.com"))
 					.andExpect(jsonPath("$[2].email").value("user3@gmail.com"))
 					.andExpect(jsonPath("$[2].active").value("false"));
 
-			when(adminService.disactivateUser(""))
+			when(adminService.deactivateUser(""))
 					.thenThrow(new EmptyInformationException("Recipient email address missing."));
-			mockMvc.perform(post("/admin/disactivate/{userEmail}", "")).andDo(print()).andDo(print())
+			mockMvc.perform(post("/admin/deactivate/{userEmail}", "")).andDo(print()).andDo(print())
 					.andExpect(status().isNotFound());
 
 			// empty email doesn't even go to the mapping and gives NOT_FOUND
-			verify(adminService, times(1)).disactivateUser(any());
+			verify(adminService, times(1)).deactivateUser(any());
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
 		}

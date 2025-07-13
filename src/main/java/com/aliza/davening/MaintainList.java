@@ -72,8 +72,9 @@ public class MaintainList { // TODO*: tests for all these
 		// davenforRepository.findByExpireAtLessThan(LocalDate.now());
 		Category currentCategory = categoryRepository.getCurrent().get();
 		CategoryName categoryName = currentCategory.getCname();
-		if (categoryName.equals(SHIDDUCHIM) || categoryName.equals(BANIM))
-			return;
+		//At first Lynne said these not all the time, then she said yes
+		//if (categoryName.equals(SHIDDUCHIM) || categoryName.equals(BANIM))
+		//	return;
 
 		List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(categoryName.toString());
 

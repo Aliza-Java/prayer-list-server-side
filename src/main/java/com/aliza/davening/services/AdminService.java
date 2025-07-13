@@ -97,7 +97,7 @@ public class AdminService {
 
 		Category.categories = Arrays.asList(new Category(REFUA, false, 180, 1), new Category(SHIDDUCHIM, true, 40, 2),
 				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 30, 4),
-				new Category(YESHUA_AND_PARNASSA, false, 180, 5)); //todo* in future - why twice? make more efficient
+				new Category(YESHUA_AND_PARNASSA, false, 180, 5)); // todo* in future - why twice? make more efficient
 	}
 
 	/*
@@ -187,7 +187,7 @@ public class AdminService {
 		}
 
 		/*
-		 * If davener already exists on database (but was disactivated at a different
+		 * If davener already exists on database (but was deactivated at a different
 		 * time from receiving weekly emails), will change to active and save him under
 		 * the same user
 		 */
@@ -198,6 +198,16 @@ public class AdminService {
 			user.setActive(true);
 		} else { // new davener - save full incoming data
 			userRepository.save(user);
+		}
+
+		// only notify if being activated (deactivated->activated) or if completely new
+		// and chose active
+		if (existingUser.isPresent() || user.isActive()) {
+			try {
+				emailSender.notifyActivatedUser(userEmail);
+			} catch (EmptyInformationException ex) {
+				System.out.println("There was an error sending the email to " + userEmail + ": " + ex.getMessage());
+			}
 		}
 
 		return userRepository.findAll();
@@ -258,7 +268,7 @@ public class AdminService {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
 		davenforRepository.softDeleteById(optionalDavenfor.get().getId());
-		return davenforRepository.findAll();
+		return getAllDavenfors();
 	}
 
 	// TODO*: enable in future
@@ -383,28 +393,28 @@ public class AdminService {
 	 */
 
 	// tested
-	public List<User> disactivateUser(String userEmail) throws EmptyInformationException {
+	public List<User> deactivateUser(String userEmail) throws EmptyInformationException {
 		List<User> userList = null;
 		try {
-			Optional<User> userToDisactivate = userRepository.findByEmail(userEmail);
-			if (userToDisactivate.isEmpty()) { // TODO* - add test that user not found (really can't get empty
+			Optional<User> userToDeactivate = userRepository.findByEmail(userEmail);
+			if (userToDeactivate.isEmpty()) { // TODO* - add test that user not found (really can't get empty
 												// email because "" doesn't go to link)
 				System.out.println(String.format(
-						"The email %s cannot be disactivated because it is not found.  Please check the email address. ",
+						"The email %s cannot be deactivated because it is not found.  Please check the email address. ",
 						userEmail));
 				return userRepository.findAll();
 			}
-			if (!userToDisactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
+			if (!userToDeactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
 														// returning most recent users list.
 				System.out.println(String.format(
-						"The email %s has already been disactivated from receiving the davening lists. ", userEmail));
+						"The email %s has already been deactivated from receiving the davening lists. ", userEmail));
 			}
 
 			else {
-				userRepository.disactivateUser(userEmail);
+				userRepository.deactivateUser(userEmail);
 				entityManager.flush();
 				entityManager.clear();
-				emailSender.notifyDisactivatedUser(userEmail);
+				emailSender.notifydeactivatedUser(userEmail);
 			}
 		} finally { // in case there were previous errors (such as in emailSender), return
 					// userList anyway.
@@ -504,7 +514,7 @@ public class AdminService {
 
 	// todo* in future: test now that changed
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
-		//TODO* in future - test if came in null
+		// TODO* in future - test if came in null
 		Category category;
 		String pEnglish;
 		String pHebrew;

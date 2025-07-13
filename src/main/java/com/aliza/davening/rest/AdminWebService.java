@@ -106,9 +106,9 @@ public class AdminWebService {
 	}
 
 	// tested
-	@PostMapping(path = "disactivate/{userEmail}")
-	public List<User> disactivateUser(@PathVariable String userEmail) throws EmptyInformationException {
-		return adminService.disactivateUser(userEmail);
+	@PostMapping(path = "deactivate/{userEmail}")
+	public List<User> deactivateUser(@PathVariable String userEmail) throws EmptyInformationException {
+		return adminService.deactivateUser(userEmail);
 	}
 
 	// tested

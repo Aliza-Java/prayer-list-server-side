@@ -190,8 +190,7 @@ public class EmailSender {
 		Category category;
 		String pEnglish;
 		String pHebrew;
-		String linkToUnsubscribe = client + "/unsubscribe";
-		String emailText = String.format(EmailScheme.weeklyEmailText, linkToUnsubscribe);
+		String emailText = getUnsubscribeLine();
 
 		if (info == null) {
 			category = adminService.inferCategory();
@@ -277,8 +276,11 @@ public class EmailSender {
 	public void notifyUserDeletedName(Davenfor davenfor) {
 		String link = getLinkToExtend(davenfor);
 		String button = utilities.createSingleButton(link, "#32a842", "This name is still relevant");
-		String message = String.format(EmailScheme.nameAutoDeletedUserMessage, davenfor.getNameEnglish(), button);
-		sendEmail(createMimeMessage(sessionProvider.getSession(), EmailScheme.nameAutoDeletedUserSubject, message,
+		String name = davenfor.getNameEnglish().trim().length() == 0 ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
+		String message = String.format(EmailScheme.nameAutoDeletedUserMessage, name, davenfor.getCategory(), button);
+		String subject = String.format(EmailScheme.nameAutoDeletedUserSubject, jwtUtils.generateOtp());
+
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message,
 				davenfor.getUserEmail(), null, null, null));
 	}
 
@@ -322,7 +324,8 @@ public class EmailSender {
 	// tested
 	public void offerExtensionOrDelete(Davenfor davenfor) {
 
-		String subject = EmailScheme.expiringNameSubject;
+		//this 'code' is just for differentiating emails without sending df-id or showing name in the subject
+		String subject = String.format("%s (Internal code: %s)", EmailScheme.expiringNameSubject, jwtUtils.generateOtp());
 		String message = String.format(utilities.setExpiringNameMessage(davenfor));
 		String recipient = davenfor.getUserEmail();
 
@@ -330,13 +333,15 @@ public class EmailSender {
 	}
 
 	// tested
-	public void notifyDisactivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.userDisactivated, EmailScheme.userDisactivatedSubject);
+	public void notifydeactivatedUser(String email) throws EmptyInformationException {
+		sendEmailFromAdmin(email, EmailScheme.userdeactivated, EmailScheme.userdeactivatedSubject);
 	}
 
 	// tested
 	public void notifyActivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.userActivated, EmailScheme.userActivatedSubject);
+		System.out.println(getUserActivatedMessage());
+		
+		sendEmailFromAdmin(email, getUserActivatedMessage(), EmailScheme.userActivatedSubject);
 	}
 
 	public String requestToUnsubscribe(String email) {// TODO*: test
@@ -402,4 +407,20 @@ public class EmailSender {
 		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
 		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
+	
+	public String getUserActivatedMessage() {
+	    return "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
+	            + adminEmail + ".<br><br>" + getUnsubscribeLine();
+	}
+
+	
+	public String getUnsubscribeLine() {
+		String linkToUnsubscribe = client + "/unsubscribe";
+		return String.format(unsubscribeLine, linkToUnsubscribe);
+		
+	}
+	
+	public final String unsubscribeLine = "To unsubscribe from the weekly davening list, click <a href='%s'>HERE</a>";
+
+
 }

@@ -524,14 +524,14 @@ public class ServiceEmailSenderTests {
 
 	@Test
 	@Order(8)
-	public void notifyDisactivatedUserTest() {
+	public void notifydeactivatedUserTest() {
 		try {
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
-				emailSender.notifyDisactivatedUser(null);
+				emailSender.notifydeactivatedUser(null);
 			});
 			assertTrue(exception.getMessage().contains("email address missing"));
 
-			emailSender.notifyDisactivatedUser("test@tmail.com");
+			emailSender.notifydeactivatedUser("test@tmail.com");
 
 			greenMail.waitForIncomingEmail(5000, 1);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();

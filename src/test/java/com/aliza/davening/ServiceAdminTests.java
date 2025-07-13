@@ -382,7 +382,7 @@ public class ServiceAdminTests {
 
 	@Test
 	@Order(14)
-	public void disactivateUserTest() {
+	public void deactivateUserTest() {
 		when(userRep.findByEmail(user2.getEmail())).thenReturn(Optional.of(user2));
 		when(userRep.findByEmail(user3.getEmail())).thenReturn(Optional.of(user3));
 		when(userRep.findAll()).thenReturn(users);
@@ -391,13 +391,13 @@ public class ServiceAdminTests {
 		assertTrue(user3.isActive());
 
 		try {
-			adminService.disactivateUser("user2@gmail.com");
+			adminService.deactivateUser("user2@gmail.com");
 
-			System.out.println("disactivateUserTest: should have only printed that user2 is already disactivated");
-			adminService.disactivateUser("user3@gmail.com");
+			System.out.println("deactivateUserTest: should have only printed that user2 is already deactivated");
+			adminService.deactivateUser("user3@gmail.com");
 
-			verify(userRep, times(1)).disactivateUser(any());
-			verify(emailSender, times(1)).notifyDisactivatedUser(any());
+			verify(userRep, times(1)).deactivateUser(any());
+			verify(emailSender, times(1)).notifydeactivatedUser(any());
 			verify(userRep, times(2)).findAll();
 		} catch (EmptyInformationException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());

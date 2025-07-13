@@ -138,17 +138,18 @@ public class UserService {
 		String subject;
 		String message;
 
+		String name = davenfor.getNameEnglish().isEmpty() ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
+
 		//something is empty
 		if (davenfor.getNameEnglish().isEmpty() || davenfor.getNameHebrew().isEmpty()
 				|| (Category.isBanim(davenfor.getCategory())
 						&& (davenfor.getNameEnglishSpouse().isEmpty() || davenfor.getNameHebrewSpouse().isEmpty()))) {
-			String name = davenfor.getNameEnglish().isEmpty() ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
 			subject = String.format(EmailScheme.informAdminOfPartialNewNameSubject, name);
 			message = EmailScheme.setAdminAlertMessage(true,  davenfor, client + "/admin");
 		}
 
 		else {
-			subject = EmailScheme.informAdminOfNewNameSubject;
+			subject = String.format(EmailScheme.informAdminOfNewNameSubject, name);
 			message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
 					davenfor.getNameHebrew(), category.getCname().getVisual(), userEmail, client + "/admin");
 		}
@@ -354,25 +355,25 @@ public class UserService {
 	}
 
 	// TODO* test
-	// similar to admin's disactivate
+	// similar to admin's deactivate
 	public String unsubscribe(String token) throws EmptyInformationException {
 		String email = jwtUtils.extractEmailFromToken(token);
 		Optional<User> userToUnsubscribe = userRepository.findByEmail(email);
 		if (userToUnsubscribe.isEmpty()) {
 			System.out.println(String.format(
-					"The email cannot be disactivated because it is not found: %s.  Please check the email address. ",
+					"The email cannot be deactivated because it is not found: %s.  Please check the email address. ",
 					email));
 			return "There was a problem unsubscribing the email sent";
 		}
 		if (!userToUnsubscribe.get().isActive()) { // Just to log/notify, and continue business as usual
 			System.out.println(String
-					.format("The email %s has already been disactivated from receiving the davening lists. ", email));
+					.format("The email %s has already been deactivated from receiving the davening lists. ", email));
 		} else {
-			userRepository.disactivateUser(email);
+			userRepository.deactivateUser(email);
 			entityManager.flush();
 			entityManager.clear();
 		}
-		emailSender.notifyDisactivatedUser(email);
+		emailSender.notifydeactivatedUser(email);
 		String response = String.format(SchemeValues.unsubscribeText, email);
 		return response;
 	}

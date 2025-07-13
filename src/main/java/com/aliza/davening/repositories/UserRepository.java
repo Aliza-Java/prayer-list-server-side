@@ -21,7 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 	 @Modifying
 	 @Transactional
 	 @Query("update User u set u.active=false where email=?1")
-	 public void disactivateUser(String email);
+	 public void deactivateUser(String email);
 	 
 	 @Modifying
 	 @Transactional

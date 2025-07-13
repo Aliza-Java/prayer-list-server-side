@@ -12,10 +12,13 @@ import com.aliza.davening.entities.Davenfor;
 @Component
 public class EmailScheme {
 
-	public final String client = SchemeValues.client;
+	public final static String client = SchemeValues.client;
 
 	@Value("${server.url}")
 	public String server;
+
+	@Value("${admin.email}")
+	public String adminEmail;
 
 	public String getServer() {
 		return server;
@@ -67,7 +70,6 @@ public class EmailScheme {
 
 	public static final String emailBodyStyle = "<div style='font-family: Arial, sans-serif; font-size: 18px; color: #000000; line-height: 2;'>%s</div>";
 
-	public static final String weeklyEmailText = "To unsubscribe from the weekly davening list, click <a href='%s'>HERE</a>";
 
 	// Subject includes the category
 	public static final String weeklyEmailSubject = "Weekly davening list for week of: %s";
@@ -75,11 +77,11 @@ public class EmailScheme {
 	// Default subject in emails from admin
 	public static final String adminMessageSubject = "Message from davening list admin";
 
-	public static final String userDisactivated = "We are confirming that your participation on the davening list has been disactivated. <br><br> You will no longer receive emails regarding the davening list. <br><br>If you think you did not disactivate your participation on the list, please contact your list admin immediately. ";
+	public static final String userdeactivated = "We are confirming that your participation on the davening list has been deactivated. <br><br> You will no longer receive emails regarding the davening list. <br><br>If you think you did not deactivate your participation on the list, please contact your list admin immediately. ";
 
-	public static final String userActivated = "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact your list admin immediately. ";
 
-	public static final String userDisactivatedSubject = "You have been unsubscribed";
+
+	public static final String userdeactivatedSubject = "You have been unsubscribed";
 
 	public static final String userActivatedSubject = "Welcome to the Davening List";
 
@@ -123,9 +125,9 @@ public class EmailScheme {
 
 	public static final String deleteNameAdminMessage = "We want to let you know that the name <b>%s</b> from the <b>%s</b> category has been removed from the davening list by <b>%s</b>.";
 
-	public static final String nameAutoDeletedUserSubject = "Missed Our Alerts? You Can Still Repost Your Davening Name";
+	public static final String nameAutoDeletedUserSubject = "Missed Our Alerts? You Can Still Repost Your Davening Name (Internal code: %s)";
 
-	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, your davening name <b>%s</b> has been removed as part of our cleanup process. <br> "
+	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, your davening name <b>%s</b> has been removed from our <b>%s</b> category as part of our cleanup process. <br> "
 			+ "No worries though — if you'd like to repost this name (although it might not be included in this week's list), you can do so easily by clicking the button below: <br>"
 			+ "<div>%s </div>" + "Let us know if you need any help! <br>" + "The Davening List team";
 
@@ -146,7 +148,7 @@ public class EmailScheme {
 		sb.append("The following names in the ");
 		sb.append(category);
 		sb.append(" have been automatically removed this week, as they were not confirmed by users: <br>");
-		names.forEach(n -> sb.append(n.getNameEnglish() + "<br>"));
+		names.forEach(n -> sb.append((n.getNameEnglish().trim().length() == 0 ? n.getNameHebrew() : n.getNameEnglish()) + "<br>"));
 
 		return sb.toString();
 	}
@@ -182,7 +184,8 @@ public class EmailScheme {
 	private static String getNameValue(String name) {
 		if (name.trim() == "")
 			return "(blank)";
-			else 
-				return name;
+		else
+			return name;
 	}
+
 }

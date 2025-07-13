@@ -55,9 +55,9 @@ public class RepUserTests {
 
 	@Test
 	@Order(2)
-	public void disactivateUserTest() {
+	public void deactivateUserTest() {
 		User user = new User();
-		user.setEmail("please.disactivate@gmail.com");
+		user.setEmail("please.deactivate@gmail.com");
 		user.setActive(true);
 		userRep.save(user);
 
@@ -66,12 +66,12 @@ public class RepUserTests {
 		user2.setActive(true);
 		userRep.save(user2);
 
-		userRep.disactivateUser("please.disactivate@gmail.com");
+		userRep.deactivateUser("please.deactivate@gmail.com");
 
 		testEntityManager.refresh(user);
 		testEntityManager.refresh(user2);
 
-		Optional<User> retrieved = userRep.findByEmail("please.disactivate@gmail.com");
+		Optional<User> retrieved = userRep.findByEmail("please.deactivate@gmail.com");
 		assertTrue(retrieved.isPresent());
 		assertFalse(retrieved.get().isActive());
 
