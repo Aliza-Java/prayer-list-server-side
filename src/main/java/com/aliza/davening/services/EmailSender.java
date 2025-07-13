@@ -409,7 +409,7 @@ public class EmailSender {
 	}
 	
 	public String getUserActivatedMessage() {
-	    return "We are confirming that your participation on the davening list has been activated. <br><br> You will now be receiving emails regarding the davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
+	    return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br><br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
 	            + adminEmail + ".<br><br>" + getUnsubscribeLine();
 	}
 
@@ -420,7 +420,7 @@ public class EmailSender {
 		
 	}
 	
-	public final String unsubscribeLine = "To unsubscribe from the weekly davening list, click <a href='%s'>HERE</a>";
+	public final String unsubscribeLine = "To unsubscribe from the Emek Hafrashat Challah Davening list, click <a href='%s'>HERE</a>";
 
 
 }

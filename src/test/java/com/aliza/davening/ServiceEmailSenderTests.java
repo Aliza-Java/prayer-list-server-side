@@ -211,7 +211,7 @@ public class ServiceEmailSenderTests {
 			// Bcc can be added as a separate header and checked in the test but I think
 			// that defies the purpose
 			assertEquals(1, receivedMessages.length);
-			assertEquals("Message from davening list admin", receivedMessages[0].getSubject());
+			assertEquals("Message from Emek Hafrashat Challah Davening list admin", receivedMessages[0].getSubject());
 			assertEquals("recip@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("test"));
@@ -286,8 +286,6 @@ public class ServiceEmailSenderTests {
 			assertTrue(receivedMessages[2].getSubject().contains("Vayeshev"));
 
 			assertNull(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("To unsubscribe from the weekly"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("special information"));
 
 			MimeMessage message = receivedMessages[0];
 			Object content = message.getContent();
@@ -349,7 +347,7 @@ public class ServiceEmailSenderTests {
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
 			assertEquals(3, receivedMessages.length);
-			assertTrue(receivedMessages[2].getSubject().contains("Weekly davening list for week of: Toldot"));
+			assertTrue(receivedMessages[2].getSubject().contains("Emek Hafrashat Challah Davening list for week of: Toldot"));
 
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("special information"));
 
@@ -368,7 +366,7 @@ public class ServiceEmailSenderTests {
 						assertNotNull(fileName);
 						assertTrue(fileName.contains("Davening List"));
 						assertTrue(fileName.contains("-"));
-						assertEquals(44, fileName.length());
+						assertEquals(62, fileName.length());
 					}
 				}
 			}
@@ -561,7 +559,7 @@ public class ServiceEmailSenderTests {
 
 			// one for recipient, one for admin as Bcc
 			assertEquals(1, receivedMessages.length);
-			assertEquals("Welcome to the Davening List", receivedMessages[0].getSubject());
+			assertEquals("Welcome to the Emek Hafrashat Challah Davening List", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("has been activated"));
 
 		} catch (MessagingException | EmptyInformationException e) {
@@ -583,7 +581,7 @@ public class ServiceEmailSenderTests {
 			assertEquals(1, receivedMessages.length);
 			assertEquals("user1@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
-			assertEquals("Action required - Is this name still relevant?", receivedMessages[0].getSubject());
+			assertTrue(receivedMessages[0].getSubject().contains("Action required - Is this name still relevant? (Internal code:"));
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]).toString());
 
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));

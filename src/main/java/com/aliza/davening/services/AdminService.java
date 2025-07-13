@@ -407,7 +407,7 @@ public class AdminService {
 			if (!userToDeactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
 														// returning most recent users list.
 				System.out.println(String.format(
-						"The email %s has already been deactivated from receiving the davening lists. ", userEmail));
+						"The email %s has already been deactivated from receiving the Davening lists.", userEmail));
 			}
 
 			else {
@@ -440,7 +440,7 @@ public class AdminService {
 			if (userToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual,
 															// returning
 				// most recent daveners list.
-				System.out.println(String.format("The email %s is already receiving the davening lists. ", userEmail));
+				System.out.println(String.format("The email %s is already receiving the Davening lists. ", userEmail));
 			}
 
 			else {

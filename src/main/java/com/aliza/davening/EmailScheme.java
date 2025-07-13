@@ -46,7 +46,7 @@ public class EmailScheme {
 	public static final String pageDivider = "<script>document.addEventListener(\"DOMContentLoaded\", function () { const rows = Array.from(document.querySelectorAll(\"table tr\")); const pageHeight = 900; let currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); let currentHeight = 0; rows.forEach(row => { const rowHeight = row.offsetHeight; if (currentHeight + rowHeight > pageHeight) { currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); currentHeight = 0; } currentPage.appendChild(row); currentHeight += rowHeight; }); });</script>";
 
 //TODO*: move to separate file, to make editing easier.  All long htmls should be read from files
-	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Weekly Davening List</title><style>.container {height:100%%; width: 650px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s ; height: 100%%; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 650px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 650px; height: 100%%; font-size: 14.5pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
+	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Emek Hafrashat Challah Davening List</title><style>.container {height:100%%; width: 650px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s ; height: 100%%; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 650px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 650px; height: 100%%; font-size: 14.5pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
 
 	public static final String htmlBodyStart = "<body><div class='container'><div class='page'>";
 
@@ -72,18 +72,18 @@ public class EmailScheme {
 
 
 	// Subject includes the category
-	public static final String weeklyEmailSubject = "Weekly davening list for week of: %s";
+	public static final String weeklyEmailSubject = "Emek Hafrashat Challah Davening list for week of: %s";
 
 	// Default subject in emails from admin
-	public static final String adminMessageSubject = "Message from davening list admin";
+	public static final String adminMessageSubject = "Message from Emek Hafrashat Challah Davening list admin";
 
-	public static final String userdeactivated = "We are confirming that your participation on the davening list has been deactivated. <br><br> You will no longer receive emails regarding the davening list. <br><br>If you think you did not deactivate your participation on the list, please contact your list admin immediately. ";
+	public static final String userdeactivated = "We are confirming that your participation on the Hafrashat Challah Davening list has been deactivated. <br><br> You will no longer receive emails regarding the Hafrashat Challah Davening list. <br><br>If you think you did not deactivate your participation on the list, please contact your list admin immediately. ";
 
 
 
 	public static final String userdeactivatedSubject = "You have been unsubscribed";
 
-	public static final String userActivatedSubject = "Welcome to the Davening List";
+	public static final String userActivatedSubject = "Welcome to the Emek Hafrashat Challah Davening List";
 
 	// Text appearing in Admin's email requesting to daven urgently (can be Banim or
 	// any category)
@@ -94,9 +94,9 @@ public class EmailScheme {
 	// The text in email informing admin of an update made to a name.
 	public static final String informAdminOfUpdate = "<b>%s</b> has just updated the name: <br><b>%s <br> %s </b><br>  in the category: <br> <b>%s. </b><br><br> You might want to check that it was properly updated. ";
 
-	public static final String informAdminOfUpdateSubject = "A name has been updated on your davening list. ";
+	public static final String informAdminOfUpdateSubject = "A name has been updated on your Davening list. ";
 
-	public static final String weeklyFileName = "Davening List %s";
+	public static final String weeklyFileName = "Hafrashat Challah Davening List %s";
 
 	// putting one message first, in bold, with new line before other text.
 	public static final String boldFirstMessage = "<h5>%s</h5>%s";
@@ -104,7 +104,7 @@ public class EmailScheme {
 	// putting second message, in bold, on new line after other text.
 	public static final String boldSecondMessage = "%s<h5>%s</h5>";
 
-	public static final String confirmationEmailSubject = "Davening list submission";
+	public static final String confirmationEmailSubject = "Hafrashat Challah Davening list submission";
 
 	public static final String informAdminOfPartialNewNameSubject = "Action Required: A partial new name has been added: '%s'";
 
@@ -113,9 +113,9 @@ public class EmailScheme {
 	public static final String informAdminOfNewName = "The name: <br><b>%s <br> %s </b><br> has been added to the category: <br> <b>%s. </b><br> by <b>%s</b>"
 			+ "<br><br> You might want to check that it was properly entered.  <br> <a href=\"%s\">Take me to the website</a> ";
 
-	public static final String informAdminOfNewNameSubject = "A new name: %s has been added to your davening list. ";
+	public static final String informAdminOfNewNameSubject = "A new name: %s has been added to your Davening list. ";
 
-	public static final String weeklyAdminReminderSubject = "Davening list reminder: Send out the weekly list!";
+	public static final String weeklyAdminReminderSubject = "Hafrashat Challah Davening list reminder: Send out the weekly list!";
 
 	public static final String expiringNameSubject = "Action required - Is this name still relevant?";
 
@@ -123,13 +123,13 @@ public class EmailScheme {
 
 	public static final String deleteNameAdminSubject = "Name deleted: %s";
 
-	public static final String deleteNameAdminMessage = "We want to let you know that the name <b>%s</b> from the <b>%s</b> category has been removed from the davening list by <b>%s</b>.";
+	public static final String deleteNameAdminMessage = "We want to let you know that the name <b>%s</b> from the <b>%s</b> category has been removed from the Hafrashat Challah Davening list by <b>%s</b>.";
 
 	public static final String nameAutoDeletedUserSubject = "Missed Our Alerts? You Can Still Repost Your Davening Name (Internal code: %s)";
 
-	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, your davening name <b>%s</b> has been removed from our <b>%s</b> category as part of our cleanup process. <br> "
+	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, the name for Davening <b>%s</b> has been removed from our <b>%s</b> category as part of our cleanup process. <br> "
 			+ "No worries though — if you'd like to repost this name (although it might not be included in this week's list), you can do so easily by clicking the button below: <br>"
-			+ "<div>%s </div>" + "Let us know if you need any help! <br>" + "The Davening List team";
+			+ "<div>%s </div>" + "Let us know if you need any help! <br>" + "The Emek Hafrashat Challah Davening List team";
 
 	public static final String unconfirmedSubject = "Names automatically deleted this week";
 
@@ -158,7 +158,7 @@ public class EmailScheme {
 		StringBuffer sb = new StringBuffer("");
 		sb.append("A name was ");
 		sb.append(isAdd ? "added to " : "edited on ");
-		sb.append("your davening list in the ");
+		sb.append("your Hafrashat Challah Davening list in the ");
 		sb.append("<b>").append(Category.getCategory(df.getCategory()).getCname().getVisual()).append("</b> category.")
 				.append("<br>");
 

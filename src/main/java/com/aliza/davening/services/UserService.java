@@ -367,7 +367,7 @@ public class UserService {
 		}
 		if (!userToUnsubscribe.get().isActive()) { // Just to log/notify, and continue business as usual
 			System.out.println(String
-					.format("The email %s has already been deactivated from receiving the davening lists. ", email));
+					.format("The email %s has already been deactivated from receiving the Davening lists. ", email));
 		} else {
 			userRepository.deactivateUser(email);
 			entityManager.flush();

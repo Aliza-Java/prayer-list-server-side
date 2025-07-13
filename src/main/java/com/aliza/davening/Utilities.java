@@ -221,7 +221,7 @@ public class Utilities {
 		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
 				+ "</tr></tbody></table>";
 
-		String message = "This is a reminder to send out the weekly davening list."
+		String message = "This is a reminder to send out the Hafrashat Challah Weekly Davening list."
 				+ "<br><br> If you would like to review the lists first, please log in to the system first by clicking the orange button.  "
 				+ "<br><br> Or, click the green button to go ahead and send out the list. "
 				// Inserting the button tds to an html table and connecting them to the bottom
