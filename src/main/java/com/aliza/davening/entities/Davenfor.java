@@ -1,24 +1,25 @@
 package com.aliza.davening.entities;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-
 //Davenfor = a name submitted to be davened for.
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
+
+import org.hibernate.annotations.Where;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
 @Entity
+@Where(clause = "deleted_at IS NULL")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -37,7 +38,7 @@ public class Davenfor {
 	@NotBlank(message = "Hebrew name is blank. ") // Regex pattern is made to
 	// accept blank, so that a blank input will
 	// // give only this specific message
-	@NotNull(message = "Missing Hebrew name. ") 
+	@NotNull(message = "Missing Hebrew name. ")
 	@Pattern(regexp = "^[\\u0590-\\u05fe '\\-]*$", message = "Hebrew name must contain only Hebrew letters. ")
 	private String nameHebrew;
 
@@ -59,16 +60,16 @@ public class Davenfor {
 	// Will user himself receive this name on his list?
 	private boolean submitterToReceive = true;
 
-	private LocalDate lastConfirmedAt = LocalDate.now();
+	private LocalDateTime confirmedAt = LocalDateTime.now();
 
 	@NotNull(message = "The name does not have an expiration date. ")
-	private LocalDate expireAt;
+	private LocalDateTime deletedAt;
 
 	@NotNull(message = "The name does not have a creation date. ")
-	private LocalDate createdAt = LocalDate.now();
+	private LocalDateTime createdAt = LocalDateTime.now();
 
 	// When this database record was last updated (if at all)
-	private LocalDate updatedAt;
+	private LocalDateTime updatedAt;
 
 	private String note;
 
@@ -79,7 +80,11 @@ public class Davenfor {
 	}
 
 	public boolean noSpouseInfo() {
-		return this.nameEnglishSpouse == null || this.nameEnglishSpouse.trim().length() == 0
-				|| this.nameHebrewSpouse == null || this.nameHebrewSpouse.trim().length() == 0;
+		return (this.nameEnglishSpouse == null || this.nameEnglishSpouse.trim().length() == 0)
+				&& (this.nameHebrewSpouse == null || this.nameHebrewSpouse.trim().length() == 0);
+	}
+
+	public boolean wasDeleted() {
+		return (this.deletedAt != null);
 	}
 }

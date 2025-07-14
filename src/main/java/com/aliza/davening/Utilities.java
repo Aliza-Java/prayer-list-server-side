@@ -2,6 +2,8 @@
 package com.aliza.davening;
 
 import java.io.File;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
@@ -73,9 +75,10 @@ public class Utilities {
 	String linkToSendList = client + EmailScheme.linkToSendList;
 	String linkToReviewWeekly = client + EmailScheme.linkToReviewWeekly;
 
-	public File buildListImage(Category category, String weekName, String fileName) throws EmptyInformationException {
+	public File buildListImage(Category category, String pEnglish, String pHebrew, String fileName)
+			throws EmptyInformationException {
 
-		String weeklyHtml = createWeeklyHtml(category, weekName, false);
+		String weeklyHtml = createWeeklyHtml(category, pEnglish, pHebrew, false);
 
 		String fileNameInFolder = "builtFiles/" + fileName;
 		Path filePath = Paths.get(fileNameInFolder);
@@ -94,11 +97,12 @@ public class Utilities {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
 
-		//WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this version specification in case it doesn't detect version automatically
+		// WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this
+		// version specification in case it doesn't detect version automatically
 		WebDriverManager.chromedriver().setup();
 		System.out.println("Inferring driver version automatically, should be at least 136");
 		WebDriver driver = new ChromeDriver(options);
-		
+
 		// Load HTML and take a screenshot (JPEG)
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
 		try {
@@ -126,6 +130,25 @@ public class Utilities {
 		}
 
 		driver.quit();
+
+		return filePath.toFile();
+	}
+
+	public File buildListHtml(Category category, String pEnglish, String pHebrew, String fileName)
+			throws EmptyInformationException {
+
+		String weeklyHtml = createWeeklyHtml(category, pEnglish, pHebrew, false);
+
+		String fileNameInFolder = "builtFiles/" + fileName;
+		Path filePath = Paths.get(fileNameInFolder);
+
+		try {
+			Files.write(filePath, weeklyHtml.getBytes(StandardCharsets.UTF_8));
+			System.out.println("File path: " + filePath.toAbsolutePath());
+			System.out.println("Exists? " + Files.exists(filePath));
+		} catch (Exception e) {
+			System.out.println("There was an error creating the html file: " + e.getMessage());
+		}
 
 		return filePath.toFile();
 	}
@@ -184,7 +207,7 @@ public class Utilities {
 	// program...)
 	public String setWeeklyAdminReminderMessage() {
 
-		Date expiry = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000); // 24 hours ahead
+		Date expiry = new Date(System.currentTimeMillis() + (48 * 60 * 60 * 1000)); // 48 hours ahead
 		String token = jwtUtils.generateDirectAdminToken(adminEmail, expiry);
 
 		// Prepare buttons
@@ -195,10 +218,10 @@ public class Utilities {
 		String button2 = createButton(String.format(linkToSendList, token, adminEmail.trim()), "#32a842",
 				"Send out the list");
 
-		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + button2
 				+ "</tr></tbody></table>";
 
-		String message = "This is a reminder to send out the weekly davening list."
+		String message = "This is a reminder to send out the Hafrashat Challah Weekly Davening list."
 				+ "<br><br> If you would like to review the lists first, please log in to the system first by clicking the orange button.  "
 				+ "<br><br> Or, click the green button to go ahead and send out the list. "
 				// Inserting the button tds to an html table and connecting them to the bottom
@@ -211,24 +234,26 @@ public class Utilities {
 	public String setExpiringNameMessage(Davenfor davenfor) {
 
 		// Creating the button 'components' as html tds
-		String button1 = createButton(emailSender.getLinkToExtend(davenfor), "#32a842", "Keep the name on the list");
-		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "Remove this name");
+		String button1 = createButton(emailSender.getLinkToExtend(davenfor), "#32a842", "Yes");
+		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "No");
 
 		// Inserting the button tds to an html table
-		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+		String buttonArea = "<table cellspacing='6' cellpadding='2'> <tbody>	<tr> " + button1 + button2
 				+ "</tr></tbody></table>";
 
+		String categoryName = Category.getCategory(davenfor.getCategory()).getCname().getVisual();
+		
 		// building the email message with the button area as a table at the bottom
-		String message = String.format("We've been davening for %s for %s.", davenfor.getNameEnglish(),
-				davenfor.getCategory())
-				+ "  In order to keep our lists relevant, please confirm that the davening is still relevant. "
-				+ "<br><br>  If the davening is no longer relevant for this list either simply ignore this email or click the big red remove button."
-				+ buttonArea;
+		String message = String.format("We've been davening for <b>%s</b> for <b>%s</b>.", davenfor.getNameEnglish(),
+				categoryName)
+				+ String.format(" <br>This week, the list being sent out will include names under the %s category.  In order to keep our list relevant, please confirm: Should we continue davening for <b>%s</b>?", categoryName, davenfor.getNameEnglish())
+				+ buttonArea
+				+ "<br> <b>Important: If we receive no response, the name will automatically be removed from the list.</b>";
 
 		return message;
 	}
 
-	public String createWeeklyHtml(Category category, String weekName, boolean preview)
+	public String createWeeklyHtml(Category category, String pEnglish, String pHebrew, boolean preview)
 			throws EmptyInformationException {
 		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
@@ -244,13 +269,26 @@ public class Utilities {
 		stringBuilder.append(String.format(EmailScheme.htmlHead, allowOverflow));
 		stringBuilder.append(EmailScheme.htmlBodyStart);
 
-		// building headlines and starting table
-		stringBuilder.append(String.format(EmailScheme.h5Header, EmailScheme.inMemory));
-
-		stringBuilder.append(String.format(EmailScheme.categoryAndParashaHeader, weekName, category.getCname(),
-				category.getCname().getHebName()));
-
 		stringBuilder.append(EmailScheme.tableStart);
+
+		stringBuilder.append(
+				String.format(EmailScheme.htmlNameRowInList, EmailScheme.inMemoryEnglish, EmailScheme.inMemoryHebrew));
+
+		stringBuilder.append(String.format(EmailScheme.htmlNameRowInList, EmailScheme.hostagesAndSoldiersEnglish,
+				EmailScheme.hostagesAndSoldiersHebrew));
+
+		String hafrashatChallahEng = EmailScheme.hafrashatChallahEnglish;
+		if (pEnglish != null && pEnglish.length() > 0)
+			hafrashatChallahEng += " - ".concat(pEnglish);
+		
+		String hafrashatChallahHeb = EmailScheme.hafrashatChallahHebrew;
+		if (pHebrew != null && pHebrew.length() > 0)
+			hafrashatChallahHeb += " - ".concat(pHebrew);
+		
+		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, hafrashatChallahEng, hafrashatChallahHeb));
+
+		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, category.getCname().getListName(),
+				category.getCname().getHebName()));
 
 		// Running through names, adding them in columns - English and Hebrew
 
@@ -277,16 +315,17 @@ public class Utilities {
 			}
 		}
 
-		// Closing table
-		stringBuilder.append(EmailScheme.tableClose);
-
 		// Adding line about next week's category
 		Category nextCategory = getNextCategory(category);
-		stringBuilder.append(String.format(EmailScheme.nextWeekCategory, nextCategory.getCname(),
-				nextCategory.getCname().getHebName()));
+		String nextWeekEng = String.format(EmailScheme.nextWeekEnglish, nextCategory.getCname().getListName());
+		String nextWeekHeb = String.format(EmailScheme.nextWeekHebrew, nextCategory.getCname().getHebName());
+		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, nextWeekEng, nextWeekHeb));
 
 		// Adding line to email with name and good news.
 		stringBuilder.append(String.format(EmailScheme.sendGoodNewsMessage, adminEmail));
+
+		// Closing table
+		stringBuilder.append(EmailScheme.tableClose);
 
 		// Closing <body> tag
 		stringBuilder.append(EmailScheme.htmlBodyEnd);
@@ -296,20 +335,25 @@ public class Utilities {
 
 	}
 
-	// Creates a button according to varying parameters sent in
-	private String createButton(String link, String buttonColor, String buttonText) {
-
+	// Creates a button in a table (like 2 side by side) according to varying parameters sent in
+	public String createButton(String link, String buttonColor, String buttonText) {
 		return String.format(
-				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff; display: block;' align='center' bgcolor=%s width='300' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s><span style='color: #ffffff;'>%s</span></a></td>",
+				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s target='_blank'><span style='color: #ffffff;'>%s</span></a></td>",
 				buttonColor, link, buttonText);
-
 	}
+	
+	// Creates a single button in a wider format according to varying parameters sent in
+		public String createSingleButton(String link, String buttonColor, String buttonText) {
+			return String.format(
+					"<div style='text-align: center; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; background-color:%s; padding: 0px 20px; width: fit-content;'><a style='color: white; font-size: 20px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;' href=%s target='_blank'>%s</a></div>",
+					buttonColor, link, buttonText);
+		}
 
-	public String formatFileName(String weekName) {
+	public String formatFileName(String weekName, String suffix) {
 		LocalDateTime now = LocalDateTime.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
 		String formattedNow = now.format(formatter);
-		return weekName + "_" + formattedNow + ".png";
+		return weekName + "_" + formattedNow + "." + suffix;
 	}
 
 	public String toTitlecase(String input) {
@@ -320,8 +364,8 @@ public class Utilities {
 				.map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
 				.collect(Collectors.joining(" "));
 	}
-	
+
 	public long getDaysInMs(int daysNumber) {
-		return daysNumber*24*60*60*1000;
+		return daysNumber * 24 * 60 * 60 * 1000;
 	}
 }

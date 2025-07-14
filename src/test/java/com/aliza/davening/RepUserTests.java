@@ -39,9 +39,9 @@ public class RepUserTests {
 	@Order(1)
 	public void getAllUserEmailsTest() {
 
-		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true);
-		User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false);
-		User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true);
+		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true, "");
+		User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false, "");
+		User user3 = new User(3, null, "user3@gmail.com", "Israel", null, null, true, "");
 
 		userRep.save(user1);
 		userRep.save(user2);
@@ -55,9 +55,9 @@ public class RepUserTests {
 
 	@Test
 	@Order(2)
-	public void disactivateUserTest() {
+	public void deactivateUserTest() {
 		User user = new User();
-		user.setEmail("please.disactivate@gmail.com");
+		user.setEmail("please.deactivate@gmail.com");
 		user.setActive(true);
 		userRep.save(user);
 
@@ -66,12 +66,12 @@ public class RepUserTests {
 		user2.setActive(true);
 		userRep.save(user2);
 
-		userRep.disactivateUser("please.disactivate@gmail.com");
+		userRep.deactivateUser("please.deactivate@gmail.com");
 
 		testEntityManager.refresh(user);
 		testEntityManager.refresh(user2);
 
-		Optional<User> retrieved = userRep.findByEmail("please.disactivate@gmail.com");
+		Optional<User> retrieved = userRep.findByEmail("please.deactivate@gmail.com");
 		assertTrue(retrieved.isPresent());
 		assertFalse(retrieved.get().isActive());
 
@@ -110,9 +110,9 @@ public class RepUserTests {
 	@Test
 	@Order(4)
 	public void findByEmailTest() {
-		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false);
-		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false);
-		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true);
+		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false, "");
+		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false, "");
+		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true, "");
 
 		userRep.save(user1);
 		userRep.save(user2);
@@ -128,9 +128,9 @@ public class RepUserTests {
 	@Test
 	@Order(5)
 	public void findAllTest() {
-		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true);
-		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false);
-		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true);
+		User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, true, "");
+		User user2 = new User(2, null, "user2@gmail.com", "Morocco", null, null, false, "");
+		User user3 = new User(3, null, "user3@gmail.com", "Japan", null, null, true, "");
 
 		userRep.save(user1);
 		userRep.save(user2);

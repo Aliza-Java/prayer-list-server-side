@@ -1,12 +1,9 @@
 package com.aliza.davening.services;
 
-import static com.aliza.davening.entities.CategoryName.BANIM;
-import static com.aliza.davening.entities.CategoryName.REFUA;
-import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
-import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUAH;
+import static com.aliza.davening.entities.CategoryName.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +36,7 @@ import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.JwtUtils;
 import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.util_classes.AdminSettings;
+import com.aliza.davening.util_classes.CategoryComparator;
 import com.aliza.davening.util_classes.Weekly;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -94,12 +92,12 @@ public class AdminService {
 			categoryRepository.save(new Category(SHIDDUCHIM, true, 40, 2));
 			categoryRepository.save(new Category(BANIM, false, 50, 3));
 			categoryRepository.save(new Category(SOLDIERS, false, 30, 4));
-			categoryRepository.save(new Category(YESHUAH, false, 180, 5));
+			categoryRepository.save(new Category(YESHUA_AND_PARNASSA, false, 180, 5));
 		}
 
 		Category.categories = Arrays.asList(new Category(REFUA, false, 180, 1), new Category(SHIDDUCHIM, true, 40, 2),
 				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 30, 4),
-				new Category(YESHUAH, false, 180, 5)); //todo* in future - why twice? make more efficient
+				new Category(YESHUA_AND_PARNASSA, false, 180, 5)); // todo* in future - why twice? make more efficient
 	}
 
 	/*
@@ -189,7 +187,7 @@ public class AdminService {
 		}
 
 		/*
-		 * If davener already exists on database (but was disactivated at a different
+		 * If davener already exists on database (but was deactivated at a different
 		 * time from receiving weekly emails), will change to active and save him under
 		 * the same user
 		 */
@@ -200,6 +198,16 @@ public class AdminService {
 			user.setActive(true);
 		} else { // new davener - save full incoming data
 			userRepository.save(user);
+		}
+
+		// only notify if being activated (deactivated->activated) or if completely new
+		// and chose active
+		if (existingUser.isPresent() || user.isActive()) {
+			try {
+				emailSender.notifyActivatedUser(userEmail);
+			} catch (EmptyInformationException ex) {
+				System.out.println("There was an error sending the email to " + userEmail + ": " + ex.getMessage());
+			}
 		}
 
 		return userRepository.findAll();
@@ -248,7 +256,9 @@ public class AdminService {
 
 	// tested
 	public List<Davenfor> getAllDavenfors() {
-		return davenforRepository.findAll();
+		List<Davenfor> allDavenfors = davenforRepository.findAll();
+		Collections.sort(allDavenfors, new CategoryComparator());
+		return allDavenfors;
 	}
 
 	// tested
@@ -257,8 +267,8 @@ public class AdminService {
 		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + id);
 		}
-		davenforRepository.delete(optionalDavenfor.get());
-		return davenforRepository.findAll();
+		davenforRepository.softDeleteById(optionalDavenfor.get().getId());
+		return getAllDavenfors();
 	}
 
 	// TODO*: enable in future
@@ -383,28 +393,28 @@ public class AdminService {
 	 */
 
 	// tested
-	public List<User> disactivateUser(String userEmail) throws EmptyInformationException {
+	public List<User> deactivateUser(String userEmail) throws EmptyInformationException {
 		List<User> userList = null;
 		try {
-			Optional<User> userToDisactivate = userRepository.findByEmail(userEmail);
-			if (userToDisactivate.isEmpty()) { // TODO* - add test that user not found (really can't get empty
+			Optional<User> userToDeactivate = userRepository.findByEmail(userEmail);
+			if (userToDeactivate.isEmpty()) { // TODO* - add test that user not found (really can't get empty
 												// email because "" doesn't go to link)
 				System.out.println(String.format(
-						"The email %s cannot be disactivated because it is not found.  Please check the email address. ",
+						"The email %s cannot be deactivated because it is not found.  Please check the email address. ",
 						userEmail));
 				return userRepository.findAll();
 			}
-			if (!userToDisactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
+			if (!userToDeactivate.get().isActive()) { // Just to log/notify, and continue business as usual,
 														// returning most recent users list.
 				System.out.println(String.format(
-						"The email %s has already been disactivated from receiving the davening lists. ", userEmail));
+						"The email %s has already been deactivated from receiving the Davening lists.", userEmail));
 			}
 
 			else {
-				userRepository.disactivateUser(userEmail);
+				userRepository.deactivateUser(userEmail);
 				entityManager.flush();
 				entityManager.clear();
-				emailSender.notifyDisactivatedUser(userEmail);
+				emailSender.notifydeactivatedUser(userEmail);
 			}
 		} finally { // in case there were previous errors (such as in emailSender), return
 					// userList anyway.
@@ -430,7 +440,7 @@ public class AdminService {
 			if (userToActivate.get().isActive() == true) { // Just to log/notify, and continue business as usual,
 															// returning
 				// most recent daveners list.
-				System.out.println(String.format("The email %s is already receiving the davening lists. ", userEmail));
+				System.out.println(String.format("The email %s is already receiving the Davening lists. ", userEmail));
 			}
 
 			else {
@@ -504,15 +514,17 @@ public class AdminService {
 
 	// todo* in future: test now that changed
 	public String previewWeekly(Weekly info) throws ObjectNotFoundException, EmptyInformationException {
-		//TODO* in future - test if came in null
+		// TODO* in future - test if came in null
 		Category category;
-		String parashaNameFull;
+		String pEnglish;
+		String pHebrew;
 
 		if (info == null) // came from direct, or other issue
 		{
 			try {
 				category = inferCategory();
-				parashaNameFull = inferParashaName(true);
+				pEnglish = inferParashaName(true, false);
+				pHebrew = inferParashaName(false, true);
 			} catch (ObjectNotFoundException ex) {
 				throw ex;
 			}
@@ -524,10 +536,11 @@ public class AdminService {
 			if (category == null) {
 				throw new ObjectNotFoundException("category named " + info.category);
 			}
-			parashaNameFull = info.parashaNameFull;
+			pEnglish = info.parashaNameEnglish;
+			pHebrew = info.parashaNameHebrew;
 		}
 
-		return utilities.createWeeklyHtml(category, parashaNameFull, true);
+		return utilities.createWeeklyHtml(category, pEnglish, pHebrew, true);
 	}
 
 	// tested
@@ -561,13 +574,17 @@ public class AdminService {
 		return category;
 	}
 
-	public String inferParashaName(boolean full) throws ObjectNotFoundException {
+	public String inferParashaName(boolean english, boolean hebrew) throws ObjectNotFoundException {
 		Parasha parasha = parashaRepository.findCurrent()
 				.orElseThrow(() -> new ObjectNotFoundException("current Parasha"));
-		if (full)
-			return parasha.getEnglishName() + " - " + parasha.getHebrewName();
-		else
+		if (english && !hebrew)
 			return parasha.getEnglishName();
+		if (hebrew && !english)
+			return parasha.getHebrewName();
+		if (hebrew && english)
+			return parasha.getEnglishName() + " - " + parasha.getHebrewName();
+
+		return "";
 	}
 
 //	private boolean checkIfThisCategoryNameIsInUse(String english, String hebrew, List<Category> categories, long id)

@@ -106,9 +106,9 @@ public class AdminWebService {
 	}
 
 	// tested
-	@PostMapping(path = "disactivate/{userEmail}")
-	public List<User> disactivateUser(@PathVariable String userEmail) throws EmptyInformationException {
-		return adminService.disactivateUser(userEmail);
+	@PostMapping(path = "deactivate/{userEmail}")
+	public List<User> deactivateUser(@PathVariable String userEmail) throws EmptyInformationException {
+		return adminService.deactivateUser(userEmail);
 	}
 
 	// tested
@@ -127,7 +127,7 @@ public class AdminWebService {
 	@PostMapping(path = "preview", produces = "text/plain")
 	public String previewWeekly(@RequestBody Weekly weeklyInfo)
 			throws EmptyInformationException, ObjectNotFoundException {
-		System.out.println("Generating preview for week: " + weeklyInfo.parashaNameFull);
+		System.out.println("Generating preview for week: " + weeklyInfo.parashaNameEnglish);
 		return adminService.previewWeekly(weeklyInfo);
 	}
 

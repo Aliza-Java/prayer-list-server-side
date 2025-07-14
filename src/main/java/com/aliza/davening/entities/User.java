@@ -44,6 +44,8 @@ public class User {
 	
 	// Does user want to accept weekly davening list and alerts?
 	private boolean active = true;
+	
+	private String otp;
 
 	// Constructor with only email, for quick creation.
 	@NotBlank(message = "User's email missing. ") 

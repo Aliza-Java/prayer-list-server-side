@@ -1,8 +1,8 @@
 package com.aliza.davening.services;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +26,7 @@ import com.aliza.davening.repositories.CategoryRepository;
 import com.aliza.davening.repositories.DavenforRepository;
 import com.aliza.davening.repositories.UserRepository;
 import com.aliza.davening.security.JwtUtils;
+import com.aliza.davening.util_classes.CategoryComparator;
 
 @Service
 @Transactional
@@ -73,14 +74,17 @@ public class UserService {
 
 	// According to email address user can see all names he submitted.
 	// tested
-	public List<Davenfor> getAllUserDavenfors(String email) {
+	public List<Davenfor> getAllUserDavenfors(String email) throws ObjectNotFoundException {
 
+		
 		// differentiating between non-existing email (this if) and empty list (which
 		// will return fine and will be discerned)
-		if (userRepository.findByEmail(email) == null) {
-			return new ArrayList<Davenfor>();
+		if (userRepository.findByEmail(email).isEmpty()){
+			throw new ObjectNotFoundException("User with email " + email);
 		}
-		return davenforRepository.findAllDavenforByUserEmail(email);
+		List<Davenfor> allUserDavenfors = davenforRepository.findAllDavenforByUserEmail(email);
+		Collections.sort(allUserDavenfors, new CategoryComparator());
+		return allUserDavenfors;
 	}
 
 	// tested
@@ -99,26 +103,24 @@ public class UserService {
 		// If davenfor needs 2 names (e.g. Zera shel Kayama), validate that second name
 		// is in too, and if indeed exist - trim them.
 
-		if (Category.isBanim(category.getCname().toString())) {
+		if (Category.isBanim(davenfor.getCategory())) {
 			if (davenfor.noSpouseInfo()) {
-				System.out.println(
-						"No spouse information was entered.  This is okay, but user may not be aware of the option");
-				// throw new EmptyInformationException(
-				// "This category requires also a spouse name (English and Hebrew) to be
-				// submitted. ");
+				String message = "Banim category requires also a spouse name to be submitted. ";
+				throw new EmptyInformationException(message);
 			} else {
-				davenfor.setNameEnglishSpouse(davenfor.getNameEnglishSpouse().trim());
-				davenfor.setNameHebrewSpouse(davenfor.getNameHebrewSpouse().trim());
+				if (davenfor.getNameEnglishSpouse() != null)
+					davenfor.setNameEnglishSpouse(davenfor.getNameEnglishSpouse().trim());
+				if (davenfor.getNameHebrewSpouse() != null)
+					davenfor.setNameHebrewSpouse(davenfor.getNameHebrewSpouse().trim());
 			}
 		}
 
 		davenfor.setUserEmail(existingOrNewUser(userEmail));
 
-		davenfor.setCreatedAt(LocalDate.now());
-		davenfor.setLastConfirmedAt(LocalDate.now());
+		davenfor.setCreatedAt(LocalDateTime.now());
+		davenfor.setConfirmedAt(LocalDateTime.now());
 
-		// Davenfor will expire in future according to its category's settings.
-		davenfor.setExpireAt(LocalDate.now().plusDays(category.getUpdateRate()));
+		davenfor.setDeletedAt(null);
 
 		Davenfor savedDavenfor;
 		try {
@@ -132,9 +134,24 @@ public class UserService {
 
 		// TODO*: in future, adjust that admin can choose if to get prompts: if
 		// (getMyGroupSettings(adminId).isNewNamePrompt())...
-		String subject = EmailScheme.informAdminOfNewNameSubject;
-		String message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
-				davenfor.getNameHebrew(), category.getCname().toString(), userEmail, client + "/admin");
+		String subject;
+		String message;
+
+		String name = davenfor.getNameEnglish().isEmpty() ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
+
+		//something is empty
+		if (davenfor.getNameEnglish().isEmpty() || davenfor.getNameHebrew().isEmpty()
+				|| (Category.isBanim(davenfor.getCategory())
+						&& (davenfor.getNameEnglishSpouse().isEmpty() || davenfor.getNameHebrewSpouse().isEmpty()))) {
+			subject = String.format(EmailScheme.informAdminOfPartialNewNameSubject, name);
+			message = EmailScheme.setAdminAlertMessage(true,  davenfor, client + "/admin");
+		}
+
+		else {
+			subject = String.format(EmailScheme.informAdminOfNewNameSubject, name);
+			message = String.format(EmailScheme.informAdminOfNewName, davenfor.getNameEnglish(),
+					davenfor.getNameHebrew(), category.getCname().getVisual(), userEmail, client + "/admin");
+		}
 		// TODO*: include test
 		emailSender.informAdmin(subject, message);
 
@@ -142,15 +159,16 @@ public class UserService {
 	}
 
 	// tested
-	public Davenfor updateDavenfor(Davenfor davenforToUpdate, String submitterEmail, boolean isAdmin)
+	@Transactional
+	public Davenfor updateDavenfor(Davenfor updatedInfo, String submitterEmail, boolean isAdmin)
 			throws EmptyInformationException, ObjectNotFoundException, PermissionException {
 
-		if (davenforToUpdate == null) {
+		if (updatedInfo == null) {
 			throw new EmptyInformationException("No information submitted regarding the name you wish to update. ");
 		}
 
 		// Extracting id since it may be used more than once.
-		long id = davenforToUpdate.getId();
+		long id = updatedInfo.getId();
 
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(id);
 		if (!optionalDavenfor.isPresent()) {
@@ -166,42 +184,70 @@ public class UserService {
 			}
 		}
 
+		// before changes are saved in the DB, comparing old and new to see if anything
+		// was erased (and inform admin)
+		Davenfor existingInfo = optionalDavenfor.get();
+		boolean infoRemoved = false;
+		String subject = "";
+		String message = "";
+
+		// informing admin if edited name erased an important piece of the name
+		if ((existingInfo.getNameEnglish().length() > 0 && updatedInfo.getNameEnglish().length() == 0)
+				|| (existingInfo.getNameHebrew().length() > 0 && updatedInfo.getNameHebrew().length() == 0)
+				|| (Category.isBanim(updatedInfo.getCategory()) && existingInfo.getNameEnglishSpouse().length() > 0
+						&& updatedInfo.getNameEnglishSpouse().length() == 0)
+				|| (Category.isBanim(updatedInfo.getCategory()) && existingInfo.getNameHebrewSpouse().length() > 0
+						&& updatedInfo.getNameHebrewSpouse().length() == 0)) {
+			infoRemoved = true;
+			String name = updatedInfo.getNameEnglish().isEmpty() ? updatedInfo.getNameHebrew() : updatedInfo.getNameEnglish();
+			subject = String.format(EmailScheme.informAdminOfPartialEditNameSubject, name);
+			message = EmailScheme.setAdminAlertMessage(false, updatedInfo, client + "/admin");
+		}
+
 		// Trim all names nicely
-		davenforToUpdate.setNameEnglish(davenforToUpdate.getNameEnglish().trim());
-		davenforToUpdate.setNameHebrew(davenforToUpdate.getNameHebrew().trim());
+		existingInfo.setNameEnglish(updatedInfo.getNameEnglish().trim());
+		existingInfo.setNameHebrew(updatedInfo.getNameHebrew().trim());
+		if (existingInfo.getCategory() != updatedInfo.getCategory())
+			existingInfo.setCategory(updatedInfo.getCategory());
 
 		// If davenfor needs 2 names (e.g. banim), validate that second name is in
 		// too, and if indeed exist - trim them.
-		if (Category.isBanim(davenforToUpdate.getCategory())) {
-			if (davenforToUpdate.noSpouseInfo()) {
-				throw new EmptyInformationException(
-						"This category requires also a spouse name (English and Hebrew) to be submitted. ");
+		if (Category.isBanim(updatedInfo.getCategory())) {
+			if (updatedInfo.noSpouseInfo()) {
+				String errorMessage = "Banim category requires also a spouse name to be submitted. ";
+				throw new EmptyInformationException(errorMessage);
 			} else {
-				davenforToUpdate.setNameEnglishSpouse(davenforToUpdate.getNameEnglishSpouse().trim());
-				davenforToUpdate.setNameHebrewSpouse(davenforToUpdate.getNameHebrewSpouse().trim());
+				if (updatedInfo.getNameEnglishSpouse() != null)
+					existingInfo.setNameEnglishSpouse(updatedInfo.getNameEnglishSpouse().trim());
+				if (updatedInfo.getNameHebrewSpouse() != null)
+					existingInfo.setNameHebrewSpouse(updatedInfo.getNameHebrewSpouse().trim());
 			}
 		}
 
 		if (!isAdmin) {
-			davenforToUpdate.setUserEmail(existingOrNewUser(submitterEmail));
+			existingInfo.setUserEmail(existingOrNewUser(submitterEmail));
 		}
-		davenforToUpdate.setUpdatedAt(LocalDate.now());
-		davenforToUpdate.setLastConfirmedAt(LocalDate.now());
+		existingInfo.setUpdatedAt(LocalDateTime.now());
+		existingInfo.setConfirmedAt(LocalDateTime.now());
 
 		// Davenfor will expire in future according to it's category's settings.
-		Category categoryObj = Category.getCategory(davenforToUpdate.getCategory());
-		davenforToUpdate.setExpireAt(LocalDate.now().plusDays(categoryObj.getUpdateRate()));
+		// Category categoryObj = Category.getCategory(davenforToUpdate.getCategory());
+		// davenforToUpdate.setExpireAt(LocalDate.now().plusDays(categoryObj.getUpdateRate()));
 
-		davenforRepository.save(davenforToUpdate);
+		davenforRepository.save(existingInfo);
+		entityManager.flush();
+		entityManager.clear();
 
+		// for now I don't think it's necessary to inform admin on every update
 		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
-		String subject = EmailScheme.informAdminOfUpdateSubject;
-		String message = String.format(EmailScheme.informAdminOfUpdate, davenforToUpdate.getUserEmail(),
-				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
-		emailSender.informAdmin(subject, message);
-		// }
+//		String subject = EmailScheme.informAdminOfUpdateSubject;
+//		String message = String.format(EmailScheme.informAdminOfUpdate, davenforToUpdate.getUserEmail(),
+//				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
 
-		return davenforToUpdate;
+		if (infoRemoved)
+			emailSender.informAdmin(subject, message);
+
+		return existingInfo;
 	}
 
 	// TODO* need to test after adjustments
@@ -229,16 +275,24 @@ public class UserService {
 
 		// Extending the davenfor's expiration date according to the defined length in
 		// its category.
-		Category categoryObj = Category.getCategory(davenforToExtend.getCategory());
-		LocalDate extendedDate = LocalDate.now().plusDays(categoryObj.getUpdateRate());
-		davenforRepository.extendExpiryDate(davenforId, extendedDate, LocalDate.now());
+		// Category categoryObj = Category.getCategory(davenforToExtend.getCategory());
+		// LocalDate extendedDate =
+		// LocalDate.now().plusDays(categoryObj.getUpdateRate());
+		// davenforRepository.extendExpiryDate(davenforId, extendedDate,
+		// LocalDate.now());
+
+		if (davenforToExtend.wasDeleted())
+			davenforRepository.reviveDavenfor(davenforId);
+
+		davenforRepository.setConfirmedAt(LocalDateTime.now(), davenforId);
+
 		return davenforToExtend;
 	}
 
 	// tested
 	public List<Davenfor> deleteDavenfor(long davenforId, String auth, boolean viaEmail)
 			throws ObjectNotFoundException, PermissionException {
-		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
+		Optional<Davenfor> optionalDavenfor = davenforRepository.findByIdIncludingDeleted(davenforId);
 		if (!optionalDavenfor.isPresent()) {
 			throw new ObjectNotFoundException("Name with id: " + davenforId);
 		}
@@ -246,21 +300,25 @@ public class UserService {
 		Davenfor davenforToDelete = optionalDavenfor.get();
 		String email = viaEmail ? jwtUtils.extractEmailFromToken(auth) : auth;
 		if (davenforToDelete.getUserEmail().equalsIgnoreCase(email)) {
-			davenforRepository.delete(davenforToDelete);
+			davenforRepository.softDeleteById(davenforToDelete.getId());
 		} else {
 			throw new PermissionException(
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
 
-		String adminSubject = String.format(EmailScheme.deleteNameSubject, davenforToDelete.getNameEnglish());
-		String adminMessage = String.format(EmailScheme.deleteNameMessage, davenforToDelete.getNameEnglish(),
+		String name = davenforToDelete.getNameEnglish().trim().length() == 0 ? davenforToDelete.getNameHebrew() : davenforToDelete.getNameEnglish();
+		String adminSubject = String.format(EmailScheme.deleteNameAdminSubject, name);
+		String adminMessage = String.format(EmailScheme.deleteNameAdminMessage, name,
 				davenforToDelete.getCategory(), davenforToDelete.getUserEmail());
 		emailSender.informAdmin(adminSubject, adminMessage);
 
 		if (viaEmail)
 			return List.of(davenforToDelete); // return one so that can extract it in the confirmation message
-		else
-			return davenforRepository.findAllDavenforByUserEmail(email); // return all to show on website remaining ones
+		else {
+			List<Davenfor> allUserDavenfors = davenforRepository.findAllDavenforByUserEmail(email);
+			Collections.sort(allUserDavenfors, new CategoryComparator());
+			return allUserDavenfors;// return all to show on website remaining ones
+		}
 	}
 
 	// tested
@@ -295,26 +353,55 @@ public class UserService {
 	}
 
 	// TODO* test
-	// similar to admin's disactivate
+	// similar to admin's deactivate
 	public String unsubscribe(String token) throws EmptyInformationException {
 		String email = jwtUtils.extractEmailFromToken(token);
 		Optional<User> userToUnsubscribe = userRepository.findByEmail(email);
 		if (userToUnsubscribe.isEmpty()) {
 			System.out.println(String.format(
-					"The email cannot be disactivated because it is not found: %s.  Please check the email address. ",
+					"The email cannot be deactivated because it is not found: %s.  Please check the email address. ",
 					email));
 			return "There was a problem unsubscribing the email sent";
 		}
 		if (!userToUnsubscribe.get().isActive()) { // Just to log/notify, and continue business as usual
 			System.out.println(String
-					.format("The email %s has already been disactivated from receiving the davening lists. ", email));
+					.format("The email %s has already been deactivated from receiving the Davening lists. ", email));
 		} else {
-			userRepository.disactivateUser(email);
+			userRepository.deactivateUser(email);
 			entityManager.flush();
 			entityManager.clear();
 		}
-		emailSender.notifyDisactivatedUser(email);
+		emailSender.notifydeactivatedUser(email);
 		String response = String.format(SchemeValues.unsubscribeText, email);
 		return response;
 	}
+	
+	public boolean setNewOtp(String email) throws EmailException, ObjectNotFoundException {
+		Optional<User> optionalUser = userRepository.findByEmail(email);
+
+	    if (optionalUser.isEmpty()) {
+	        throw new ObjectNotFoundException("user with email " + email);
+	    }
+		
+		String otp = jwtUtils.generateOtp();
+
+	    int rowsUpdated = userRepository.setOtp(otp, email);
+	    System.out.println("Rows updated: " + rowsUpdated);
+
+	    return emailSender.sendOtp(email, otp); // Send email with code
+	}
+	
+	public boolean verifyOtp(String email, String otp) throws PermissionException {
+	    // Retrieve the OTP from DB (and check expiration, e.g. 5 min)
+	    Optional<User> optionalUser = userRepository.findByEmail(email);
+	    	    
+	    if (!otp.equals(optionalUser.get().getOtp())) {
+	    	throw new PermissionException("Invalid or expired code");
+	    }
+
+	    userRepository.setOtp("", email);
+
+	    return true;
+	}
+	
 }

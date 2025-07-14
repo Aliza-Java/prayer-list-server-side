@@ -38,7 +38,6 @@ public class DaveningApplication {
 //			// TODO Auto-generated catch block
 //			e.printStackTrace();
 //		}
-//	    System.out.println(content);
 
 		// For testing:
 

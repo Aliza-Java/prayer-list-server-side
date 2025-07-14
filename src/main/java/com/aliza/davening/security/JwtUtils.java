@@ -107,6 +107,10 @@ public class JwtUtils {
 
 	public String getExpiryNotice(Date expiry) {
 		SimpleDateFormat formatter = new SimpleDateFormat("(EEEE) HH:mm");
-		return "Your token will expire tomorrow " + formatter.format(expiry);
+		return "Your token will expire in 48 hours " + formatter.format(expiry);
+	}
+	
+	public String generateOtp() {
+	    return String.valueOf((int)(Math.random() * 9000) + 1000); // 4-digit number
 	}
 }

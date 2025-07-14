@@ -7,13 +7,15 @@ public class SchemeValues {
 	public static final long NON_EXIST = -1;
 	
 	public static final String client = "http://localhost:4200";
+	
+	public static final String server = "http://localhost:8080/dlist/";
 
 	// The default amount of days to wait after warning a submitter before deleting
 	// a davenfor.
 	public static int waitBeforeDeletion = 7;
 	public static boolean adminNewNamePrompt = false;
 
-	public final static String banimName = "Zera Shel Kayama";
+	public final static String banimName = "Banim";
 
 	public static int adminId = 10;
 

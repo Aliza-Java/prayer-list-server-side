@@ -2,7 +2,6 @@ package com.aliza.davening.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -71,16 +70,17 @@ public class EmailSender {
 	String adminEmail;
 
 	public final String client = SchemeValues.client;
+	public final String server = SchemeValues.server;
 
 	// @Value("${admin.id}")
 	long adminId = 1;
 
 	@Value("${link.to.extend}")
-	String linkToExtendClient;
+	String linkToExtendServer;
 
 	@Value("${link.to.remove}")
-	String linkToRemoveClient;
-
+	String linkToRemoveServer;
+	
 	@Value("${link.to.unsubscribe}")
 	String linkToUnsubscribe;
 
@@ -105,14 +105,15 @@ public class EmailSender {
 			Multipart multipart = new MimeMultipart();
 
 			MimeBodyPart textPart = new MimeBodyPart();
-			textPart.setContent(text, "text/html; charset=UTF-8");
-			multipart.addBodyPart(textPart);
+			String formattedText = String.format(EmailScheme.emailBodyStyle, text);
+			textPart.setContent(formattedText, "text/html; charset=UTF-8");
+			multipart.addBodyPart(textPart); // email body
 
 			if (attachment != null) {
 				MimeBodyPart attachmentPart = new MimeBodyPart();
 				attachmentPart.attachFile(attachment);
 				attachmentPart.setFileName(attachmentName);
-				multipart.addBodyPart(attachmentPart);
+				multipart.addBodyPart(attachmentPart); // the attachment
 			}
 
 			message.setContent(multipart);
@@ -151,7 +152,7 @@ public class EmailSender {
 			if (allRecipients.size() > 1)
 				additionalMessage = String.format("(and %d more) ", allRecipients.size() - 1);
 
-			System.out.println(String.format("Email to %s %ssent successfully!", allRecipients.get(0).toString(),
+			System.out.println(String.format("Email to %s %s sent successfully!", allRecipients.get(0).toString(),
 					additionalMessage));
 
 		} catch (MessagingException e) {
@@ -187,15 +188,14 @@ public class EmailSender {
 			throws EmailException, EmptyInformationException, ObjectNotFoundException {
 
 		Category category;
-		String parashaNameEnglish;
-		String parashaNameFull;
-		String linkToUnsubscribe = client + "/unsubscribe";
-		String emailText = String.format(EmailScheme.weeklyEmailText, linkToUnsubscribe);
+		String pEnglish;
+		String pHebrew;
+		String emailText = getUnsubscribeLine();
 
 		if (info == null) {
 			category = adminService.inferCategory();
-			parashaNameEnglish = adminService.inferParashaName(false);
-			parashaNameFull = adminService.inferParashaName(true);
+			pEnglish = adminService.inferParashaName(true, false);
+			pHebrew = adminService.inferParashaName(false, true);
 		} else // info came in (but parts may be missing)
 		{
 			if (info.category != null && info.category.length() > 0)
@@ -204,26 +204,34 @@ public class EmailSender {
 				category = categoryRepository.findById(info.categoryId)
 						.orElseThrow(() -> new ObjectNotFoundException("Category"));
 
-			parashaNameEnglish = (info.parashaNameEnglish != null && info.parashaNameEnglish.length() > 0)
+			pEnglish = (info.parashaNameEnglish != null && info.parashaNameEnglish.length() > 0)
 					? info.parashaNameEnglish
-					: adminService.inferParashaName(false);
+					: adminService.inferParashaName(true, false);
 
-			parashaNameFull = info.parashaNameFull;
+			pHebrew = info.parashaNameHebrew;
 
 			if (info.message != null)
 				emailText = concatAdminMessage(info.message, emailText);
 		}
 
-		String subject = String.format(EmailScheme.weeklyEmailSubject, parashaNameEnglish);
+		String subject = String.format(EmailScheme.weeklyEmailSubject, pEnglish);
 
 		List<String> usersList = userRepository.getAllUsersEmails();
 		if (usersList.size() == 0)
 			throw new EmailException("There are no active users, cannot send list");
 
-		String fileName = String.format(EmailScheme.weeklyFileName, utilities.formatFileName(parashaNameEnglish));
+		String fileNamePng = String.format(EmailScheme.weeklyFileName, utilities.formatFileName(pEnglish, "png"));
+		// String fileNameHtml = String.format(EmailScheme.weeklyFileName,
+		// utilities.formatFileName(pEnglish, "html"));
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, null, usersList,
-				utilities.buildListImage(category, parashaNameFull, fileName), fileName));
+				utilities.buildListImage(category, pEnglish, pHebrew, fileNamePng), fileNamePng));
+
+		// todo* in future - if want to send as html
+		// sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText,
+		// null, usersList,
+		// utilities.buildListHtml(category, pEnglish, pHebrew, fileNamePng),
+		// fileNamePng));
 
 		return true;
 	}
@@ -254,15 +262,26 @@ public class EmailSender {
 
 		else {
 			urgentMessage = String.format(EmailScheme.urgentDavenforEmailText, davenfor.getNameEnglish(),
-					davenfor.getNameHebrew(), utilities.toTitlecase(davenfor.getCategory()));
+					davenfor.getNameHebrew(), (Category.getCategory(davenfor.getCategory()).getCname().getVisual()));
 		}
 
 		if (davenfor.getNote() != null) {
-			urgentMessage = concatAdminMessageAfter(davenfor.getNote(), urgentMessage);
+			urgentMessage = urgentMessage + utilities.toTitlecase(davenfor.getNote());
 		}
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, urgentMessage, null, davenersList, null,
 				null));
+	}
+
+	public void notifyUserDeletedName(Davenfor davenfor) {
+		String link = getLinkToExtend(davenfor);
+		String button = utilities.createSingleButton(link, "#32a842", "This name is still relevant");
+		String name = davenfor.getNameEnglish().trim().length() == 0 ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
+		String message = String.format(EmailScheme.nameAutoDeletedUserMessage, name, davenfor.getCategory(), button);
+		String subject = String.format(EmailScheme.nameAutoDeletedUserSubject, jwtUtils.generateOtp());
+
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message,
+				davenfor.getUserEmail(), null, null, null));
 	}
 
 	// tested
@@ -283,11 +302,14 @@ public class EmailSender {
 
 		// todo* in future - make these a method (used twice)
 
+		String name = confirmedDavenfor.getNameEnglish().isEmpty() ? confirmedDavenfor.getNameHebrew()
+				: confirmedDavenfor.getNameEnglish();
+
 		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
 				StandardCharsets.UTF_8);
-		String personalizedEmailText = String.format(emailText, confirmedDavenfor.getNameEnglish(),
-				confirmedDavenfor.getCategory(), getLinkToExtend(confirmedDavenfor),
-				getLinkToDelete(confirmedDavenfor));
+		String personalizedEmailText = String.format(emailText, name,
+				Category.getCategory(confirmedDavenfor.getCategory()).getCname().getVisual(),
+				getLinkToExtend(confirmedDavenfor), getLinkToDelete(confirmedDavenfor));
 
 		try {
 			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, personalizedEmailText, emailAddress,
@@ -302,7 +324,8 @@ public class EmailSender {
 	// tested
 	public void offerExtensionOrDelete(Davenfor davenfor) {
 
-		String subject = EmailScheme.expiringNameSubject;
+		//this 'code' is just for differentiating emails without sending df-id or showing name in the subject
+		String subject = String.format("%s (Internal code: %s)", EmailScheme.expiringNameSubject, jwtUtils.generateOtp());
 		String message = String.format(utilities.setExpiringNameMessage(davenfor));
 		String recipient = davenfor.getUserEmail();
 
@@ -310,13 +333,15 @@ public class EmailSender {
 	}
 
 	// tested
-	public void notifyDisactivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.userDisactivated, EmailScheme.userDisactivatedSubject);
+	public void notifydeactivatedUser(String email) throws EmptyInformationException {
+		sendEmailFromAdmin(email, EmailScheme.userdeactivated, EmailScheme.userdeactivatedSubject);
 	}
 
 	// tested
 	public void notifyActivatedUser(String email) throws EmptyInformationException {
-		sendEmailFromAdmin(email, EmailScheme.userActivated, EmailScheme.userActivatedSubject);
+		System.out.println(getUserActivatedMessage());
+		
+		sendEmailFromAdmin(email, getUserActivatedMessage(), EmailScheme.userActivatedSubject);
 	}
 
 	public String requestToUnsubscribe(String email) {// TODO*: test
@@ -328,16 +353,27 @@ public class EmailSender {
 				email);
 	}
 
+	public boolean sendOtp(String email, String otp) throws EmailException {
+
+		String subject = "Your Login Code";// put into EmailScheme
+
+		String emailText = "Your one-time login code is: <b>" + otp + "</b>. <br> Please enter this code on the website to continue. <br> <br> If you did not attempt to log in, you can safely ignore this email.";
+		// put this into a file and make much nicer!
+
+		try {
+			sendEmail(createMimeMessage(sessionProvider.getSession(), subject, emailText, email, null, null, null));
+		} catch (Exception e) {
+			throw new EmailException(String.format("Could not send otp email to %s", email));
+		}
+
+		return true;
+
+	}
+
 	private String concatAdminMessage(String adminMessage, String emailText) {
 		// adding admin message before name and bolding it according to settings in
 		// EmailScheme.
 		return String.format(EmailScheme.boldFirstMessage, adminMessage, emailText);
-	}
-
-	private String concatAdminMessageAfter(String adminMessage, String emailText) {
-		// adding admin message after name and bolding it according to settings in
-		// EmailScheme.
-		return String.format(EmailScheme.boldSecondMessage, emailText, adminMessage);
 	}
 
 	private String setUnsubscribeMessage(String email) {
@@ -349,17 +385,42 @@ public class EmailSender {
 	}
 
 	public String getLinkToExtend(Davenfor davenfor) {
-		long week = utilities.getDaysInMs(7);
-		Date expiration = new Date(new Date().getTime() + week);
-		return String.format(client + linkToExtendClient, davenfor.getId(),
-				URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
-				jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration));
+		long fiveDays = utilities.getDaysInMs(5);
+		Date expiration = new Date(new Date().getTime() + fiveDays);
+		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
+		return String.format(server + linkToExtendServer, davenfor.getId(), token);
+		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
 
 	public String getLinkToDelete(Davenfor davenfor) {
-		long week = utilities.getDaysInMs(7);
-		Date expiration = new Date(new Date().getTime() + week);
-		return String.format(client + linkToRemoveClient, davenfor.getId(),
-				jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration));
+		long fiveDays = utilities.getDaysInMs(5);
+		Date expiration = new Date(new Date().getTime() + fiveDays);
+		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
+		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
+		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
+
+	public String getLinkToRepost(Davenfor davenfor) {
+		long twoWeeks = utilities.getDaysInMs(14);
+		Date expiration = new Date(new Date().getTime() + twoWeeks);
+		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
+		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
+		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
+	}
+	
+	public String getUserActivatedMessage() {
+	    return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br><br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
+	            + adminEmail + ".<br><br>" + getUnsubscribeLine();
+	}
+
+	
+	public String getUnsubscribeLine() {
+		String linkToUnsubscribe = client + "/unsubscribe";
+		return String.format(unsubscribeLine, linkToUnsubscribe);
+		
+	}
+	
+	public final String unsubscribeLine = "To unsubscribe from the Emek Hafrashat Challah Davening list, click <a href='%s'>HERE</a>";
+
+
 }

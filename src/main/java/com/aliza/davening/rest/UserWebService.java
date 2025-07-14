@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -28,6 +29,8 @@ import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
 import com.aliza.davening.exceptions.ObjectNotFoundException;
 import com.aliza.davening.exceptions.PermissionException;
+import com.aliza.davening.security.JwtUtils;
+import com.aliza.davening.security.LoginRequest;
 import com.aliza.davening.services.EmailSender;
 import com.aliza.davening.services.UserService;
 
@@ -38,16 +41,19 @@ import com.aliza.davening.services.UserService;
 public class UserWebService {
 
 	public final String client = SchemeValues.client;
-	
+
 	@Autowired
 	UserService userService;
 
 	@Autowired
 	EmailSender emailSender;
 
+	@Autowired
+	JwtUtils jwtUtils;
+
 	// tested
 	@RequestMapping(path = "getmynames/{email}")
-	public List<Davenfor> getUserDavenfors(@PathVariable String email) {
+	public List<Davenfor> getUserDavenfors(@PathVariable String email) throws ObjectNotFoundException {
 		return userService.getAllUserDavenfors(email);
 	}
 
@@ -100,5 +106,30 @@ public class UserWebService {
 		Map<String, String> response = new HashMap<>();
 		response.put("message", message);
 		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping("request-otp")
+	public ResponseEntity<?> requestOtp(@RequestBody Map<String, String> request) {
+		String email = request.get("email");
+		try {
+			userService.setNewOtp(email);
+			return ResponseEntity.ok().build();
+		} catch (EmailException e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+		} catch (ObjectNotFoundException e) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + e.getMessage());
+		}
+	}
+
+	@PostMapping("verify-otp")
+	public ResponseEntity<List<Davenfor>> verifyOtp(@RequestBody LoginRequest request) {
+		try {
+			userService.verifyOtp(request.getUsername(), request.getPassword());
+			return ResponseEntity.ok(userService.getAllUserDavenfors(request.getUsername()));
+		} catch (ObjectNotFoundException ex) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		} catch (PermissionException ex) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+		}
 	}
 }
