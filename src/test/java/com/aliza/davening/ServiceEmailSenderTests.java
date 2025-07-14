@@ -134,12 +134,12 @@ public class ServiceEmailSenderTests {
 
 	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshua1 = new Davenfor(4, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
-			null, null, true, null, null, null, null, null);
+	public static Davenfor dfYeshua1 = new Davenfor(4, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה",
+			"Moshe ben Sara", null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira",
-			null, null, true, null, null, null, null, null);
+	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה",
+			"Amram ben Shira", null, null, true, null, null, null, null, null);
 	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @EmailSenderTest unexpected Exception: ";
@@ -267,7 +267,8 @@ public class ServiceEmailSenderTests {
 		Weekly info = new Weekly("Vayeshev", "וישב", 5L, "YESHUA_AND_PARNASSA", "special information");
 
 		try {
-			when(davenforRep.findAllDavenforByCategory(YESHUA_AND_PARNASSA.toString())).thenReturn(Collections.emptyList());
+			when(davenforRep.findAllDavenforByCategory(YESHUA_AND_PARNASSA.toString()))
+					.thenReturn(Collections.emptyList());
 
 			exception = assertThrows(EmptyInformationException.class, () -> {
 				emailSender.sendOutWeekly(info);
@@ -335,7 +336,8 @@ public class ServiceEmailSenderTests {
 		}
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
-		when(davenforRep.findAllDavenforByCategory("YESHUA_AND_PARNASSA")).thenReturn(Arrays.asList(dfYeshua1, dfYeshua2));
+		when(davenforRep.findAllDavenforByCategory("YESHUA_AND_PARNASSA"))
+				.thenReturn(Arrays.asList(dfYeshua1, dfYeshua2));
 
 		Weekly info = new Weekly(null, null, 5L, "YESHUA_AND_PARNASSA", "special information");
 
@@ -347,7 +349,8 @@ public class ServiceEmailSenderTests {
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();
 
 			assertEquals(3, receivedMessages.length);
-			assertTrue(receivedMessages[2].getSubject().contains("Emek Hafrashat Challah Davening list for week of: Toldot"));
+			assertTrue(receivedMessages[2].getSubject()
+					.contains("Emek Hafrashat Challah Davening list for week of: Toldot"));
 
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("special information"));
 
@@ -408,7 +411,6 @@ public class ServiceEmailSenderTests {
 //			when(davenforRep.findAllDavenforByCategory(REFUA.toString())).thenReturn(Arrays.asList(dfRefua));
 //			when(davenforRep.findAllDavenforByCategory(YESHUAH.toString()))
 //					.thenReturn(Arrays.asList(dfYeshua1, dfYeshua2));
-//			System.out.println(davenforRep.findAll());
 //			emailSender.sendSimplifiedWeekly();
 //
 //			// Verify that the email was sent
@@ -475,10 +477,10 @@ public class ServiceEmailSenderTests {
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[0].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Please daven now for <b>Avraham ben Sara"));
 			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Testnote")); //titlecased
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Testnote")); // titlecased
 			assertEquals("Please daven for Avraham ben Sara", receivedMessages[2].getSubject());
 			assertTrue(GreenMailUtil.getBody(receivedMessages[2]).contains("Please daven now for <b>Avraham ben Sara"));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[2]).contains("Testnote")); //titlecased
+			assertTrue(GreenMailUtil.getBody(receivedMessages[2]).contains("Testnote")); // titlecased
 			greenMail.stop();
 
 			// need to stop and start, otherwise receivedMessages adds on also previous
@@ -581,18 +583,17 @@ public class ServiceEmailSenderTests {
 			assertEquals(1, receivedMessages.length);
 			assertEquals("user1@gmail.com",
 					(receivedMessages[0].getRecipients(MimeMessage.RecipientType.TO)[0]).toString());
-			assertTrue(receivedMessages[0].getSubject().contains("Action required - Is this name still relevant? (Internal code:"));
-			System.out.println(GreenMailUtil.getBody(receivedMessages[0]).toString());
+			assertTrue(receivedMessages[0].getSubject()
+					.contains("Action required - Is this name still relevant? (Internal code:"));
 
-			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("Yes")); // extend button
 			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("No")); // delete button
-			System.out.println(GreenMailUtil.getBody(receivedMessages[0]));
-			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("/dlist/direct/delete/4/ABCdef"));// token info.
-																										// 3D is
-																										// escaping
-																										// literal for
-																										// '='
+			assertTrue(GreenMailUtil.getBody(receivedMessages[0]).contains("/dlist/direct/delete/4/ABCdef"));// token
+																												// info.
+			// 3D is
+			// escaping
+			// literal for
+			// '='
 
 		} catch (MessagingException e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());

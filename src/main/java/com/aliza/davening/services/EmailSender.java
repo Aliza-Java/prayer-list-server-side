@@ -152,7 +152,7 @@ public class EmailSender {
 			if (allRecipients.size() > 1)
 				additionalMessage = String.format("(and %d more) ", allRecipients.size() - 1);
 
-			System.out.println(String.format("Email to %s %ssent successfully!", allRecipients.get(0).toString(),
+			System.out.println(String.format("Email to %s %s sent successfully!", allRecipients.get(0).toString(),
 					additionalMessage));
 
 		} catch (MessagingException e) {

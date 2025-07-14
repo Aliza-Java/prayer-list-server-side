@@ -236,7 +236,6 @@ public class IntegrationTests {
 	@Order(7)
 	public void testDeleteDavenfor() {
 		List<Davenfor> davenfors = davenforRepository.findAll();
-		System.out.println(davenfors);
 		try {
 			mockMvc.perform(delete("/user/delete/{id}/{email}", 3L, "user2@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))

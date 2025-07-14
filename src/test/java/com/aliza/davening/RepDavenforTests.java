@@ -125,8 +125,6 @@ public class RepDavenforTests {
 		davenforRep.save(df3);
 		davenforRep.save(df4);
 
-		System.out.println(davenforRep.findAll());
-		
 		List<Davenfor> retrieved = davenforRep.findAllDavenforByUserEmail("user1@gmail.com");
 		assertEquals(3, retrieved.size());
 	}

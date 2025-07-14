@@ -106,7 +106,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(1)
 	public void getAllSubmitterDavenforsTest() throws ObjectNotFoundException {
-		System.out.println("Test 1");
 		// service returns davenfors fetched from repository
 		when(davenforRep.findAllDavenforByUserEmail(submitterEmail)).thenReturn(getDfList());
 		List<Davenfor> dfs = (userService.getAllUserDavenfors(submitterEmail));
@@ -127,7 +126,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(2)
 	public void addDavenforTest() {
-		System.out.println("Test 2");
 		Davenfor dfShidduchim = getDf(catShidduchim);
 		Davenfor dfRefua = getDf(catRefua);
 		Davenfor dfBanim = getDf(catBanim);
@@ -163,7 +161,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(3)
 	public void updateDavenforTest() {
-		System.out.println("Test 3");
 		try {
 			// no davenfor throws exception
 			Exception exception = assertThrows(EmptyInformationException.class, () -> {
@@ -228,7 +225,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(4)
 	public void extendDavenforTest() {
-		System.out.println("Test 4");
 
 		try {
 			// no email throws exception
@@ -272,7 +268,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(5)
 	public void deleteDavenforTest() {
-		System.out.println("Test 5");
 
 		// davenfor not found in repository throws exception
 		Davenfor refua = getDf(catRefua);
@@ -309,7 +304,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(6)
 	public void getAllCategoriesTest() {
-		System.out.println("Test 6");
 
 		// no categories throws error
 		when(categoryRep.findAllOrderById()).thenReturn(Collections.emptyList());
@@ -329,8 +323,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(7)
 	public void existingOrNewSubmitterTest() {
-		System.out.println("Test 7");
-
 		// once new
 		when(userRep.findByEmail(submitterEmail)).thenReturn(Optional.empty());
 		assertEquals(submitterEmail, userService.existingOrNewUser(submitterEmail));
@@ -349,8 +341,6 @@ public class ServiceUserTests {
 	@Test
 	@Order(8)
 	public void getCategoryTest() {
-		System.out.println("Test 8");
-
 		Category existingCategory = new Category();
 		existingCategory.setCname(SOLDIERS);
 

@@ -105,8 +105,6 @@ public class RepCategoryTests {
 
 		Optional<Category> retrieved1 = categoryRep.findByCname(CategoryName.REFUA);
 		Optional<Category> retrieved2 = categoryRep.findByCname(CategoryName.YESHUA_AND_PARNASSA);
-		System.out.println(retrieved1);
-		System.out.println(retrieved2);
 
 		assertTrue(retrieved1.get().getCatOrder() > retrieved2.get().getCatOrder());
 	}

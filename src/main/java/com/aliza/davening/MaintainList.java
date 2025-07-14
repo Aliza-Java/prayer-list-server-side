@@ -76,7 +76,6 @@ public class MaintainList { // TODO*: tests for all these
 		List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(categoryName.toString());
 
 		System.out.println("Davenfors in question: " + relevantDavenfors.size());
-		System.out.println(relevantDavenfors);
 		for (Davenfor d : relevantDavenfors) {
 			emailSender.offerExtensionOrDelete(d);
 			System.out.println("emailed " + d.getUserEmail() + " to offerExtensionOrDelete for df id " + d.getId());

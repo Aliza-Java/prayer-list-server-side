@@ -106,7 +106,6 @@ public class UserService {
 		if (Category.isBanim(davenfor.getCategory())) {
 			if (davenfor.noSpouseInfo()) {
 				String message = "Banim category requires also a spouse name to be submitted. ";
-				System.out.println(message);
 				throw new EmptyInformationException(message);
 			} else {
 				if (davenfor.getNameEnglishSpouse() != null)
@@ -216,7 +215,6 @@ public class UserService {
 		if (Category.isBanim(updatedInfo.getCategory())) {
 			if (updatedInfo.noSpouseInfo()) {
 				String errorMessage = "Banim category requires also a spouse name to be submitted. ";
-				System.out.println(errorMessage);
 				throw new EmptyInformationException(errorMessage);
 			} else {
 				if (updatedInfo.getNameEnglishSpouse() != null)
