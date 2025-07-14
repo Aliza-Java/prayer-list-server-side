@@ -1,9 +1,6 @@
 //Scheduled actions to maintain the list
 package com.aliza.davening;
 
-import static com.aliza.davening.entities.CategoryName.BANIM;
-import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
-
 import java.util.List;
 
 import javax.transaction.Transactional;
