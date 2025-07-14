@@ -89,7 +89,7 @@ public class EmailScheme {
 	// any category)
 	public static final String urgentDavenforEmailBanim = "Please daven now for <b>%s - %s</b> and <b>%s - %s</b>, for: <b>%s</b>. <br>";
 
-	public static final String urgentDavenforEmailText = "Please daven now for <b>%s - %s</b>, for: <b>%s<b/>. <br>";
+	public static final String urgentDavenforEmailText = "Please daven now for <b>%s - %s</b> for: <b>%s<b/>. <br>";
 
 	// The text in email informing admin of an update made to a name.
 	public static final String informAdminOfUpdate = "<b>%s</b> has just updated the name: <br><b>%s <br> %s </b><br>  in the category: <br> <b>%s. </b><br><br> You might want to check that it was properly updated. ";
