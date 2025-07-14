@@ -207,7 +207,7 @@ public class Utilities {
 	// program...)
 	public String setWeeklyAdminReminderMessage() {
 
-		Date expiry = new Date(System.currentTimeMillis() + 24 * 60 * 60 * 1000); // 24 hours ahead
+		Date expiry = new Date(System.currentTimeMillis() + (48 * 60 * 60 * 1000)); // 48 hours ahead
 		String token = jwtUtils.generateDirectAdminToken(adminEmail, expiry);
 
 		// Prepare buttons
@@ -218,7 +218,7 @@ public class Utilities {
 		String button2 = createButton(String.format(linkToSendList, token, adminEmail.trim()), "#32a842",
 				"Send out the list");
 
-		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + "<tr>" + button2
+		String buttonArea = "<table cellspacing='2' cellpadding='2'>	<tbody>	<tr> " + button1 + button2
 				+ "</tr></tbody></table>";
 
 		String message = "This is a reminder to send out the Hafrashat Challah Weekly Davening list."

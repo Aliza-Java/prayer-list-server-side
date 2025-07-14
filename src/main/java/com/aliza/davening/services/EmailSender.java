@@ -355,9 +355,9 @@ public class EmailSender {
 
 	public boolean sendOtp(String email, String otp) throws EmailException {
 
-		String subject = "Your login code";// put into EmailScheme
+		String subject = "Your Login Code";// put into EmailScheme
 
-		String emailText = "Welcome! <br> Your Code is: <b>" + otp + "</b>. Please enter it on the website page.";
+		String emailText = "Your one-time login code is: <b>" + otp + "</b>. <br> Please enter this code on the website to continue. <br> <br> If you did not attempt to log in, you can safely ignore this email.";
 		// put this into a file and make much nicer!
 
 		try {
