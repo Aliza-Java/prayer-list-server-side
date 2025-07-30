@@ -1,6 +1,5 @@
 package com.aliza.davening.rest;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -60,9 +59,9 @@ public class UserWebService {
 	// tested
 	@PostMapping(path = "{email}")
 	public boolean addDavenfor(@RequestBody Davenfor davenfor, @PathVariable String email)
-			throws EmptyInformationException, ObjectNotFoundException, IOException, EmailException {// TODO*: add tests
-																									// for last 3
-																									// exceptions
+			throws EmptyInformationException, ObjectNotFoundException, EmailException {// TODO*: add tests
+																						// for last 3
+																						// exceptions
 		return userService.addDavenfor(davenfor, email);
 	}
 
@@ -81,7 +80,7 @@ public class UserWebService {
 		userService.extendDavenfor(davenforId, email);
 	}
 
-	@DeleteMapping("delete/{id}/{email}") //this method is called from the website
+	@DeleteMapping("delete/{id}/{email}") // this method is called from the website
 	public List<Davenfor> deleteDavenfor(@PathVariable long id, @PathVariable("email") String email)
 			throws ObjectNotFoundException, PermissionException {
 		return userService.deleteDavenfor(id, email, false);

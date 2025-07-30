@@ -2,9 +2,6 @@ package com.aliza.davening.services;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -80,7 +77,7 @@ public class EmailSender {
 
 	@Value("${link.to.remove}")
 	String linkToRemoveServer;
-	
+
 	@Value("${link.to.unsubscribe}")
 	String linkToUnsubscribe;
 
@@ -90,6 +87,7 @@ public class EmailSender {
 		// Create the email message
 		MimeMessage message = new MimeMessage(session);
 		try {
+			message.setFrom(new InternetAddress("davening.list@gmail.com", "Emek Hafrashat Challah Davening List")); //*TODO in future - put this in env file
 			message.setRecipients(Message.RecipientType.TO, to);
 			if (bccList != null) {
 				bccList.forEach(bcc -> {
@@ -276,12 +274,13 @@ public class EmailSender {
 	public void notifyUserDeletedName(Davenfor davenfor) {
 		String link = getLinkToExtend(davenfor);
 		String button = utilities.createSingleButton(link, "#32a842", "This name is still relevant");
-		String name = davenfor.getNameEnglish().trim().length() == 0 ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
+		String name = davenfor.getNameEnglish().trim().length() == 0 ? davenfor.getNameHebrew()
+				: davenfor.getNameEnglish();
 		String message = String.format(EmailScheme.nameAutoDeletedUserMessage, name, davenfor.getCategory(), button);
 		String subject = String.format(EmailScheme.nameAutoDeletedUserSubject, jwtUtils.generateOtp());
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message,
-				davenfor.getUserEmail(), null, null, null));
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, davenfor.getUserEmail(), null, null,
+				null));
 	}
 
 	// tested
@@ -289,7 +288,7 @@ public class EmailSender {
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, adminEmail, null, null, null));
 	}
 
-	public boolean sendConfirmationEmail(long davenforId) throws EmailException, IOException, ObjectNotFoundException {
+	public boolean sendConfirmationEmail(long davenforId) throws EmailException, ObjectNotFoundException {
 
 		Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
 		if (!optionalDavenfor.isPresent()) {
@@ -305,9 +304,7 @@ public class EmailSender {
 		String name = confirmedDavenfor.getNameEnglish().isEmpty() ? confirmedDavenfor.getNameHebrew()
 				: confirmedDavenfor.getNameEnglish();
 
-		String emailText = new String(Files.readAllBytes(Paths.get(EmailScheme.confirmationEmailTextLocation)),
-				StandardCharsets.UTF_8);
-		String personalizedEmailText = String.format(emailText, name,
+		String personalizedEmailText = String.format(EmailScheme.submitEmailText, name,
 				Category.getCategory(confirmedDavenfor.getCategory()).getCname().getVisual(),
 				getLinkToExtend(confirmedDavenfor), getLinkToDelete(confirmedDavenfor));
 
@@ -324,8 +321,10 @@ public class EmailSender {
 	// tested
 	public void offerExtensionOrDelete(Davenfor davenfor) {
 
-		//this 'code' is just for differentiating emails without sending df-id or showing name in the subject
-		String subject = String.format("%s (Internal code: %s)", EmailScheme.expiringNameSubject, jwtUtils.generateOtp());
+		// this 'code' is just for differentiating emails without sending df-id or
+		// showing name in the subject
+		String subject = String.format("%s (Internal code: %s)", EmailScheme.expiringNameSubject,
+				jwtUtils.generateOtp());
 		String message = String.format(utilities.setExpiringNameMessage(davenfor));
 		String recipient = davenfor.getUserEmail();
 
@@ -340,7 +339,7 @@ public class EmailSender {
 	// tested
 	public void notifyActivatedUser(String email) throws EmptyInformationException {
 		System.out.println(getUserActivatedMessage());
-		
+
 		sendEmailFromAdmin(email, getUserActivatedMessage(), EmailScheme.userActivatedSubject);
 	}
 
@@ -357,7 +356,8 @@ public class EmailSender {
 
 		String subject = "Your Login Code";// put into EmailScheme
 
-		String emailText = "Your one-time login code is: <b>" + otp + "</b>. <br> Please enter this code on the website to continue. <br> <br> If you did not attempt to log in, you can safely ignore this email.";
+		String emailText = "Your one-time login code is: <b>" + otp
+				+ "</b>. <br> Please enter this code on the website to continue. <br> <br> If you did not attempt to log in, you can safely ignore this email.";
 		// put this into a file and make much nicer!
 
 		try {
@@ -407,20 +407,17 @@ public class EmailSender {
 		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
 		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
-	
+
 	public String getUserActivatedMessage() {
-	    return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br><br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
-	            + adminEmail + ".<br><br>" + getUnsubscribeLine();
+		return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br><br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
+				+ adminEmail + ".<br><br>" + getUnsubscribeLine();
 	}
 
-	
 	public String getUnsubscribeLine() {
 		String linkToUnsubscribe = client + "/unsubscribe";
 		return String.format(unsubscribeLine, linkToUnsubscribe);
-		
+
 	}
-	
+
 	public final String unsubscribeLine = "To unsubscribe from the Emek Hafrashat Challah Davening list, click <a href='%s'>HERE</a>";
-
-
 }

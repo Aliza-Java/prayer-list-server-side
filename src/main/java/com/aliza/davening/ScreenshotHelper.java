@@ -12,14 +12,9 @@ import ru.yandex.qatools.ashot.shooting.ShootingStrategies;
 
 public class ScreenshotHelper {
     public static void captureScreenshot(WebDriver driver, String filePath) throws Exception {
-//        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-//        Files.copy(screenshot.toPath(), new File(filePath).toPath());
-        
         Screenshot screenshot = new AShot()
         	    .shootingStrategy(ShootingStrategies.viewportPasting(1000))
         	    .takeScreenshot(driver);
-        	ImageIO.write(screenshot.getImage(), "PNG", new File(filePath));
-        
-        
+        	ImageIO.write(screenshot.getImage(), "PNG", new File(filePath));        
     }
 }
