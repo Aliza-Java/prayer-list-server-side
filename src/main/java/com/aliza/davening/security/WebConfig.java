@@ -9,7 +9,10 @@ public class WebConfig implements WebMvcConfigurer {
 
 	@Override
 	public void addCorsMappings(CorsRegistry registry) {
-		registry.addMapping("/**").allowedOrigins("http://localhost:4200") // Allow Angular app
+		registry.addMapping("/**").allowedOrigins("https://localhost:4200",
+				"http://localhost:4200",
+                "https://www.emekhafrashatchallah.com", 
+                "https://emekhafrashatchallah.com") // Allow Angular app in all envs
 				.allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS").allowCredentials(true)
                  .allowedHeaders("*")
                  .exposedHeaders("Token-Expired") 

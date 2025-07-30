@@ -70,7 +70,6 @@ public class EmailScheme {
 
 	public static final String emailBodyStyle = "<div style='font-family: Arial, sans-serif; font-size: 18px; color: #000000; line-height: 2;'>%s</div>";
 
-
 	// Subject includes the category
 	public static final String weeklyEmailSubject = "Emek Hafrashat Challah Davening list for week of: %s";
 
@@ -78,8 +77,6 @@ public class EmailScheme {
 	public static final String adminMessageSubject = "Message from Emek Hafrashat Challah Davening list admin";
 
 	public static final String userdeactivated = "We are confirming that your participation on the Hafrashat Challah Davening list has been deactivated. <br><br> You will no longer receive emails regarding the Hafrashat Challah Davening list. <br><br>If you think you did not deactivate your participation on the list, please contact your list admin immediately. ";
-
-
 
 	public static final String userdeactivatedSubject = "You have been unsubscribed";
 
@@ -129,11 +126,12 @@ public class EmailScheme {
 
 	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, the name for Davening <b>%s</b> has been removed from our <b>%s</b> category as part of our cleanup process. <br> "
 			+ "No worries though — if you'd like to repost this name (although it might not be included in this week's list), you can do so easily by clicking the button below: <br>"
-			+ "<div>%s </div>" + "Let us know if you need any help! <br>" + "The Emek Hafrashat Challah Davening List team";
+			+ "<div>%s </div>" + "Let us know if you need any help! <br>"
+			+ "The Emek Hafrashat Challah Davening List team";
 
 	public static final String unconfirmedSubject = "Names automatically deleted this week";
 
-	// Links inserted to email allowing submitters to extend or delete names. URL
+	public static final String submitEmailText = "Thank you for submitting <b>%s</b> to the Hafrashat Challah Davening list, in the <b>%s</b> category. <br> <br> In order to keep our lists relevant, you will receive reminder emails periodically. You can then choose to keep this name on the list or not.";
 	// will change when uploaded to cloud
 	public static String linkToExtend = "extend/%s?email=%s";
 	public static String linkToDelete = "/guest/delete?id=%d&token=%s";
@@ -148,7 +146,8 @@ public class EmailScheme {
 		sb.append("The following names in the ");
 		sb.append(category);
 		sb.append(" have been automatically removed this week, as they were not confirmed by users: <br>");
-		names.forEach(n -> sb.append((n.getNameEnglish().trim().length() == 0 ? n.getNameHebrew() : n.getNameEnglish()) + "<br>"));
+		names.forEach(n -> sb
+				.append((n.getNameEnglish().trim().length() == 0 ? n.getNameHebrew() : n.getNameEnglish()) + "<br>"));
 
 		return sb.toString();
 	}
@@ -180,7 +179,7 @@ public class EmailScheme {
 
 		return sb.toString();
 	}
-	
+
 	private static String getNameValue(String name) {
 		if (name.trim() == "")
 			return "(blank)";

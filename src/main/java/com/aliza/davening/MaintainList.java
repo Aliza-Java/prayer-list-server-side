@@ -47,7 +47,7 @@ public class MaintainList { // TODO*: tests for all these
 	private long adminId;
 
 	// Every Sunday at 2 a.m. changes category and parasha
-	@Scheduled(cron = "0 0 2 * * SUN")
+	@Scheduled(cron = "0 0 2 * * SUN", zone = "Asia/Jerusalem")
 	public void updateNewWeek() {
 		System.out.println("Begin updateNewWeek().  Current category: " + adminService.findCurrentCategory()
 				+ ", current parasha: " + adminService.findCurrentParasha());
@@ -62,7 +62,7 @@ public class MaintainList { // TODO*: tests for all these
 	// for each category going to be sent out, Sends email to davenfor's submitter
 	// to ask if name in category is still relevant,
 	// Fires right after changing category and parasha
-	@Scheduled(cron = "0 5 2 * * SUN")
+	@Scheduled(cron = "0 5 2 * * SUN", zone = "Asia/Jerusalem")
 	public void offerExtensionOrDelete() {
 		System.out.println("Begin offerExtensionOrDelete()");
 		// List<Davenfor> expiredDavenfors =
@@ -85,7 +85,7 @@ public class MaintainList { // TODO*: tests for all these
 
 	// 'Deletes' davenfors which have not been confirmed, according to category that
 	// will be sent to admin
-	@Scheduled(cron = "0 55 7 * * WED")
+	@Scheduled(cron = "0 55 7 * * WED", zone = "Asia/Jerusalem")
 	@Transactional
 	public void deleteUnconfirmed() {
 		// TODO*: when add more admins, will need to add admin_id to each davenfor
@@ -114,7 +114,7 @@ public class MaintainList { // TODO*: tests for all these
 
 	// Every Wednesday at 7 a.m. an email will be sent to Admin with a link to see
 	// list and send out, with link to his login page.
-	@Scheduled(cron = "0 0 8 * * WED")
+	@Scheduled(cron = "0 0 8 * * WED", zone = "Asia/Jerusalem")
 	public void remindAdmin() {
 		System.out.println("Begin remindAdmin()");
 		emailSender.informAdmin(EmailScheme.weeklyAdminReminderSubject, utilities.setWeeklyAdminReminderMessage());

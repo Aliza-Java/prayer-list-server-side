@@ -2,6 +2,7 @@
 package com.aliza.davening;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -83,20 +84,17 @@ public class Utilities {
 		String fileNameInFolder = "builtFiles/" + fileName;
 		Path filePath = Paths.get(fileNameInFolder);
 
-		// moving from manual chrome extraction to automatic
-//		String driverPath = null;
-//		try {
-//			driverPath = ChromeDriverUtil.extractChromeDriver();
-//		} catch (Exception e) {
-//			System.out.println("There was a problem extracting ChromeDriver: " + e.getMessage());
-//			throw new EmailException("There was a problem creating the list image");
-//		}
-//		System.setProperty("webdriver.chrome.driver", driverPath);
+		// Ensure the directory exists
+		try {
+			Files.createDirectories(filePath.getParent());
+		} catch (IOException e1) {
+			System.out.println("Unable to create parent file 'builtFiles'.");
+		}
 
 		// Set up headless Chrome
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
-
+		
 		// WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this
 		// version specification in case it doesn't detect version automatically
 		WebDriverManager.chromedriver().setup();
@@ -116,6 +114,7 @@ public class Utilities {
 		driver.manage().window().setSize(new Dimension(width, (int) height)); // Adjust height dynamically
 
 		System.out.println("Computed Page Height: " + height);
+		System.out.println("Page Height: " + width);		
 
 		try {
 			Thread.sleep(1000);
@@ -126,6 +125,7 @@ public class Utilities {
 		try {
 			ScreenshotHelper.captureScreenshot(driver, fileNameInFolder);
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("There was an error with capturing the screenshot: " + e.getMessage());
 		}
 

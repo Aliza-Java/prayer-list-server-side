@@ -1,6 +1,5 @@
 package com.aliza.davening.services;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
@@ -89,7 +88,7 @@ public class UserService {
 
 	// tested
 	public boolean addDavenfor(Davenfor davenfor, String userEmail)
-			throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {
+			throws EmptyInformationException, EmailException, ObjectNotFoundException {
 
 		Category category = Category.getCategory(davenfor.getCategory());
 		if (category == null) {
