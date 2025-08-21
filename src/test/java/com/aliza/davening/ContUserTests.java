@@ -124,7 +124,7 @@ public class ContUserTests {
 	@Test
 	@Order(2)
 	public void testAddDavenfor()
-			throws EmptyInformationException, EmailException, IOException, ObjectNotFoundException {// TODO*: add tests
+			throws EmptyInformationException, EmailException, ObjectNotFoundException {// TODO*: add tests
 																									// for last 3
 																									// exceptions
 		// todo* - fix. check if still true: This exception should no longer be thrown.
