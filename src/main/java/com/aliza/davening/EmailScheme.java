@@ -96,10 +96,10 @@ public class EmailScheme {
 	public static final String weeklyFileName = "Hafrashat Challah Davening List %s";
 
 	// putting one message first, in bold, with new line before other text.
-	public static final String boldFirstMessage = "<h5>%s</h5>%s";
+	public static final String boldFirstMessage = "<h4>%s</h4>%s"; //todo* in future - make not bold
 
 	// putting second message, in bold, on new line after other text.
-	public static final String boldSecondMessage = "%s<h5>%s</h5>";
+	public static final String boldSecondMessage = "%s<h4>%s</h4>";
 
 	public static final String confirmationEmailSubject = "Hafrashat Challah Davening list submission";
 
