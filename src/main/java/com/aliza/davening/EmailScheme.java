@@ -114,7 +114,8 @@ public class EmailScheme {
 
 	public static final String weeklyAdminReminderSubject = "Hafrashat Challah Davening list reminder: Send out the weekly list!";
 
-	public static final String expiringNameSubject = "Action required - Is this name still relevant?";
+	public static final String expiringNameSubjectOne = "Action required - Is this name still relevant?";
+	public static final String expiringNameSubjectMultiple = "Action required - Are these names still relevant?";
 
 	public static final String unsubscribeSubject = "Unsubscribe - action required";
 

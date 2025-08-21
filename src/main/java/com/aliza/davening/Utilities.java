@@ -94,7 +94,7 @@ public class Utilities {
 		// Set up headless Chrome
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
-		
+
 		// WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this
 		// version specification in case it doesn't detect version automatically
 		WebDriverManager.chromedriver().setup();
@@ -114,7 +114,7 @@ public class Utilities {
 		driver.manage().window().setSize(new Dimension(width, (int) height)); // Adjust height dynamically
 
 		System.out.println("Computed Page Height: " + height);
-		System.out.println("Page Height: " + width);		
+		System.out.println("Page Width: " + width);
 
 		try {
 			Thread.sleep(1000);
@@ -231,26 +231,29 @@ public class Utilities {
 		return message;
 	}
 
-	public String setExpiringNameMessage(Davenfor davenfor) {
+	public String setExpiringNameMessage(List<Davenfor> davenfors) {
 
-		// Creating the button 'components' as html tds
-		String button1 = createButton(emailSender.getLinkToExtend(davenfor), "#32a842", "Yes");
-		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "No");
-
-		// Inserting the button tds to an html table
-		String buttonArea = "<table cellspacing='6' cellpadding='2'> <tbody>	<tr> " + button1 + button2
-				+ "</tr></tbody></table>";
-
-		String categoryName = Category.getCategory(davenfor.getCategory()).getCname().getVisual();
+		String categoryName = Category.getCategory(davenfors.get(0).getCategory()).getCname().getVisual();
+		String name;
+		StringBuilder sb = new StringBuilder(String.format(
+				" <br>This week, the list being sent out will include names under the <b>%s</b> category.  In order to keep our list relevant, please confirm:",
+				categoryName));
+		sb.append("<table cellspacing='6' cellpadding='2'> <tbody> ");
+		for (Davenfor d : davenfors) {
+			name = d.getNameEnglish().trim().length() == 0 ? d.getNameHebrew() : d.getNameEnglish();
+			sb.append("<tr><td colspan='2' style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
+			sb.append(String.format("Should we continue davening for <b>%s</b>?", name));
+			sb.append("</td></tr>");			
+			sb.append("<tr>");
+			sb.append(createButton(emailSender.getLinkToExtend(d), "#32a842", "Yes"));
+			sb.append(createButton(emailSender.getLinkToDelete(d), "#d10a3f", "No"));
+			sb.append("</tr>");
+		}
 		
-		// building the email message with the button area as a table at the bottom
-		String message = String.format("We've been davening for <b>%s</b> for <b>%s</b>.", davenfor.getNameEnglish(),
-				categoryName)
-				+ String.format(" <br>This week, the list being sent out will include names under the %s category.  In order to keep our list relevant, please confirm: Should we continue davening for <b>%s</b>?", categoryName, davenfor.getNameEnglish())
-				+ buttonArea
-				+ "<br> <b>Important: If we receive no response, the name will automatically be removed from the list.</b>";
+		sb.append("</table>");
+		sb.append("<b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
 
-		return message;
+		return sb.toString();
 	}
 
 	public String createWeeklyHtml(Category category, String pEnglish, String pHebrew, boolean preview)
@@ -280,11 +283,11 @@ public class Utilities {
 		String hafrashatChallahEng = EmailScheme.hafrashatChallahEnglish;
 		if (pEnglish != null && pEnglish.length() > 0)
 			hafrashatChallahEng += " - ".concat(pEnglish);
-		
+
 		String hafrashatChallahHeb = EmailScheme.hafrashatChallahHebrew;
 		if (pHebrew != null && pHebrew.length() > 0)
 			hafrashatChallahHeb += " - ".concat(pHebrew);
-		
+
 		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, hafrashatChallahEng, hafrashatChallahHeb));
 
 		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, category.getCname().getListName(),
@@ -335,19 +338,21 @@ public class Utilities {
 
 	}
 
-	// Creates a button in a table (like 2 side by side) according to varying parameters sent in
+	// Creates a button in a table (like 2 side by side) according to varying
+	// parameters sent in
 	public String createButton(String link, String buttonColor, String buttonText) {
 		return String.format(
-				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s target='_blank'><span style='color: #ffffff;'>%s</span></a></td>",
+				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100px' height='40px'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s target='_blank'><span style='color: #ffffff;'>%s</span></a></td>",
 				buttonColor, link, buttonText);
 	}
-	
-	// Creates a single button in a wider format according to varying parameters sent in
-		public String createSingleButton(String link, String buttonColor, String buttonText) {
-			return String.format(
-					"<div style='text-align: center; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; background-color:%s; padding: 0px 20px; width: fit-content;'><a style='color: white; font-size: 20px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;' href=%s target='_blank'>%s</a></div>",
-					buttonColor, link, buttonText);
-		}
+
+	// Creates a single button in a wider format according to varying parameters
+	// sent in
+	public String createSingleButton(String link, String buttonColor, String buttonText) {
+		return String.format(
+				"<div style='text-align: center; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; background-color:%s; padding: 5px 20px; width: fit-content;'><a style='color: white; font-size: 20px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;' href=%s target='_blank'>%s</a></div>",
+				buttonColor, link, buttonText);
+	}
 
 	public String formatFileName(String weekName, String suffix) {
 		LocalDateTime now = LocalDateTime.now();
