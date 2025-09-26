@@ -91,36 +91,51 @@ public class Utilities {
 			System.out.println("Unable to create parent file 'builtFiles'.");
 		}
 
-		// Set up headless Chrome
+		// Start with minimal window size
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
+		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
+				"--window-size=670,1300");
 
-		// WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this
-		// version specification in case it doesn't detect version automatically
 		WebDriverManager.chromedriver().setup();
-		System.out.println("Inferring driver version automatically, should be at least 136");
 		WebDriver driver = new ChromeDriver(options);
 
-		// Load HTML and take a screenshot (JPEG)
+		// Load HTML content
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
 		try {
 			Thread.sleep(2000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e1) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
 
+		// Get [largest] EXACT content dimensions
 		JavascriptExecutor js = (JavascriptExecutor) driver;
-		long height = (long) js.executeScript("return document.body.scrollHeight;");
-		driver.manage().window().setSize(new Dimension(width, (int) height)); // Adjust height dynamically
+		long contentWidth = (long) js.executeScript("return Math.max(" + "document.body.scrollWidth, "
+				+ "document.body.offsetWidth, " + "document.documentElement.clientWidth, "
+				+ "document.documentElement.scrollWidth, " + "document.documentElement.offsetWidth" + ");");
 
-		System.out.println("Computed Page Height: " + height);
-		System.out.println("Page Width: " + width);
+		long contentHeight = (long) js.executeScript("return Math.max(" + "document.body.scrollHeight, "
+				+ "document.body.offsetHeight, " + "document.documentElement.clientHeight, "
+				+ "document.documentElement.scrollHeight, " + "document.documentElement.offsetHeight" + ");");
 
+		// Set window to EXACT content size
+		driver.manage().window().setSize(new Dimension((int) Math.max(contentWidth, 670),
+				(int) Math.max(calculateDocHeight(category), (int) contentHeight)));
 		try {
 			Thread.sleep(1000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e2) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
+
+		// Ensure we're at top-left
+		js.executeScript("window.scrollTo(0, 0);");
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e1) {
+			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
+		}
+
+		System.out.println("Content Width: " + contentWidth);
+		System.out.println("Content Height: " + contentHeight);
 
 		try {
 			ScreenshotHelper.captureScreenshot(driver, fileNameInFolder);
@@ -130,7 +145,6 @@ public class Utilities {
 		}
 
 		driver.quit();
-
 		return filePath.toFile();
 	}
 
@@ -241,17 +255,19 @@ public class Utilities {
 		sb.append("<table cellspacing='6' cellpadding='2'> <tbody> ");
 		for (Davenfor d : davenfors) {
 			name = d.getNameEnglish().trim().length() == 0 ? d.getNameHebrew() : d.getNameEnglish();
-			sb.append("<tr><td colspan='2' style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
+			sb.append(
+					"<tr><td colspan='2' style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
 			sb.append(String.format("Should we continue davening for <b>%s</b>?", name));
-			sb.append("</td></tr>");			
+			sb.append("</td></tr>");
 			sb.append("<tr>");
 			sb.append(createButton(emailSender.getLinkToExtend(d), "#32a842", "Yes"));
 			sb.append(createButton(emailSender.getLinkToDelete(d), "#d10a3f", "No"));
 			sb.append("</tr>");
 		}
-		
+
 		sb.append("</table>");
-		sb.append("<b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+		sb.append(
+				"<b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
 
 		return sb.toString();
 	}
@@ -372,5 +388,20 @@ public class Utilities {
 
 	public long getDaysInMs(int daysNumber) {
 		return daysNumber * 24 * 60 * 60 * 1000;
+	}
+
+	private int calculateDocHeight(Category category) {
+		int davenforAmount = davenforRepository.findAllDavenforByCategory(category.getCname().toString()).size();
+		int multiply = 1; // one line per davenfor.
+
+		if (Category.isBanim(category.getCname().toString()))
+			multiply = 2;
+
+		// row height currently
+		int rowHeight = 33;
+
+		// base amount is 200, plus 10px buffer, plus more - testing the window height
+		// buffer problem
+		return 210 + (davenforAmount * rowHeight * multiply);
 	}
 }
