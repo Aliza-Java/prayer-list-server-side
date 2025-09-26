@@ -2,6 +2,8 @@
 package com.aliza.davening;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -76,10 +78,20 @@ public class MaintainList { // TODO*: tests for all these
 		List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(categoryName.toString());
 
 		System.out.println("Davenfors in question: " + relevantDavenfors.size());
-		for (Davenfor d : relevantDavenfors) {
-			emailSender.offerExtensionOrDelete(d);
-			System.out.println("emailed " + d.getUserEmail() + " to offerExtensionOrDelete for df id " + d.getId());
+		
+		// Group the davenfors by user email
+		Map<String, List<Davenfor>> davenforsByUser = relevantDavenfors.stream()
+		    .collect(Collectors.groupingBy(Davenfor::getUserEmail));
+
+		// Send one email per user with all their davenfors
+		for (Map.Entry<String, List<Davenfor>> entry : davenforsByUser.entrySet()) {
+		    String userEmail = entry.getKey();
+		    List<Davenfor> userDavenfors = entry.getValue();
+
+		    emailSender.offerExtensionOrDelete(userDavenfors, userEmail);
+		    System.out.println(String.format("Emailed %s about %d davenfor(s)", userEmail, userDavenfors.size()));
 		}
+		
 		System.out.println("End offerExtensionOrDelete()");
 	}
 

@@ -319,16 +319,14 @@ public class EmailSender {
 	}
 
 	// tested
-	public void offerExtensionOrDelete(Davenfor davenfor) {
+	public void offerExtensionOrDelete(List<Davenfor> userDavenfors, String userEmail) {
 
 		// this 'code' is just for differentiating emails without sending df-id or
 		// showing name in the subject
-		String subject = String.format("%s (Internal code: %s)", EmailScheme.expiringNameSubject,
-				jwtUtils.generateOtp());
-		String message = String.format(utilities.setExpiringNameMessage(davenfor));
-		String recipient = davenfor.getUserEmail();
+		String subject = (userDavenfors.size() == 1) ? EmailScheme.expiringNameSubjectOne : EmailScheme.expiringNameSubjectMultiple;
+		String message = String.format(utilities.setExpiringNameMessage(userDavenfors));
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, recipient, null, null, null));
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null, null));
 	}
 
 	// tested
@@ -409,7 +407,8 @@ public class EmailSender {
 	}
 
 	public String getUserActivatedMessage() {
-		return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br><br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
+		String button = utilities.createSingleButton(client, "#32a842", "Take me to the website!");
+		return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br>" + button + "<br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
 				+ adminEmail + ".<br><br>" + getUnsubscribeLine();
 	}
 

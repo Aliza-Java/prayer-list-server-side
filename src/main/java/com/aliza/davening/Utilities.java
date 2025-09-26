@@ -91,36 +91,51 @@ public class Utilities {
 			System.out.println("Unable to create parent file 'builtFiles'.");
 		}
 
-		// Set up headless Chrome
+		// Start with minimal window size
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless", "--disable-gpu", "--window-size=600,1080");
-		
-		// WebDriverManager.chromedriver().driverVersion("136.0.0").setup(); //Add this
-		// version specification in case it doesn't detect version automatically
+		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
+				"--window-size=670,1300");
+
 		WebDriverManager.chromedriver().setup();
-		System.out.println("Inferring driver version automatically, should be at least 136");
 		WebDriver driver = new ChromeDriver(options);
 
-		// Load HTML and take a screenshot (JPEG)
+		// Load HTML content
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
 		try {
 			Thread.sleep(2000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e1) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
 
+		// Get [largest] EXACT content dimensions
 		JavascriptExecutor js = (JavascriptExecutor) driver;
-		long height = (long) js.executeScript("return document.body.scrollHeight;");
-		driver.manage().window().setSize(new Dimension(width, (int) height)); // Adjust height dynamically
+		long contentWidth = (long) js.executeScript("return Math.max(" + "document.body.scrollWidth, "
+				+ "document.body.offsetWidth, " + "document.documentElement.clientWidth, "
+				+ "document.documentElement.scrollWidth, " + "document.documentElement.offsetWidth" + ");");
 
-		System.out.println("Computed Page Height: " + height);
-		System.out.println("Page Height: " + width);		
+		long contentHeight = (long) js.executeScript("return Math.max(" + "document.body.scrollHeight, "
+				+ "document.body.offsetHeight, " + "document.documentElement.clientHeight, "
+				+ "document.documentElement.scrollHeight, " + "document.documentElement.offsetHeight" + ");");
 
+		// Set window to EXACT content size
+		driver.manage().window().setSize(new Dimension((int) Math.max(contentWidth, 670),
+				(int) Math.max(calculateDocHeight(category), (int) contentHeight)));
 		try {
 			Thread.sleep(1000);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException e2) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
+
+		// Ensure we're at top-left
+		js.executeScript("window.scrollTo(0, 0);");
+		try {
+			Thread.sleep(500);
+		} catch (InterruptedException e1) {
+			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
+		}
+
+		System.out.println("Content Width: " + contentWidth);
+		System.out.println("Content Height: " + contentHeight);
 
 		try {
 			ScreenshotHelper.captureScreenshot(driver, fileNameInFolder);
@@ -130,7 +145,6 @@ public class Utilities {
 		}
 
 		driver.quit();
-
 		return filePath.toFile();
 	}
 
@@ -231,26 +245,31 @@ public class Utilities {
 		return message;
 	}
 
-	public String setExpiringNameMessage(Davenfor davenfor) {
+	public String setExpiringNameMessage(List<Davenfor> davenfors) {
 
-		// Creating the button 'components' as html tds
-		String button1 = createButton(emailSender.getLinkToExtend(davenfor), "#32a842", "Yes");
-		String button2 = createButton(emailSender.getLinkToDelete(davenfor), "#d10a3f", "No");
+		String categoryName = Category.getCategory(davenfors.get(0).getCategory()).getCname().getVisual();
+		String name;
+		StringBuilder sb = new StringBuilder(String.format(
+				" <br>This week, the list being sent out will include names under the <b>%s</b> category.  In order to keep our list relevant, please confirm:",
+				categoryName));
+		sb.append("<table cellspacing='6' cellpadding='2'> <tbody> ");
+		for (Davenfor d : davenfors) {
+			name = d.getNameEnglish().trim().length() == 0 ? d.getNameHebrew() : d.getNameEnglish();
+			sb.append(
+					"<tr><td colspan='2' style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
+			sb.append(String.format("Should we continue davening for <b>%s</b>?", name));
+			sb.append("</td></tr>");
+			sb.append("<tr>");
+			sb.append(createButton(emailSender.getLinkToExtend(d), "#32a842", "Yes"));
+			sb.append(createButton(emailSender.getLinkToDelete(d), "#d10a3f", "No"));
+			sb.append("</tr>");
+		}
 
-		// Inserting the button tds to an html table
-		String buttonArea = "<table cellspacing='6' cellpadding='2'> <tbody>	<tr> " + button1 + button2
-				+ "</tr></tbody></table>";
+		sb.append("</table>");
+		sb.append(
+				"<b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
 
-		String categoryName = Category.getCategory(davenfor.getCategory()).getCname().getVisual();
-		
-		// building the email message with the button area as a table at the bottom
-		String message = String.format("We've been davening for <b>%s</b> for <b>%s</b>.", davenfor.getNameEnglish(),
-				categoryName)
-				+ String.format(" <br>This week, the list being sent out will include names under the %s category.  In order to keep our list relevant, please confirm: Should we continue davening for <b>%s</b>?", categoryName, davenfor.getNameEnglish())
-				+ buttonArea
-				+ "<br> <b>Important: If we receive no response, the name will automatically be removed from the list.</b>";
-
-		return message;
+		return sb.toString();
 	}
 
 	public String createWeeklyHtml(Category category, String pEnglish, String pHebrew, boolean preview)
@@ -280,11 +299,11 @@ public class Utilities {
 		String hafrashatChallahEng = EmailScheme.hafrashatChallahEnglish;
 		if (pEnglish != null && pEnglish.length() > 0)
 			hafrashatChallahEng += " - ".concat(pEnglish);
-		
+
 		String hafrashatChallahHeb = EmailScheme.hafrashatChallahHebrew;
 		if (pHebrew != null && pHebrew.length() > 0)
 			hafrashatChallahHeb += " - ".concat(pHebrew);
-		
+
 		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, hafrashatChallahEng, hafrashatChallahHeb));
 
 		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, category.getCname().getListName(),
@@ -335,19 +354,21 @@ public class Utilities {
 
 	}
 
-	// Creates a button in a table (like 2 side by side) according to varying parameters sent in
+	// Creates a button in a table (like 2 side by side) according to varying
+	// parameters sent in
 	public String createButton(String link, String buttonColor, String buttonText) {
 		return String.format(
-				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100' height='40'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s target='_blank'><span style='color: #ffffff;'>%s</span></a></td>",
+				"<td style='-webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; color: #ffffff;' align='center' bgcolor=%s width='100px' height='40px'><a style='font-size: 16px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; line-height: 40px;  display: inline-block;' href=%s target='_blank'><span style='color: #ffffff;'>%s</span></a></td>",
 				buttonColor, link, buttonText);
 	}
-	
-	// Creates a single button in a wider format according to varying parameters sent in
-		public String createSingleButton(String link, String buttonColor, String buttonText) {
-			return String.format(
-					"<div style='text-align: center; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; background-color:%s; padding: 0px 20px; width: fit-content;'><a style='color: white; font-size: 20px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;' href=%s target='_blank'>%s</a></div>",
-					buttonColor, link, buttonText);
-		}
+
+	// Creates a single button in a wider format according to varying parameters
+	// sent in
+	public String createSingleButton(String link, String buttonColor, String buttonText) {
+		return String.format(
+				"<div style='text-align: center; -webkit-border-radius: 5px; -moz-border-radius: 5px; border-radius: 5px; background-color:%s; padding: 5px 20px; width: fit-content;'><a style='color: white; font-size: 20px; font-weight: bold; font-family: Helvetica, Arial, sans-serif; text-decoration: none; display: inline-block;' href=%s target='_blank'>%s</a></div>",
+				buttonColor, link, buttonText);
+	}
 
 	public String formatFileName(String weekName, String suffix) {
 		LocalDateTime now = LocalDateTime.now();
@@ -367,5 +388,20 @@ public class Utilities {
 
 	public long getDaysInMs(int daysNumber) {
 		return daysNumber * 24 * 60 * 60 * 1000;
+	}
+
+	private int calculateDocHeight(Category category) {
+		int davenforAmount = davenforRepository.findAllDavenforByCategory(category.getCname().toString()).size();
+		int multiply = 1; // one line per davenfor.
+
+		if (Category.isBanim(category.getCname().toString()))
+			multiply = 2;
+
+		// row height currently
+		int rowHeight = 33;
+
+		// base amount is 200, plus 10px buffer, plus more - testing the window height
+		// buffer problem
+		return 210 + (davenforAmount * rowHeight * multiply);
 	}
 }

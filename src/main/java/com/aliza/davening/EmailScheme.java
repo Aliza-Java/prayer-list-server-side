@@ -46,13 +46,13 @@ public class EmailScheme {
 	public static final String pageDivider = "<script>document.addEventListener(\"DOMContentLoaded\", function () { const rows = Array.from(document.querySelectorAll(\"table tr\")); const pageHeight = 900; let currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); let currentHeight = 0; rows.forEach(row => { const rowHeight = row.offsetHeight; if (currentHeight + rowHeight > pageHeight) { currentPage = document.createElement(\"div\"); currentPage.classList.add(\"page\"); document.body.appendChild(currentPage); currentHeight = 0; } currentPage.appendChild(row); currentHeight += rowHeight; }); });</script>";
 
 //TODO*: move to separate file, to make editing easier.  All long htmls should be read from files
-	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Emek Hafrashat Challah Davening List</title><style>.container {height:100%%; width: 650px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s ; height: 100%%; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 650px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 5px;  }  .page {width: 650px; height: 100%%; font-size: 14.5pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
+	public static final String htmlHead = "<!DOCTYPE html><html><head><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><title>Emek Hafrashat Challah Davening List</title><style>.container {height:100%%; width: 650px; margin: 0 auto; } html, body {overflow-x: hidden; overflow-y: %s ; height: 100%%; margin: 0 auto;} @media print { .page { page-break-after: always; }  tr { page-break-inside: avoid; } }   body{text-align:center} table, td {padding: 10px; border-collapse: collapse; border: 1px solid black} h2, h3, h4, h5{text-align:center} html, body {width: 650px; margin: 0; padding: 0;}  tr{height:auto} td { vertical-align: top; padding: 3px;  }  .page {width: 650px; height: 100%%; font-size: 13.5pt; border: 1px solid black;  box-sizing: border-box;}</style></head>";
 
 	public static final String htmlBodyStart = "<body><div class='container'><div class='page'>";
 
 	public static final String tableStart = "<table style='height:100%;width:100%;border-collapse:collapse;'>";
 
-	public static final String htmlNameRowInList = "<tr><td style='text-align:left'>%s</td><td style='text-align:right'>%s</td></tr>";
+	public static final String htmlNameRowInList = "<tr style='height: 28px'><td style='text-align:left'>%s</td><td style='text-align:right'>%s</td></tr>";
 
 	public static final String htmlBanimRowInList = "<tr><td style='text-align:left'>%s<br>%s</td><td style='text-align:right'>%s<br>%s</td></tr>";
 
@@ -96,10 +96,10 @@ public class EmailScheme {
 	public static final String weeklyFileName = "Hafrashat Challah Davening List %s";
 
 	// putting one message first, in bold, with new line before other text.
-	public static final String boldFirstMessage = "<h5>%s</h5>%s";
+	public static final String boldFirstMessage = "<h4>%s</h4>%s"; //todo* in future - make not bold
 
 	// putting second message, in bold, on new line after other text.
-	public static final String boldSecondMessage = "%s<h5>%s</h5>";
+	public static final String boldSecondMessage = "%s<h4>%s</h4>";
 
 	public static final String confirmationEmailSubject = "Hafrashat Challah Davening list submission";
 
@@ -114,7 +114,8 @@ public class EmailScheme {
 
 	public static final String weeklyAdminReminderSubject = "Hafrashat Challah Davening list reminder: Send out the weekly list!";
 
-	public static final String expiringNameSubject = "Action required - Is this name still relevant?";
+	public static final String expiringNameSubjectOne = "Action required - Is this name still relevant?";
+	public static final String expiringNameSubjectMultiple = "Action required - Are these names still relevant?";
 
 	public static final String unsubscribeSubject = "Unsubscribe - action required";
 
