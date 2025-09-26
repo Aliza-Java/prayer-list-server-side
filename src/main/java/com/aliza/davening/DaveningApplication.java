@@ -30,6 +30,7 @@ public class DaveningApplication {
 		builder.headless(false);
 		@SuppressWarnings("unused")
 		ConfigurableApplicationContext context = builder.run(args);
+		System.out.println("Version update: 2025-sep-09-15-08");
 
 //		String content="didn't go through try";
 //		try {

@@ -64,7 +64,7 @@ public class MaintainList { // TODO*: tests for all these
 	// for each category going to be sent out, Sends email to davenfor's submitter
 	// to ask if name in category is still relevant,
 	// Fires right after changing category and parasha
-	@Scheduled(cron = "0 47 23 * * THU", zone = "Asia/Jerusalem")
+	@Scheduled(cron = "0 5 2 * * SUN", zone = "Asia/Jerusalem")
 	public void offerExtensionOrDelete() {
 		System.out.println("Begin offerExtensionOrDelete()");
 		// List<Davenfor> expiredDavenfors =
