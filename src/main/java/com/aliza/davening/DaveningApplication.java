@@ -30,7 +30,7 @@ public class DaveningApplication {
 		builder.headless(false);
 		@SuppressWarnings("unused")
 		ConfigurableApplicationContext context = builder.run(args);
-		System.out.println("Version update: 2025-sep-09-15-08");
+		System.out.println("Version update: 2025-sep-28-13-49");
 
 //		String content="didn't go through try";
 //		try {
@@ -42,13 +42,13 @@ public class DaveningApplication {
 
 		// For testing:
 
-		// AdminService adminService = context.getBean(AdminService.class);
-		// adminService.activateDavener("aliza.shanet@gmail.com");
+		//MaintainList ml = context.getBean(MaintainList.class);
+		//ml.updateNewWeek();
+		//ml.offerExtensionOrDelete();
 		// SubmitterService submitterService = context.getBean(SubmitterService.class);
 		// CategoryRepository categoryRep = context.getBean(CategoryRepository.class);
-		 MaintainList ml = context.getBean(MaintainList.class);
 
-		 ml.deleteUnconfirmed();
+		 //ml.deleteUnconfirmed();
 	}
 
 	// For encoding user passwords - rest of application needs this (leave it!)
