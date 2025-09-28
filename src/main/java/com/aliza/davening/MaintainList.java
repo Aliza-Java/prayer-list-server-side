@@ -103,22 +103,30 @@ public class MaintainList { // TODO*: tests for all these
 		// TODO*: when add more admins, will need to add admin_id to each davenfor
 		// (unless in different DBs?)
 		System.out.println("Begin deleteUnconfirmed()");
-
 		Category category = adminService.findCurrentCategory();
-		String categoryDb = category.getCname().toString();
-		System.out.println(String.format("Starting with %d davenfors in the %s category. ", davenforRepository.findAllDavenforByCategory(categoryDb).size(), categoryDb));
-		List<Davenfor> unconfirmed = davenforRepository.findAllByCategoryAndConfirmedAtIsNull(categoryDb);
+		String categoryDbName = category.getCname().toString();
+		System.out.println(String.format("Starting with %d davenfors in the %s category. ", davenforRepository.findAllDavenforByCategory(categoryDbName).size(), categoryDbName));
+		List<Davenfor> unconfirmed = davenforRepository.findAllByCategoryAndConfirmedAtIsNull(categoryDbName);
 		
 		if (unconfirmed.size() > 0)
 		{
-		unconfirmed.forEach(u -> {
-			davenforRepository.softDeleteById(u.getId());
-			emailSender.notifyUserDeletedName(u);
-		});
-		emailSender.informAdmin(EmailScheme.unconfirmedSubject, EmailScheme
+			// Group the davenfors by user email
+			Map<String, List<Davenfor>> davenforsByUser = unconfirmed.stream()
+			    .collect(Collectors.groupingBy(Davenfor::getUserEmail));
+
+			// Send one email per user with all their davenfors
+			for (Map.Entry<String, List<Davenfor>> entry : davenforsByUser.entrySet()) {
+			    String userEmail = entry.getKey();
+			    List<Davenfor> userDavenfors = entry.getValue();
+				userDavenfors.forEach(d -> davenforRepository.softDeleteById(d.getId()));
+			    emailSender.notifyUserDeletedName(userDavenfors, userEmail);
+			    System.out.println(String.format("Emailed %s about %d deleted davenfor(s)", userEmail, userDavenfors.size()));
+			}
+			
+			emailSender.informAdmin(EmailScheme.unconfirmedSubject, EmailScheme
 				.createUnconfirmedMessage(category.getCname().getVisual(), unconfirmed));
 
-		System.out.println(String.format("End deleteUnconfirmed() - now have %d davenfors in the %s category. ", davenforRepository.findAllDavenforByCategory(categoryDb).size(), categoryDb));
+		System.out.println(String.format("End deleteUnconfirmed() - now have %d davenfors in the %s category. ", davenforRepository.findAllDavenforByCategory(categoryDbName).size(), categoryDbName));
 		}
 		else
 			System.out.println("End deleteUnconfirmed().  No relevant davenfors were found to delete.");

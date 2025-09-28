@@ -148,9 +148,9 @@ public class EmailSender {
 
 			String additionalMessage = "";
 			if (allRecipients.size() > 1)
-				additionalMessage = String.format("(and %d more) ", allRecipients.size() - 1);
+				additionalMessage = String.format(" (and %d more) ", allRecipients.size() - 1);
 
-			System.out.println(String.format("Email to %s %s sent successfully!", allRecipients.get(0).toString(),
+			System.out.println(String.format("Email to %s%s sent successfully!", allRecipients.get(0).toString(),
 					additionalMessage));
 
 		} catch (MessagingException e) {
@@ -271,15 +271,12 @@ public class EmailSender {
 				null));
 	}
 
-	public void notifyUserDeletedName(Davenfor davenfor) {
-		String link = getLinkToExtend(davenfor);
-		String button = utilities.createSingleButton(link, "#32a842", "This name is still relevant");
-		String name = davenfor.getNameEnglish().trim().length() == 0 ? davenfor.getNameHebrew()
-				: davenfor.getNameEnglish();
-		String message = String.format(EmailScheme.nameAutoDeletedUserMessage, name, davenfor.getCategory(), button);
-		String subject = String.format(EmailScheme.nameAutoDeletedUserSubject, jwtUtils.generateOtp());
+	public void notifyUserDeletedName(List<Davenfor> davenfors, String userEmail) {
+		
+		String subject = davenfors.size() == 1 ? EmailScheme.nameAutoDeletedUserSubjectOne : EmailScheme.nameAutoDeletedUserSubjectMultiple;
+		String message = String.format(utilities.setWasDeletedMessage(davenfors)); 
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, davenfor.getUserEmail(), null, null,
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null,
 				null));
 	}
 

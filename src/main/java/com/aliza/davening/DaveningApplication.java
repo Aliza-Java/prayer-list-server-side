@@ -46,12 +46,9 @@ public class DaveningApplication {
 		// adminService.activateDavener("aliza.shanet@gmail.com");
 		// SubmitterService submitterService = context.getBean(SubmitterService.class);
 		// CategoryRepository categoryRep = context.getBean(CategoryRepository.class);
-		// EmailSender es = context.getBean(EmailSender.class);
+		 MaintainList ml = context.getBean(MaintainList.class);
 
-		// es.offerExtensionOrDelete(new Davenfor(5, "aliza.shanet@gmail.com",
-		// categoryRep.getOne(1L), "nameHebrew", "nameEnglish", null, null, true,
-		// LocalDate.now(), LocalDate.now(),LocalDate.now(),LocalDate.now(),"test note"
-		// ));
+		 ml.deleteUnconfirmed();
 	}
 
 	// For encoding user passwords - rest of application needs this (leave it!)

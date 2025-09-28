@@ -93,8 +93,7 @@ public class Utilities {
 
 		// Start with minimal window size
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
-				"--window-size=670,1300");
+		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars", "--window-size=670,1300");
 
 		WebDriverManager.chromedriver().setup();
 		WebDriver driver = new ChromeDriver(options);
@@ -103,7 +102,7 @@ public class Utilities {
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
 		try {
 			Thread.sleep(2000);
-		} catch (InterruptedException e1) {
+		} catch (InterruptedException e) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
 
@@ -122,7 +121,7 @@ public class Utilities {
 				(int) Math.max(calculateDocHeight(category), (int) contentHeight)));
 		try {
 			Thread.sleep(1000);
-		} catch (InterruptedException e2) {
+		} catch (InterruptedException e) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
 
@@ -130,7 +129,7 @@ public class Utilities {
 		js.executeScript("window.scrollTo(0, 0);");
 		try {
 			Thread.sleep(500);
-		} catch (InterruptedException e1) {
+		} catch (InterruptedException e) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
 
@@ -268,6 +267,39 @@ public class Utilities {
 		sb.append("</table>");
 		sb.append(
 				"<b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+
+		return sb.toString();
+	}
+
+	public String setWasDeletedMessage(List<Davenfor> davenfors) {
+		// TODO: make beginning and end like setExpiringNameMessage, then a repeating
+		// question and button for each.
+		// TODO: also would be nice to give feedback not in a new tab, rather an alert
+		// or even better - a button that changes.
+
+		String name;
+		String buttonText;
+		String categoryName = Category.getCategory(davenfors.get(0).getCategory()).getCname().getVisual();
+
+		StringBuilder sb = new StringBuilder("Hi! <br>");
+		sb.append(String.format(
+				"We tried reaching out, but since we didn’t hear back, the following names in the <b>%s</b> category have been removed from our Davening list as part of our cleanup process. <br><br>",
+				categoryName));
+		sb.append(
+				"No worries though — if you'd like to repost any of the following name(s) - although they might not be included in this week's list - you can do so easily by clicking the button with the name: <br>");
+		sb.append("<table cellspacing='6' cellpadding='2'> <tbody> ");
+		for (Davenfor d : davenfors) {
+			name = d.getNameEnglish().trim().length() == 0 ? d.getNameHebrew() : d.getNameEnglish();
+			buttonText = String.format("The name %s is still relevant", name);
+
+			sb.append(
+					"<tr><td style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
+						sb.append(createSingleButton(emailSender.getLinkToExtend(d), "#32a842", buttonText));
+			sb.append("</td></tr>");
+		}
+
+		sb.append("Let us know if you need any help! <br>");
+		sb.append("The Emek Hafrashat Challah Davening List team");
 
 		return sb.toString();
 	}
