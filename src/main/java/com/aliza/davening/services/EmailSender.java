@@ -2,6 +2,8 @@ package com.aliza.davening.services;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -75,6 +77,9 @@ public class EmailSender {
 	@Value("${link.to.extend}")
 	String linkToExtendServer;
 
+	@Value("${link.to.confirm.combined}") // goes to client
+	String linkToConfirmCombined;
+
 	@Value("${link.to.remove}")
 	String linkToRemoveServer;
 
@@ -87,7 +92,8 @@ public class EmailSender {
 		// Create the email message
 		MimeMessage message = new MimeMessage(session);
 		try {
-			message.setFrom(new InternetAddress("davening.list@gmail.com", "Emek Hafrashat Challah Davening List")); //*TODO in future - put this in env file
+			// *TODO in future put this in env file
+			message.setFrom(new InternetAddress("davening.list@gmail.com", "Emek Hafrashat Challah Davening List")); 
 			message.setRecipients(Message.RecipientType.TO, to);
 			if (bccList != null) {
 				bccList.forEach(bcc -> {
@@ -272,12 +278,12 @@ public class EmailSender {
 	}
 
 	public void notifyUserDeletedName(List<Davenfor> davenfors, String userEmail) {
-		
-		String subject = davenfors.size() == 1 ? EmailScheme.nameAutoDeletedUserSubjectOne : EmailScheme.nameAutoDeletedUserSubjectMultiple;
-		String message = String.format(utilities.setWasDeletedMessage(davenfors)); 
 
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null,
-				null));
+		String subject = davenfors.size() == 1 ? EmailScheme.nameAutoDeletedUserSubjectOne
+				: EmailScheme.nameAutoDeletedUserSubjectMultiple;
+		String message = String.format(utilities.setWasDeletedMessage(davenfors));
+
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null, null));
 	}
 
 	// tested
@@ -316,12 +322,13 @@ public class EmailSender {
 	}
 
 	// tested
-	public void offerExtensionOrDelete(List<Davenfor> userDavenfors, String userEmail) {
+	public void offerExtensionOrDelete(List<Davenfor> userDavenfors, String userEmail, String category) {
 
 		// this 'code' is just for differentiating emails without sending df-id or
 		// showing name in the subject
-		String subject = (userDavenfors.size() == 1) ? EmailScheme.expiringNameSubjectOne : EmailScheme.expiringNameSubjectMultiple;
-		String message = String.format(utilities.setExpiringNameMessage(userDavenfors));
+		String subject = (userDavenfors.size() == 1) ? EmailScheme.expiringNameSubjectOne
+				: EmailScheme.expiringNameSubjectMultiple;
+		String message = String.format(utilities.setExpiringNameMessage(userDavenfors, category));
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null, null));
 	}
@@ -387,6 +394,14 @@ public class EmailSender {
 		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
 
+	public String getLinkCombinedConfirm(List<Davenfor> davenfors, String category) {
+		long fiveDays = utilities.getDaysInMs(5);
+		Date expiration = new Date(new Date().getTime() + fiveDays);
+		String token = jwtUtils.generateEmailToken(davenfors.get(1).getUserEmail(), expiration);
+		String idsMap = createIdsMap(davenfors);
+		return String.format(client + linkToConfirmCombined, category, token, idsMap);
+	}
+
 	public String getLinkToDelete(Davenfor davenfor) {
 		long fiveDays = utilities.getDaysInMs(5);
 		Date expiration = new Date(new Date().getTime() + fiveDays);
@@ -405,7 +420,9 @@ public class EmailSender {
 
 	public String getUserActivatedMessage() {
 		String button = utilities.createSingleButton(client, "#32a842", "Take me to the website!");
-		return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br>" + button + "<br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
+		return "We are confirming that your participation on the Emek Hafrashat Challah Davening list has been activated. <br>"
+				+ button
+				+ "<br> You will now be receiving emails regarding the Hafrashat Challah Davening list.  You may unsubscribe at any time.  <br><br>If you did not request to join the list, please contact the list admin immediately at "
 				+ adminEmail + ".<br><br>" + getUnsubscribeLine();
 	}
 
@@ -416,4 +433,18 @@ public class EmailSender {
 	}
 
 	public final String unsubscribeLine = "To unsubscribe from the Emek Hafrashat Challah Davening list, click <a href='%s'>HERE</a>";
+
+	private String createIdsMap(List<Davenfor> davenfors) {
+		StringBuilder sb = new StringBuilder();
+		String name;
+		for (Davenfor d : davenfors) {
+			name = URLEncoder.encode((d.getNameEnglish().isEmpty() ? d.getNameHebrew() : d.getNameEnglish()),
+					StandardCharsets.UTF_8);
+			sb.append(d.getId()).append(":").append(name).append(",");
+		}
+
+		// trim off the last comma;
+		return sb.substring(0, sb.length() - 1);
+	}
+
 }

@@ -93,7 +93,8 @@ public class Utilities {
 
 		// Start with minimal window size
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars", "--window-size=670,1300");
+		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
+				"--window-size=670,1300");
 
 		WebDriverManager.chromedriver().setup();
 		WebDriver driver = new ChromeDriver(options);
@@ -244,29 +245,20 @@ public class Utilities {
 		return message;
 	}
 
-	public String setExpiringNameMessage(List<Davenfor> davenfors) {
+	public String setExpiringNameMessage(List<Davenfor> davenfors, String category) {
+		String link = emailSender.getLinkCombinedConfirm(davenfors, category);
 
-		String categoryName = Category.getCategory(davenfors.get(0).getCategory()).getCname().getVisual();
-		String name;
 		StringBuilder sb = new StringBuilder(String.format(
-				" <br>This week, the list being sent out will include names under the <b>%s</b> category.  In order to keep our list relevant, please confirm:",
-				categoryName));
-		sb.append("<table cellspacing='6' cellpadding='2'> <tbody> ");
-		for (Davenfor d : davenfors) {
-			name = d.getNameEnglish().trim().length() == 0 ? d.getNameHebrew() : d.getNameEnglish();
-			sb.append(
-					"<tr><td colspan='2' style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
-			sb.append(String.format("Should we continue davening for <b>%s</b>?", name));
-			sb.append("</td></tr>");
-			sb.append("<tr>");
-			sb.append(createButton(emailSender.getLinkToExtend(d), "#32a842", "Yes"));
-			sb.append(createButton(emailSender.getLinkToDelete(d), "#d10a3f", "No"));
-			sb.append("</tr>");
-		}
+				" <br>This week, the list being sent out will include names under the <b>%s</b> category.  <br>In order to keep our list relevant, please confirm the names you have submitted in this category.  <br> <br> You can do so by clicking the button below:",
+				category));
 
-		sb.append("</table>");
+		sb.append(createSingleButton(link, "#32a842", "Confirm my submitted names"));
+
 		sb.append(
-				"<b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+				"<br><b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+
+		sb.append("<br><br>Let us know if you need any help!");
+		sb.append("<br>The Emek Hafrashat Challah Davening List team");
 
 		return sb.toString();
 	}
@@ -294,7 +286,7 @@ public class Utilities {
 
 			sb.append(
 					"<tr><td style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
-						sb.append(createSingleButton(emailSender.getLinkToExtend(d), "#32a842", buttonText));
+			sb.append(createSingleButton(emailSender.getLinkToExtend(d), "#32a842", buttonText));
 			sb.append("</td></tr>");
 		}
 

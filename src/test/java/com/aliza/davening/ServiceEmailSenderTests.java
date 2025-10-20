@@ -574,7 +574,7 @@ public class ServiceEmailSenderTests {
 	public void offerExtensionOrDelete() {
 		try {
 			when(jwtUtils.generateEmailToken(any(), any())).thenReturn("ABCdef");
-			emailSender.offerExtensionOrDelete(List.of(dfYeshua1), dfYeshua1.getUserEmail());
+			emailSender.offerExtensionOrDelete(List.of(dfYeshua1), dfYeshua1.getUserEmail(), "Yeshua_and_Parnassa");
 
 			greenMail.waitForIncomingEmail(5000, 1);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();

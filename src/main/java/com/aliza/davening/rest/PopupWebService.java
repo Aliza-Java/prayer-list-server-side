@@ -11,12 +11,12 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.aliza.davening.SchemeValues;
-import com.aliza.davening.entities.Category;
 import com.aliza.davening.entities.Davenfor;
 import com.aliza.davening.exceptions.EmailException;
 import com.aliza.davening.exceptions.EmptyInformationException;
@@ -65,7 +65,7 @@ public class PopupWebService {
 	}
 
 	// todo*: test sending via token, with errors and good
-	@GetMapping("delete/{id}/{token}")
+	@DeleteMapping("delete/{id}/{token}")
 	public String deleteDavenforViaEmail(@PathVariable long id, @PathVariable String token, Model model) {
 		Davenfor deletedDf;
 		model.addAttribute("client", client);
@@ -94,25 +94,29 @@ public class PopupWebService {
 	}
 
 	// to test
-	@GetMapping("extend/{id}/{token}")
-	public String extendDavenfor(@PathVariable long id, @PathVariable String token, Model model) {
+	@PostMapping("extend/{id}/{token}")
+	public ResponseEntity<Boolean> extendDavenfor(@PathVariable long id, @PathVariable String token, Model model) {
 
-		Davenfor extendedDf;
 		model.addAttribute("client", client);
 
 		try {
-			extendedDf = davenforRepository.findByIdIncludingDeleted(id).get();
+			davenforRepository.findByIdIncludingDeleted(id).get();
 			userService.extendDavenfor(id, token);
 		} catch (Exception e) {
-			model.addAttribute("message", "There was a problem confirming this name");
-			model.addAttribute("reason", e.getMessage());
-			return "extend-problem"; // maps to `src/main/resources/templates/extend-problem.html` due to Thymeleaf
+			// model.addAttribute("message", "There was a problem confirming this name");
+			// model.addAttribute("reason", e.getMessage());
+			return ResponseEntity.ok(false); // maps to `src/main/resources/templates/extend-problem.html` due to
+												// Thymeleaf
 		}
 
-		model.addAttribute("response", String.format("Thank you for confirming %s in the %s category!",
-				extendedDf.getNameEnglish(), Category.getCategory(extendedDf.getCategory()).getCname().getVisual()));
-		return "extend-confirmation"; // maps to `src/main/resources/templates/extend-confirmation.html` due to
-										// Thymeleaf
+		// model.addAttribute("response", String.format("Thank you for confirming %s in
+		// the %s category!",
+		// extendedDf.getNameEnglish(),
+		// Category.getCategory(extendedDf.getCategory()).getCname().getVisual()));
+		// return "extend-confirmation"; // maps to
+		// `src/main/resources/templates/extend-confirmation.html` due to
+		// Thymeleaf
+		return ResponseEntity.ok(true);
 
 	}
 
