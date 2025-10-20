@@ -397,7 +397,7 @@ public class EmailSender {
 	public String getLinkCombinedConfirm(List<Davenfor> davenfors, String category) {
 		long fiveDays = utilities.getDaysInMs(5);
 		Date expiration = new Date(new Date().getTime() + fiveDays);
-		String token = jwtUtils.generateEmailToken(davenfors.get(1).getUserEmail(), expiration);
+		String token = jwtUtils.generateEmailToken(davenfors.get(0).getUserEmail(), expiration);
 		String idsMap = createIdsMap(davenfors);
 		return String.format(client + linkToConfirmCombined, category, token, idsMap);
 	}
