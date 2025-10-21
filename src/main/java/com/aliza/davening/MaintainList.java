@@ -67,16 +67,11 @@ public class MaintainList { // TODO*: tests for all these
 	@Scheduled(cron = "0 5 2 * * SUN", zone = "Asia/Jerusalem")
 	public void offerExtensionOrDelete() {
 		System.out.println("Begin offerExtensionOrDelete()");
-		// List<Davenfor> expiredDavenfors =
-		// davenforRepository.findByExpireAtLessThan(LocalDate.now());
+
 		Category currentCategory = categoryRepository.getCurrent().get();
 		CategoryName categoryName = currentCategory.getCname();
-		// At first Lynne said these not all the time, then she said yes
-		// if (categoryName.equals(SHIDDUCHIM) || categoryName.equals(BANIM))
-		// return;
 
 		List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(categoryName.toString());
-
 		System.out.println("Davenfors in question: " + relevantDavenfors.size());
 
 		// Group the davenfors by user email
@@ -119,7 +114,7 @@ public class MaintainList { // TODO*: tests for all these
 				String userEmail = entry.getKey();
 				List<Davenfor> userDavenfors = entry.getValue();
 				userDavenfors.forEach(d -> davenforRepository.softDeleteById(d.getId()));
-				emailSender.notifyUserDeletedName(userDavenfors, userEmail);
+				emailSender.notifyUserDeletedName(userDavenfors, userEmail, category.getCname().getVisual());
 				System.out.println(
 						String.format("Emailed %s about %d deleted davenfor(s)", userEmail, userDavenfors.size()));
 			}

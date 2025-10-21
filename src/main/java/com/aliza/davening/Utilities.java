@@ -263,35 +263,20 @@ public class Utilities {
 		return sb.toString();
 	}
 
-	public String setWasDeletedMessage(List<Davenfor> davenfors) {
-		// TODO: make beginning and end like setExpiringNameMessage, then a repeating
-		// question and button for each.
-		// TODO: also would be nice to give feedback not in a new tab, rather an alert
-		// or even better - a button that changes.
-
-		String name;
-		String buttonText;
-		String categoryName = Category.getCategory(davenfors.get(0).getCategory()).getCname().getVisual();
+	public String setWasDeletedMessage(List<Davenfor> davenfors, String categoryName) {
+		String link = emailSender.getLinkCombinedDeleted(davenfors, categoryName);
 
 		StringBuilder sb = new StringBuilder("Hi! <br>");
 		sb.append(String.format(
-				"We tried reaching out, but since we didn’t hear back, the following names in the <b>%s</b> category have been removed from our Davening list as part of our cleanup process. <br><br>",
+				"We tried reaching out, but since we didn’t hear back, there were some names in the <b>%s</b> category have been removed from our Davening list as part of our cleanup process. <br><br>",
 				categoryName));
 		sb.append(
-				"No worries though — if you'd like to repost any of the following name(s) - although they might not be included in this week's list - you can do so easily by clicking the button with the name: <br>");
-		sb.append("<table cellspacing='6' cellpadding='2'> <tbody> ");
-		for (Davenfor d : davenfors) {
-			name = d.getNameEnglish().trim().length() == 0 ? d.getNameHebrew() : d.getNameEnglish();
-			buttonText = String.format("The name %s is still relevant", name);
+				"No worries though — if you want, you can easily repost any of the removed names (although they might not be included in this week's list).  Just click the button to view the names: <br>");
 
-			sb.append(
-					"<tr><td style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
-			sb.append(createSingleButton(emailSender.getLinkToExtend(d), "#32a842", buttonText));
-			sb.append("</td></tr>");
-		}
+		sb.append(createSingleButton(link, "#32a842", "My names might still be relevant"));
 
-		sb.append("Let us know if you need any help! <br>");
-		sb.append("The Emek Hafrashat Challah Davening List team");
+		sb.append("<br>Let us know if you need any help!");
+		sb.append("<br>The Emek Hafrashat Challah Davening List team");
 
 		return sb.toString();
 	}

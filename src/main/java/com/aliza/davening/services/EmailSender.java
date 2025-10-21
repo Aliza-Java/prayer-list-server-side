@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -80,6 +81,9 @@ public class EmailSender {
 	@Value("${link.to.confirm.combined}") // goes to client
 	String linkToConfirmCombined;
 
+	@Value("${link.to.deleted.combined}") // goes to client
+	String linkToDeletedCombined;
+
 	@Value("${link.to.remove}")
 	String linkToRemoveServer;
 
@@ -93,7 +97,7 @@ public class EmailSender {
 		MimeMessage message = new MimeMessage(session);
 		try {
 			// *TODO in future put this in env file
-			message.setFrom(new InternetAddress("davening.list@gmail.com", "Emek Hafrashat Challah Davening List")); 
+			message.setFrom(new InternetAddress("davening.list@gmail.com", "Emek Hafrashat Challah Davening List"));
 			message.setRecipients(Message.RecipientType.TO, to);
 			if (bccList != null) {
 				bccList.forEach(bcc -> {
@@ -277,15 +281,6 @@ public class EmailSender {
 				null));
 	}
 
-	public void notifyUserDeletedName(List<Davenfor> davenfors, String userEmail) {
-
-		String subject = davenfors.size() == 1 ? EmailScheme.nameAutoDeletedUserSubjectOne
-				: EmailScheme.nameAutoDeletedUserSubjectMultiple;
-		String message = String.format(utilities.setWasDeletedMessage(davenfors));
-
-		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null, null));
-	}
-
 	// tested
 	public void informAdmin(String subject, String message) {
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, adminEmail, null, null, null));
@@ -324,11 +319,18 @@ public class EmailSender {
 	// tested
 	public void offerExtensionOrDelete(List<Davenfor> userDavenfors, String userEmail, String category) {
 
-		// this 'code' is just for differentiating emails without sending df-id or
-		// showing name in the subject
 		String subject = (userDavenfors.size() == 1) ? EmailScheme.expiringNameSubjectOne
 				: EmailScheme.expiringNameSubjectMultiple;
-		String message = String.format(utilities.setExpiringNameMessage(userDavenfors, category));
+		String message = utilities.setExpiringNameMessage(userDavenfors, category);
+
+		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null, null));
+	}
+
+	public void notifyUserDeletedName(List<Davenfor> userDavenfors, String userEmail, String categoryName) {
+
+		String subject = userDavenfors.size() == 1 ? EmailScheme.nameAutoDeletedUserSubjectOne
+				: EmailScheme.nameAutoDeletedUserSubjectMultiple;
+		String message = utilities.setWasDeletedMessage(userDavenfors, categoryName);
 
 		sendEmail(createMimeMessage(sessionProvider.getSession(), subject, message, userEmail, null, null, null));
 	}
@@ -399,7 +401,15 @@ public class EmailSender {
 		Date expiration = new Date(new Date().getTime() + fiveDays);
 		String token = jwtUtils.generateEmailToken(davenfors.get(0).getUserEmail(), expiration);
 		String idsMap = createIdsMap(davenfors);
-		return String.format(client + linkToConfirmCombined, category, token, idsMap);
+		return MessageFormat.format(client + linkToConfirmCombined, category, token, idsMap);
+	}
+
+	public String getLinkCombinedDeleted(List<Davenfor> davenfors, String category) {
+		long twoWeeks = utilities.getDaysInMs(14);
+		Date expiration = new Date(new Date().getTime() + twoWeeks);
+		String token = jwtUtils.generateEmailToken(davenfors.get(0).getUserEmail(), expiration);
+		String idsMap = createIdsMap(davenfors);
+		return MessageFormat.format(client + linkToDeletedCombined, category, token, idsMap);
 	}
 
 	public String getLinkToDelete(Davenfor davenfor) {
