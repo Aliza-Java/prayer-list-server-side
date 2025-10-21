@@ -75,7 +75,7 @@ public class PopupWebService {
 			deletedDf = davenforRepository.findByIdIncludingDeleted(id).get();
 			if (deletedDf.getDeletedAt() != null) {
 				model.addAttribute("status",
-						String.format("The name %s has been removed already", deletedDf.getNameEnglish()));
+						String.format("The name %s has been removed already", deletedDf.getName()));
 				model.addAttribute("action", "Take me to the website");
 				return "delete-problem";
 			}
@@ -88,7 +88,7 @@ public class PopupWebService {
 		}
 
 		model.addAttribute("response",
-				String.format("The name %s has been removed from our lists", deletedDf.getNameEnglish()));
+				String.format("The name %s has been removed from our lists", deletedDf.getName()));
 		return "delete-confirmation"; // maps to `src/main/resources/templates/delete-confirmation.html` due to
 										// Thymeleaf
 	}
@@ -109,13 +109,6 @@ public class PopupWebService {
 												// Thymeleaf
 		}
 
-		// model.addAttribute("response", String.format("Thank you for confirming %s in
-		// the %s category!",
-		// extendedDf.getNameEnglish(),
-		// Category.getCategory(extendedDf.getCategory()).getCname().getVisual()));
-		// return "extend-confirmation"; // maps to
-		// `src/main/resources/templates/extend-confirmation.html` due to
-		// Thymeleaf
 		return ResponseEntity.ok(true);
 
 	}

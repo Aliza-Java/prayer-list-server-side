@@ -89,6 +89,6 @@ public class Davenfor {
 	}
 	
 	public String getName() {
-		return ((this.nameEnglish == null || this.nameEnglish.isEmpty()) ? this.nameHebrew : this.nameEnglish);
+		return ((this.nameEnglish == null || this.nameEnglish.trim().isEmpty()) ? this.nameHebrew : this.nameEnglish);
 	}
 }

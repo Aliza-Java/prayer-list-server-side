@@ -144,7 +144,7 @@ public class EmailScheme {
 		sb.append(category);
 		sb.append(" have been automatically removed this week, as they were not confirmed by users: <br>");
 		names.forEach(n -> sb
-				.append((n.getNameEnglish().trim().length() == 0 ? n.getNameHebrew() : n.getNameEnglish()) + "<br>"));
+				.append((n.getName()) + "<br>"));
 
 		return sb.toString();
 	}

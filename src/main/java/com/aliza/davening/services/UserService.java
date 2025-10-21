@@ -136,7 +136,7 @@ public class UserService {
 		String subject;
 		String message;
 
-		String name = davenfor.getNameEnglish().isEmpty() ? davenfor.getNameHebrew() : davenfor.getNameEnglish();
+		String name = davenfor.getName();
 
 		//something is empty
 		if (davenfor.getNameEnglish().isEmpty() || davenfor.getNameHebrew().isEmpty()
@@ -198,8 +198,7 @@ public class UserService {
 				|| (Category.isBanim(updatedInfo.getCategory()) && existingInfo.getNameHebrewSpouse().length() > 0
 						&& updatedInfo.getNameHebrewSpouse().length() == 0)) {
 			infoRemoved = true;
-			String name = updatedInfo.getNameEnglish().isEmpty() ? updatedInfo.getNameHebrew() : updatedInfo.getNameEnglish();
-			subject = String.format(EmailScheme.informAdminOfPartialEditNameSubject, name);
+			subject = String.format(EmailScheme.informAdminOfPartialEditNameSubject, updatedInfo.getName());
 			message = EmailScheme.setAdminAlertMessage(false, updatedInfo, client + "/admin");
 		}
 
@@ -236,12 +235,6 @@ public class UserService {
 		davenforRepository.save(existingInfo);
 		entityManager.flush();
 		entityManager.clear();
-
-		// for now I don't think it's necessary to inform admin on every update
-		// if (getMyGroupSettings(adminId).isNewNamePrompt()) {
-//		String subject = EmailScheme.informAdminOfUpdateSubject;
-//		String message = String.format(EmailScheme.informAdminOfUpdate, davenforToUpdate.getUserEmail(),
-//				davenforToUpdate.getNameEnglish(), davenforToUpdate.getNameHebrew(), davenforToUpdate.getCategory());
 
 		if (infoRemoved)
 			emailSender.informAdmin(subject, message);
@@ -305,7 +298,7 @@ public class UserService {
 					"This name is registered under a different email address.  You do not have the permission to delete it.");
 		}
 
-		String name = davenforToDelete.getNameEnglish().trim().length() == 0 ? davenforToDelete.getNameHebrew() : davenforToDelete.getNameEnglish();
+		String name = davenforToDelete.getName();
 		String adminSubject = String.format(EmailScheme.deleteNameAdminSubject, name);
 		String adminMessage = String.format(EmailScheme.deleteNameAdminMessage, name,
 				davenforToDelete.getCategory(), davenforToDelete.getUserEmail());

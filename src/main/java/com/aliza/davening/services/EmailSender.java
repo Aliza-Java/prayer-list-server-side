@@ -299,8 +299,7 @@ public class EmailSender {
 
 		// todo* in future - make these a method (used twice)
 
-		String name = confirmedDavenfor.getNameEnglish().isEmpty() ? confirmedDavenfor.getNameHebrew()
-				: confirmedDavenfor.getNameEnglish();
+		String name = confirmedDavenfor.getName();
 
 		String personalizedEmailText = String.format(EmailScheme.submitEmailText, name,
 				Category.getCategory(confirmedDavenfor.getCategory()).getCname().getVisual(),
@@ -393,7 +392,6 @@ public class EmailSender {
 		Date expiration = new Date(new Date().getTime() + fiveDays);
 		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
 		return String.format(server + linkToExtendServer, davenfor.getId(), token);
-		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
 
 	public String getLinkCombinedConfirm(List<Davenfor> davenfors, String category) {
@@ -417,7 +415,6 @@ public class EmailSender {
 		Date expiration = new Date(new Date().getTime() + fiveDays);
 		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
 		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
-		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
 
 	public String getLinkToRepost(Davenfor davenfor) {
@@ -425,7 +422,6 @@ public class EmailSender {
 		Date expiration = new Date(new Date().getTime() + twoWeeks);
 		String token = jwtUtils.generateEmailToken(davenfor.getUserEmail(), expiration);
 		return String.format(server + linkToRemoveServer, davenfor.getId(), token);
-		// URLEncoder.encode(davenfor.getNameEnglish(), StandardCharsets.UTF_8),
 	}
 
 	public String getUserActivatedMessage() {
@@ -448,7 +444,7 @@ public class EmailSender {
 		StringBuilder sb = new StringBuilder();
 		String name;
 		for (Davenfor d : davenfors) {
-			name = URLEncoder.encode((d.getNameEnglish().isEmpty() ? d.getNameHebrew() : d.getNameEnglish()),
+			name = URLEncoder.encode((d.getName()),
 					StandardCharsets.UTF_8);
 			sb.append(d.getId()).append(":").append(name).append(",");
 		}
