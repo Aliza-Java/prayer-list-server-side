@@ -7,11 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.Dimension;
@@ -93,8 +96,7 @@ public class Utilities {
 
 		// Start with minimal window size
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
-				"--window-size=670,1300");
+		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars", "--window-size=670,1300");
 
 		WebDriverManager.chromedriver().setup();
 		WebDriver driver = new ChromeDriver(options);
@@ -286,7 +288,7 @@ public class Utilities {
 		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category.getCname().toString());
+		List<Davenfor> categoryDavenfors = getAllDavenfors(category.getCname().toString()); 
 
 		if (categoryDavenfors.isEmpty()) {
 			throw new EmptyInformationException("There are no names to daven for in this category. ");
@@ -398,6 +400,45 @@ public class Utilities {
 	public long getDaysInMs(int daysNumber) {
 		return daysNumber * 24 * 60 * 60 * 1000;
 	}
+	
+	public List<Davenfor> getAllDavenfors(String categoryName) {
+		List<Davenfor> list = davenforRepository.findAllDavenforByCategory(categoryName);
+		if ("shidduchim".equalsIgnoreCase(categoryName)) {
+            list.sort((d1, d2) -> {
+                boolean d1Contains = containsBatOrBas(d1.getName());
+                boolean d2Contains = containsBatOrBas(d2.getName());
+
+                // Put names that contain "bat"/"bas"/"בת" first
+                if (d1Contains && !d2Contains) return -1;
+                if (!d1Contains && d2Contains) return 1;
+
+                // If both are the same category, sort alphabetically
+                return d1.getName().compareToIgnoreCase(d2.getName());
+            });
+        }
+
+        return list;
+	}
+	
+	private static final Collator collator = Collator.getInstance(new Locale("he", "IL"));
+
+    public static Comparator<Davenfor> batFirstComparator() {
+        return (d1, d2) -> {
+            boolean d1Contains = containsBatOrBas(d1.getName());
+            boolean d2Contains = containsBatOrBas(d2.getName());
+
+            if (d1Contains && !d2Contains) return -1;
+            if (!d1Contains && d2Contains) return 1;
+
+            return collator.compare(d1.getName(), d2.getName());
+        };
+    }
+
+    private static boolean containsBatOrBas(String name) {
+        if (name == null) return false;
+        String lower = name.toLowerCase();
+        return lower.contains(" bat ") || lower.contains(" bas ") || lower.contains(" בת ");
+    }
 
 	private int calculateDocHeight(Category category) {
 		int davenforAmount = davenforRepository.findAllDavenforByCategory(category.getCname().toString()).size();

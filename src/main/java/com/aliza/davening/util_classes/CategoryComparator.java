@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
+import com.aliza.davening.Utilities;
 import com.aliza.davening.entities.Davenfor;
 
 public class CategoryComparator implements Comparator<Davenfor> {
@@ -23,6 +24,13 @@ public class CategoryComparator implements Comparator<Davenfor> {
 		if (index2 == -1)
 			index2 = Integer.MAX_VALUE;
 
-		return Integer.compare(index1, index2);
+		int result = Integer.compare(index1, index2);
+
+        // If same category and category is "shidduchim" → apply Bat/Bas/בת sorting
+        if (result == 0 && "shidduchim".equalsIgnoreCase(d1.getCategory())) {
+            return Utilities.batFirstComparator().compare(d1, d2);
+        }
+
+        return result;
 	}
 }
