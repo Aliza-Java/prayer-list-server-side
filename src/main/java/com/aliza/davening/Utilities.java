@@ -96,7 +96,11 @@ public class Utilities {
 
 		// Start with minimal window size
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars", "--window-size=670,1300");
+		int calculatedHeight = calculateDocHeight(category);
+		System.out.println("calculated height is " + calculatedHeight);
+		
+		String customWindowSize = String.format("--window-size=665, %d", calculatedHeight);
+		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars", customWindowSize);
 
 		WebDriverManager.chromedriver().setup();
 		WebDriver driver = new ChromeDriver(options);
@@ -111,17 +115,32 @@ public class Utilities {
 
 		// Get [largest] EXACT content dimensions
 		JavascriptExecutor js = (JavascriptExecutor) driver;
-		long contentWidth = (long) js.executeScript("return Math.max(" + "document.body.scrollWidth, "
-				+ "document.body.offsetWidth, " + "document.documentElement.clientWidth, "
-				+ "document.documentElement.scrollWidth, " + "document.documentElement.offsetWidth" + ");");
+//		long contentWidth = (long) js.executeScript("return Math.max(" + "document.body.scrollWidth, "
+//				+ "document.body.offsetWidth, " + "document.documentElement.clientWidth, "
+//				+ "document.documentElement.scrollWidth, " + "document.documentElement.offsetWidth" + ");");
+//		System.out.println(contentWidth + " is the max of scrollWidth, offsetWidth, clientWidth, scrollWidth2 and offsetWidth2");
 
 		long contentHeight = (long) js.executeScript("return Math.max(" + "document.body.scrollHeight, "
 				+ "document.body.offsetHeight, " + "document.documentElement.clientHeight, "
 				+ "document.documentElement.scrollHeight, " + "document.documentElement.offsetHeight" + ");");
+		System.out.println(contentHeight + " is the max of scrollHeight, offsetHeight, clientHeight, sccrollHeight2 and offsetHeight2");
 
-		// Set window to EXACT content size
-		driver.manage().window().setSize(new Dimension((int) Math.max(contentWidth, 670),
-				(int) Math.max(calculateDocHeight(category), (int) contentHeight)));
+		// Set window to EXACT content size		
+		//int finalWidth = (int) Math.max(contentWidth, 665);
+		int finalWidth = 665;
+		//System.out.println("final width is 665");
+		
+		int finalHeight = (int) Math.max(calculatedHeight, (int) contentHeight);
+		System.out.println("final height is " + finalHeight);
+
+		System.out.println(driver.manage().window().getSize());
+
+		driver.manage().window().setSize(new Dimension(finalWidth, finalHeight));
+		
+		System.out.println("after set it to width: " + finalWidth + " and height: " + finalHeight + " got:");
+		System.out.println(driver.manage().window().getSize());	
+
+		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -135,9 +154,6 @@ public class Utilities {
 		} catch (InterruptedException e) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
-
-		System.out.println("Content Width: " + contentWidth);
-		System.out.println("Content Height: " + contentHeight);
 
 		try {
 			ScreenshotHelper.captureScreenshot(driver, fileNameInFolder);
@@ -329,7 +345,7 @@ public class Utilities {
 					EmailScheme.banimLineHebrew));
 
 			// Inserting in one box both name and spouse name. If spouse name is null (it is
-			// not mandatory), just put an empty string.
+			// not mandatory), just put an empty string. //todo: this is not true anymore, but doesn't affect the outcome
 			for (Davenfor d : categoryDavenfors) {
 				stringBuilder.append(String.format(EmailScheme.htmlBanimRowInList, d.getNameEnglish(),
 						d.getNameEnglishSpouse() != null ? d.getNameEnglishSpouse() : "", d.getNameHebrew(),
@@ -440,18 +456,17 @@ public class Utilities {
         return lower.contains(" bat ") || lower.contains(" bas ") || lower.contains(" בת ");
     }
 
+    //It's a delicate balance of matching the --window-size (the initial screen size holding the image),
+    //the screen.size() (the size of the camera lens) and matching it all to the outcoming html.
+    //currently I set width to be fixed (665) because that works best, and height according to the formula below.
 	private int calculateDocHeight(Category category) {
 		int davenforAmount = davenforRepository.findAllDavenforByCategory(category.getCname().toString()).size();
-		int multiply = 1; // one line per davenfor.
-
-		if (Category.isBanim(category.getCname().toString()))
-			multiply = 2;
+		int multiply = Category.isBanim(category.getCname().toString()) ? 2 : 1; // one line per davenfor unless banim.
 
 		// row height currently
-		int rowHeight = 33;
+		int rowHeight = 31; //this is the height that works.  larger makes a long gap at the bottom, and shorter (might) cut it off
 
-		// base amount is 200, plus 10px buffer, plus more - testing the window height
-		// buffer problem
-		return 210 + (davenforAmount * rowHeight * multiply);
+		//6 info lines added to every list
+		return 100 + ((davenforAmount+6) * rowHeight * multiply);
 	}
 }
