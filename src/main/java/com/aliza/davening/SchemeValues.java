@@ -7,8 +7,10 @@ public class SchemeValues {
 	public static final long NON_EXIST = -1;
 	//*TODO in future - see if can take these out to .env (might not be loaded in time)
 	public static final String client = "https://emekhafrashatchallah.com";
+	//public static final String client = "http://localhost:4200";
 
 	public static final String server = "https://api.emekhafrashatchallah.com/dlist/";
+	//public static final String server = "http://localhost:8080";
 	
 	// The default amount of days to wait after warning a submitter before deleting
 	// a davenfor.
