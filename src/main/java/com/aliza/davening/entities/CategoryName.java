@@ -5,8 +5,7 @@ import lombok.Getter;
 @Getter
 public enum CategoryName {
 	REFUA("רפואה", "Refua", "Refua"), SHIDDUCHIM("שידוך", "Shidduchim", "Shidduch"),
-	BANIM("זרע של קיימא", "Banim", "Zera Shel Kayama"), SOLDIERS("חיילים", "Soldiers", "Soldiers"),
-	YESHUA_AND_PARNASSA("ישועה ופרנסה", "Yeshua and Parnassa", "Yeshua and Parnassa");
+	BANIM("זרע של קיימא", "Banim", "Zera Shel Kayama"), SOLDIERS("חיילים", "Soldiers", "Soldiers");
 
 	private String hebName;
 	private String visual;

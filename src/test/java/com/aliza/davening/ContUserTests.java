@@ -4,7 +4,6 @@ import static com.aliza.davening.entities.CategoryName.BANIM;
 import static com.aliza.davening.entities.CategoryName.REFUA;
 import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUA_AND_PARNASSA;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -88,24 +87,23 @@ public class ContUserTests {
 	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-	public static Category catYeshua = new Category(YESHUA_AND_PARNASSA, false, 180, 5);
 
 	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshua1 = new Davenfor(2, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfSoldiers1 = new Davenfor(2, "user1@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfSoldiers2 = new Davenfor(4, "user2@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
-	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
+	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfSoldiers1, dfBanim, dfSoldiers2);
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @Submitter controller test unexpected Exception: ";
 
 	@Test
 	@Order(1)
 	public void testGetSubmitterDavenfors() throws ObjectNotFoundException {
-		when(userService.getAllUserDavenfors("user1@gmail.com")).thenReturn(Arrays.asList(dfRefua, dfYeshua1));
+		when(userService.getAllUserDavenfors("user1@gmail.com")).thenReturn(Arrays.asList(dfRefua, dfSoldiers1));
 
 		try {
 			mockMvc.perform(get("/user/getmynames/{email}", "user1@gmail.com")).andDo(print())
@@ -139,7 +137,7 @@ public class ContUserTests {
 					.andExpect(jsonPath("$.messages[0]", containsString("spouse name (English and Hebrew)")));
 
 			when(userService.addDavenfor(any(), eq("user3@gmail.com"))).thenReturn(true);
-			String requestBodyGood = "{ \"email\": \"user3@gmail.com\", \"category\": \"YESHUA_AND_PARNASSA\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+			String requestBodyGood = "{ \"email\": \"user3@gmail.com\", \"category\": \"SOLIDERS\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 			mockMvc.perform(post("/user/{email}", "user3@gmail.com").content(requestBodyGood)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
@@ -154,7 +152,7 @@ public class ContUserTests {
 	@Test
 	@Order(3)
 	public void testUpdateDavenfor() {
-		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\" :\"YESHUA_AND_PARNASSA\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\" :\"SOLDIERS\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			when(userService.updateDavenfor(any(), eq("user1@gmail.com"), eq(false))).thenReturn(dfRefua);
@@ -227,7 +225,7 @@ public class ContUserTests {
 	public void testDeleteDavenfor() {
 		try {
 			when(userService.deleteDavenfor(1L, "user1@gmail.com", false))
-					.thenReturn(Arrays.asList(dfYeshua1, dfBanim, dfYeshua2));
+					.thenReturn(Arrays.asList(dfSoldiers1, dfBanim, dfSoldiers2));
 
 			mockMvc.perform(delete("/user/delete/{id}/{email}", "1", "user1@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(3))
@@ -262,11 +260,11 @@ public class ContUserTests {
 	public void testFindAllCategories() {
 		try {
 			when(userService.getAllCategories())
-					.thenReturn(Arrays.asList(catRefua, catBanim, catShidduchim, catSoldiers, catYeshua));
+					.thenReturn(Arrays.asList(catRefua, catBanim, catShidduchim, catSoldiers));
 
 			mockMvc.perform(get("/user/categories")).andDo(print()).andExpect(status().isOk())
-					.andExpect(jsonPath("$.length()").value(5)).andExpect(jsonPath("$[0]").value("refua"))
-					.andExpect(jsonPath("$[1]").value("banim")).andExpect(jsonPath("$[4]").value("yeshua_and_parnassa"));
+					.andExpect(jsonPath("$.length()").value(4)).andExpect(jsonPath("$[0]").value("refua"))
+					.andExpect(jsonPath("$[1]").value("banim")).andExpect(jsonPath("$[3]").value("soldiers"));
 
 			when(userService.getAllCategories()).thenThrow(new ObjectNotFoundException("System categories"));
 

@@ -4,7 +4,6 @@ import static com.aliza.davening.entities.CategoryName.BANIM;
 import static com.aliza.davening.entities.CategoryName.REFUA;
 import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUA_AND_PARNASSA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -99,8 +98,7 @@ public class ServiceAdminTests {
 	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-	public static Category catYeshua = new Category(YESHUA_AND_PARNASSA, false, 180, 5);
-	public static List<Category> categories = Arrays.asList(catRefua, catShidduchim, catBanim, catSoldiers, catYeshua);
+	public static List<Category> categories = Arrays.asList(catRefua, catShidduchim, catBanim, catSoldiers);
 
 	public static Admin admin1 = new Admin(1, adminEmail, adminPass, false, 7);
 	public static Admin admin2 = new Admin(2, "admin2@gmail.com", null, false, 7);
@@ -118,13 +116,13 @@ public class ServiceAdminTests {
 
 	public static Davenfor dfRefua = new Davenfor(1L, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshua1 = new Davenfor(4, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfSoldiers1 = new Davenfor(4, "user1@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfSoldiers2 = new Davenfor(4, "user2@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
-	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
+	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfSoldiers1, dfBanim, dfSoldiers2);
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @Admin service test unexpected Exception: ";
 
@@ -142,7 +140,6 @@ public class ServiceAdminTests {
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
 		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
 		when(categoryRep.findByCname(REFUA)).thenReturn(Optional.of(catRefua));
-		when(categoryRep.findByCname(YESHUA_AND_PARNASSA)).thenReturn(Optional.of(catYeshua));
 		when(categoryRep.findByCname(SOLDIERS)).thenReturn(Optional.of(catSoldiers));
 	}
 
@@ -368,7 +365,7 @@ public class ServiceAdminTests {
 		});
 		assertTrue(exception.getMessage().contains("id"));
 
-		when(davenforRep.findById(3L)).thenReturn(Optional.of(dfYeshua1));
+		when(davenforRep.findById(3L)).thenReturn(Optional.of(dfSoldiers1));
 		when(davenforRep.findAll()).thenReturn(davenfors);
 		try {
 			assertEquals(4, adminService.deleteDavenfor(3L).size());
@@ -472,8 +469,8 @@ public class ServiceAdminTests {
 	@Test
 	@Order(20)
 	public void findCurrentCategoryTest() {
-		when(categoryRep.getCurrent()).thenReturn(Optional.of(catYeshua));
-		assertEquals(catYeshua, adminService.findCurrentCategory());
+		when(categoryRep.getCurrent()).thenReturn(Optional.of(catSoldiers));
+		assertEquals(catSoldiers, adminService.findCurrentCategory());
 
 		verify(categoryRep, times(1)).getCurrent();
 	}
@@ -483,12 +480,12 @@ public class ServiceAdminTests {
 	public void previewWeeklyTest() {
 		// when(categoryRep.findById(3L)).thenReturn(Optional.empty());
 		when(categoryRep.findById(2L)).thenReturn(Optional.of(catShidduchim));
-		when(categoryRep.findById(5L)).thenReturn(Optional.of(catYeshua));
+		when(categoryRep.findById(5L)).thenReturn(Optional.of(catSoldiers));
 		when(categoryRep.findAll()).thenReturn(categories);
 
 		when(davenforRep.findAllDavenforByCategory(eq(SHIDDUCHIM.toString()))).thenReturn(Collections.emptyList());
-		when(davenforRep.findAllDavenforByCategory(eq(YESHUA_AND_PARNASSA.toString())))
-				.thenReturn(Arrays.asList(dfYeshua1, dfYeshua2));
+		when(davenforRep.findAllDavenforByCategory(eq(SOLDIERS.toString())))
+				.thenReturn(Arrays.asList(dfSoldiers1, dfSoldiers2));
 
 		Exception exception = assertThrows(ObjectNotFoundException.class, () -> {
 			adminService.previewWeekly(new Weekly("Vayera", "Vayera - וירא", 3L, "nonexistent", "message"));
@@ -502,10 +499,10 @@ public class ServiceAdminTests {
 			assertTrue(exception.getMessage().contains("no names"));
 
 			String html = adminService
-					.previewWeekly(new Weekly("Vayechi", "ויחי", 5L, "YESHUA_AND_PARNASSA", "message 2"));
+					.previewWeekly(new Weekly("Vayechi", "ויחי", 5L, "SOLDIERS", "message 2"));
 
 			assertTrue(html.contains("Vayechi"));
-			assertTrue(html.contains("Yeshua and Parnassa"));
+			assertTrue(html.contains("Soldiers"));
 			assertTrue(html.contains("Next week Refua"));
 
 			verify(categoryRep, times(1)).findAll(); // when printing good weekly, finds category of next week

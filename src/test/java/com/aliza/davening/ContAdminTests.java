@@ -4,7 +4,6 @@ import static com.aliza.davening.entities.CategoryName.BANIM;
 import static com.aliza.davening.entities.CategoryName.REFUA;
 import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUA_AND_PARNASSA;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,17 +101,16 @@ public class ContAdminTests {
 	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-	public static Category catYeshua = new Category(YESHUA_AND_PARNASSA, false, 180, 5);
 
 	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshua1 = new Davenfor(2, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה",
+	public static Davenfor dfSoldiers1 = new Davenfor(2, "user1@gmail.com", "Soldiers", "משה בן שרה",
 			"Moshe ben Sara", null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה",
+	public static Davenfor dfSoldiers2 = new Davenfor(4, "user2@gmail.com", "Soldiers", "עמרם בן שירה",
 			"Amram ben Shira", null, null, true, null, null, null, null, null);
-	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
+	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfSoldiers1, dfBanim, dfSoldiers2);
 
 	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false, "");
 	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false, "");
@@ -254,7 +252,7 @@ public class ContAdminTests {
 	@Order(7)
 	public void testDeleteDavenfor() {
 		try {
-			when(adminService.deleteDavenfor(1L)).thenReturn(Arrays.asList(dfYeshua1, dfBanim, dfYeshua2));
+			when(adminService.deleteDavenfor(1L)).thenReturn(Arrays.asList(dfSoldiers1, dfBanim, dfSoldiers2));
 
 			mockMvc.perform(delete("/admin/delete/{id}", 1)).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.length()").value(3)).andExpect(jsonPath("$[0].id").value(2))
@@ -443,7 +441,7 @@ public class ContAdminTests {
 	@Test
 	@Order(14)
 	public void testSendOutWeekly() {
-		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 5, \"cName\": \"yeshua_and_parnassa\", \"message\" : null}";
+		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 4, \"cName\": \"soldiers\", \"message\" : null}";
 
 		try {
 			when(emailSender.sendOutWeekly(any())).thenReturn(true);
@@ -478,7 +476,7 @@ public class ContAdminTests {
 	@Test
 	@Order(15)
 	public void testPreviewWeeklyOk() {
-		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 5, \"cName\": \"yeshua_and_parnassa\", \"message\" : null}";
+		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 4, \"cName\": \"soldiers\", \"message\" : null}";
 		try {
 			when(adminService.previewWeekly(any())).thenReturn("This seems to work");
 
@@ -495,7 +493,7 @@ public class ContAdminTests {
 	@Test
 	@Order(16)
 	public void testPreviewWeeklyEmptyInformation() {
-		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 5, \"cName\": \"yeshua_and_parnassa\", \"message\" : null}";
+		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 4, \"cName\": \"soldiers\", \"message\" : null}";
 
 		try {
 			when(adminService.previewWeekly(any()))
@@ -515,7 +513,7 @@ public class ContAdminTests {
 	@Test
 	@Order(17)
 	public void testPreviewWeeklyObjectNotFound() {
-		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 5, \"cName\": \"yeshua_and_parnassa\", \"message\" : null}";
+		String requestBody = "{\"parashaName\": \"Noach\", \"categoryId\": 4, \"cName\": \"soldiers\", \"message\" : null}";
 
 		try {
 			when(adminService.previewWeekly(any())).thenThrow(new ObjectNotFoundException("category of id 5"));
@@ -567,7 +565,7 @@ public class ContAdminTests {
 	@Order(19)
 	public void testUpdateNameByAdmin() {
 
-		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\" : \"yeshua_and_parnassa\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\" : \"soldiers\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			when(adminService.getAllDavenfors()).thenReturn(davenfors);
@@ -606,10 +604,10 @@ public class ContAdminTests {
 	@Order(20)
 	public void testUpdateDavenfor() {
 
-		String requestBody = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"yeshua_and_parnassa\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"soldiers\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
-			when(userService.updateDavenfor(any(), eq("user3@gmail.com"), eq(false))).thenReturn(dfYeshua1);
+			when(userService.updateDavenfor(any(), eq("user3@gmail.com"), eq(false))).thenReturn(dfSoldiers1);
 			mockMvc.perform(put("/admin/updatename/{email}", "user3@gmail.com").content(requestBody)
 					.contentType(MediaType.APPLICATION_JSON)).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.nameEnglish").value("Moshe ben Sara"))
@@ -646,8 +644,8 @@ public class ContAdminTests {
 	@Test
 	@Order(21)
 	public void testSendOutUrgent() {
-		String requestBody = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"yeshua_and_parnassa\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
-		String incompleteDf = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"yeshua_and_parnassa\",  \"nameEnglish\": \" \", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"soldiers\",  \"nameEnglish\": \"Moshe ben Sara\", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
+		String incompleteDf = "{ \"userEmail\": \"user3@gmail.com\", \"category\" : \"soldiers\",  \"nameEnglish\": \" \", \"nameHebrew\": \"משה בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			doNothing().when(emailSender).sendUrgentEmail(any());
@@ -672,11 +670,11 @@ public class ContAdminTests {
 	@Order(22)
 	public void testFindAllCategories() {
 		when(adminService.getAllCategories())
-				.thenReturn(Arrays.asList(catRefua, catBanim, catShidduchim, catSoldiers, catYeshua));
+				.thenReturn(Arrays.asList(catRefua, catBanim, catShidduchim, catSoldiers));
 		try {
 			mockMvc.perform(get("/admin/categories")).andDo(print()).andExpect(status().isOk())
 					.andExpect(jsonPath("$.length()").value(5)).andExpect(jsonPath("$[0]").value("refua"))
-					.andExpect(jsonPath("$[4]").value("yeshua_and_parnassa"));
+					.andExpect(jsonPath("$[4]").value("soldiers"));
 
 			when(adminService.getAllCategories()).thenReturn(Collections.emptyList());
 

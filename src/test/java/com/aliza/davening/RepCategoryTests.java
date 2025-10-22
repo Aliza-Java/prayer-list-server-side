@@ -90,12 +90,12 @@ public class RepCategoryTests {
 		categoryRep.save(c1);
 
 		Category c2 = new Category();
-		c2.setCname(CategoryName.YESHUA_AND_PARNASSA);
+		c2.setCname(CategoryName.SOLDIERS);
 		c2.setCatOrder(10);
 		categoryRep.save(c2);
 
 		long id1 = categoryRep.findByCname(CategoryName.REFUA).get().getId();
-		long id2 = categoryRep.findByCname(CategoryName.YESHUA_AND_PARNASSA).get().getId();
+		long id2 = categoryRep.findByCname(CategoryName.SOLDIERS).get().getId();
 
 		categoryRep.updateCategoryOrder(10, id1);
 		categoryRep.updateCategoryOrder(8, id2);
@@ -104,7 +104,7 @@ public class RepCategoryTests {
 		testEntityManager.refresh(categoryRep.findById(id2).get());
 
 		Optional<Category> retrieved1 = categoryRep.findByCname(CategoryName.REFUA);
-		Optional<Category> retrieved2 = categoryRep.findByCname(CategoryName.YESHUA_AND_PARNASSA);
+		Optional<Category> retrieved2 = categoryRep.findByCname(CategoryName.SOLDIERS);
 
 		assertTrue(retrieved1.get().getCatOrder() > retrieved2.get().getCatOrder());
 	}
@@ -118,14 +118,14 @@ public class RepCategoryTests {
 		categoryRep.save(c1);
 
 		Category c2 = new Category();
-		c2.setCname(CategoryName.YESHUA_AND_PARNASSA);
+		c2.setCname(CategoryName.SOLDIERS);
 		c2.setCurrent(true);
 		categoryRep.save(c2);
 
 		assertTrue(!c1.isCurrent() && c2.isCurrent());
 
 		long id1 = categoryRep.findByCname(CategoryName.REFUA).get().getId();
-		long id2 = categoryRep.findByCname(CategoryName.YESHUA_AND_PARNASSA).get().getId();
+		long id2 = categoryRep.findByCname(CategoryName.SOLDIERS).get().getId();
 
 		categoryRep.updateCategoryCurrent(true, id1);
 		categoryRep.updateCategoryCurrent(false, id2);
@@ -134,7 +134,7 @@ public class RepCategoryTests {
 		testEntityManager.refresh(categoryRep.findById(id2).get());
 
 		Optional<Category> retrieved1 = categoryRep.findByCname(CategoryName.REFUA);
-		Optional<Category> retrieved2 = categoryRep.findByCname(CategoryName.YESHUA_AND_PARNASSA);
+		Optional<Category> retrieved2 = categoryRep.findByCname(CategoryName.SOLDIERS);
 
 		assertTrue(retrieved1.get().isCurrent() && !retrieved2.get().isCurrent());
 	}
@@ -145,7 +145,7 @@ public class RepCategoryTests {
 	    EntityManager entityManager = testEntityManager.getEntityManager();
 
 		entityManager.createNativeQuery("INSERT INTO Category (id, cat_order, is_current, cname, update_rate) VALUES (11, 1, true, 'REFUA', 30)").executeUpdate();
-		entityManager.createNativeQuery("INSERT INTO Category (id, cat_order, is_current, cname, update_rate) VALUES (17, 2, false, 'YESHUA_AND_PARNASSA', 180)").executeUpdate();
+		entityManager.createNativeQuery("INSERT INTO Category (id, cat_order, is_current, cname, update_rate) VALUES (17, 2, false, 'SOLDIERS', 180)").executeUpdate();
 		entityManager.createNativeQuery("INSERT INTO Category (id, cat_order, is_current, cname, update_rate) VALUES (9, 3, false, 'BANIM', 180)").executeUpdate();
 
 		List<Category> orderedCats = categoryRep.findAllOrderById();
@@ -161,11 +161,11 @@ public class RepCategoryTests {
 		categoryRep.save(c1);
 
 		Category c2 = new Category();
-		c2.setCname(CategoryName.YESHUA_AND_PARNASSA);
+		c2.setCname(CategoryName.SOLDIERS);
 		categoryRep.save(c2);
 		
 		assertEquals("REFUA", categoryRep.findByCname(CategoryName.REFUA).get().getCname().toString());
-		assertEquals("YESHUA_AND_PARNASSA", categoryRep.findByCname(CategoryName.YESHUA_AND_PARNASSA).get().getCname().toString());
+		assertEquals("SOLDIERS", categoryRep.findByCname(CategoryName.SHIDDUCHIM).get().getCname().toString());
 		assertEquals(Optional.empty(), categoryRep.findByCname(CategoryName.SOLDIERS));
 	}
 
