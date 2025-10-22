@@ -280,6 +280,46 @@ public class UserService {
 
 		return davenforToExtend;
 	}
+	
+	// TODO - delete this as soon as combinedExtend is in use.  This is just temporary
+		public Davenfor extendDavenforTemp(long davenforId, String token)
+				throws ObjectNotFoundException, EmptyInformationException {
+
+			if (token == null) {
+				throw new EmptyInformationException("No associated email address was received. ");
+			}
+
+			Optional<Davenfor> optionalDavenfor = davenforRepository.findById(davenforId);
+			if (!optionalDavenfor.isPresent()) {
+				throw new ObjectNotFoundException("Name with id: " + davenforId);
+			}
+
+			Davenfor davenforToExtend = optionalDavenfor.get();
+
+			// todo* in future - validity checks on email. How long is it valid for?
+//			String email = jwtUtils.extractEmailFromToken(token);
+
+//			if (!davenforToExtend.getUserEmail().equalsIgnoreCase(email)) {
+//				throw new PermissionException(
+//						"This name is registered under a different email address.  You do not have the permission to update it.");
+//			}
+
+			// Extending the davenfor's expiration date according to the defined length in
+			// its category.
+			// Category categoryObj = Category.getCategory(davenforToExtend.getCategory());
+			// LocalDate extendedDate =
+			// LocalDate.now().plusDays(categoryObj.getUpdateRate());
+			// davenforRepository.extendExpiryDate(davenforId, extendedDate,
+			// LocalDate.now());
+
+			if (davenforToExtend.wasDeleted())
+				davenforRepository.reviveDavenfor(davenforId);
+
+			davenforRepository.setConfirmedAt(LocalDateTime.now(), davenforId);
+
+			return davenforToExtend;
+		}
+
 
 	// tested
 	public List<Davenfor> deleteDavenfor(long davenforId, String auth, boolean viaEmail)

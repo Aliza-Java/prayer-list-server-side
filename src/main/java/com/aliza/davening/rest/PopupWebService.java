@@ -113,6 +113,25 @@ public class PopupWebService {
 
 	}
 
+	@GetMapping("extend/{id}/{token}")
+	public ResponseEntity<Boolean> extendDavenforTemp(@PathVariable long id, @PathVariable String token, Model model) {
+
+		model.addAttribute("client", client);
+
+		try {
+			davenforRepository.findByIdIncludingDeleted(id).get();
+			userService.extendDavenforTemp(id, token);
+		} catch (Exception e) {
+			// model.addAttribute("message", "There was a problem confirming this name");
+			// model.addAttribute("reason", e.getMessage());
+			return ResponseEntity.ok(false); // maps to `src/main/resources/templates/extend-problem.html` due to
+												// Thymeleaf
+		}
+
+		return ResponseEntity.ok(true);
+
+	}
+	
 	// to test
 	@PostMapping("preview")
 	@ResponseBody
