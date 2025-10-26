@@ -30,7 +30,7 @@ public class DaveningApplication {
 		builder.headless(false);
 		@SuppressWarnings("unused")
 		ConfigurableApplicationContext context = builder.run(args);
-		System.out.println("Version update: 2025-oct-26-1-25 - limit list size while sorting shidduchim");
+		System.out.println("Version update: 2025-oct-26-1-40 - limit list size while sorting shidduchim");
 
 //		String content="didn't go through try";
 //		try {

@@ -1,4 +1,4 @@
-spackage com.aliza.davening.util_classes;
+package com.aliza.davening.util_classes;
 
 import java.util.Arrays;
 import java.util.Comparator;
