@@ -70,12 +70,12 @@ public class RepDavenforTests {
 	@Test
 	@Order(2)
 	public void setConfirmedAtTest() {
-		Davenfor dfYeshua = new Davenfor(2L, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
+		Davenfor dfSoldiers = new Davenfor(2L, "user1@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara",
 				null, null, true, null, null, null, null, null);
-		dfYeshua.setConfirmedAt(LocalDateTime.now().minusDays(3));
-		davenforRep.save(dfYeshua);
+		dfSoldiers.setConfirmedAt(LocalDateTime.now().minusDays(3));
+		davenforRep.save(dfSoldiers);
 
-		assertTrue(dfYeshua.getConfirmedAt().isBefore(LocalDateTime.now()));
+		assertTrue(dfSoldiers.getConfirmedAt().isBefore(LocalDateTime.now()));
 		Long savedId = davenforRep.findAll().get(0).getId();
 		LocalDateTime now = LocalDateTime.now();
 		davenforRep.setConfirmedAt(now, savedId);
@@ -90,11 +90,11 @@ public class RepDavenforTests {
 //	@Order(3)
 //	public void findByExpireAtLessThanTest() {
 //
-//		Davenfor df1 = new Davenfor(3L, "early@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara", null, null, true,
+//		Davenfor df1 = new Davenfor(3L, "early@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara", null, null, true,
 //				null, null, null, null, null);
 //		Davenfor df2 = new Davenfor(4L, "early@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 //				"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-//		Davenfor df3 = new Davenfor(5L, "late@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira", null, null,
+//		Davenfor df3 = new Davenfor(5L, "late@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira", null, null,
 //				true, null, null, null, null, null);
 //		df1.setExpireAt(LocalDate.now().minusDays(2));
 //		df2.setExpireAt(LocalDate.now().minusDays(4));
@@ -112,13 +112,13 @@ public class RepDavenforTests {
 	@Test
 	@Order(5)
 	public void findAllDavenforBySubmitterEmailTest() {
-		Davenfor df1 = new Davenfor(-1, "user1@gmail.com", "Yeshua_and_Parnassa", "אברהם בן שרה", "Avraham ben Sara",
+		Davenfor df1 = new Davenfor(-1, "user1@gmail.com", "Soldiers", "אברהם בן שרה", "Avraham ben Sara",
 				null, null, true, null, null, null, null, null);
-		Davenfor df2 = new Davenfor(-1, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara", null,
+		Davenfor df2 = new Davenfor(-1, "user1@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara", null,
 				null, true, null, null, null, null, null);
-		Davenfor df3 = new Davenfor(-1, "user2@gmail.com", "Yeshua_and_Parnassa", "אברהם בן שרה", "Avraham ben Sara",
+		Davenfor df3 = new Davenfor(-1, "user2@gmail.com", "Soldiers", "אברהם בן שרה", "Avraham ben Sara",
 				"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-		Davenfor df4 = new Davenfor(-1, "user1@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira",
+		Davenfor df4 = new Davenfor(-1, "user1@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira",
 				null, null, true, null, null, null, null, null);
 		davenforRep.save(df1);
 		davenforRep.save(df2);
@@ -132,11 +132,11 @@ public class RepDavenforTests {
 	@Test
 	@Order(6)
 	public void findAllDavenforByCategoryTest() {
-		Davenfor df1 = new Davenfor(13L, "user1@gmail.com", "Yeshua_and_Parnassa", "אברהם בן שרה", "Avraham ben Sara",
+		Davenfor df1 = new Davenfor(13L, "user1@gmail.com", "Soldiers", "אברהם בן שרה", "Avraham ben Sara",
 				null, null, true, null, null, null, null, null);
 		Davenfor df2 = new Davenfor(14L, "user2@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara", null, null,
 				true, null, null, null, null, null);
-		Davenfor df3 = new Davenfor(15L, "user3@gmail.com", "Yeshua_and_Parnassa", "אברהם בן שרה", "Avraham ben Sara",
+		Davenfor df3 = new Davenfor(15L, "user3@gmail.com", "Soldiers", "אברהם בן שרה", "Avraham ben Sara",
 				"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
 		Davenfor df4 = new Davenfor(16L, "user4@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira", null, null,
 				true, null, null, null, null, null);

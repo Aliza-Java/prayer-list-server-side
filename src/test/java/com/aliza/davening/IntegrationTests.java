@@ -4,7 +4,6 @@ import static com.aliza.davening.entities.CategoryName.BANIM;
 import static com.aliza.davening.entities.CategoryName.REFUA;
 import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUA_AND_PARNASSA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.doNothing;
@@ -100,17 +99,16 @@ public class IntegrationTests {
 	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-	public static Category catYeshua = new Category(YESHUA_AND_PARNASSA, false, 180, 5);
 
 	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshua1 = new Davenfor(2, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara",
+	public static Davenfor dfSoldiers1 = new Davenfor(2, "user1@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara",
 			null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira",
+	public static Davenfor dfSoldiers2 = new Davenfor(4, "user2@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira",
 			null, null, true, null, null, null, null, null);
-	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
+	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfSoldiers1, dfBanim, dfSoldiers2);
 
 	public static User user1 = new User(1, null, "user1@gmail.com", "Israel", null, null, false, "");
 	public static User user2 = new User(2, null, "user2@gmail.com", "Israel", null, null, false, "");
@@ -142,11 +140,11 @@ public class IntegrationTests {
 
 		davenforRepository.save(new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara", null,
 				null, true, null, null, null, null, null));
-		davenforRepository.save(new Davenfor(2, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה", "Moshe ben Sara", null, null,
+		davenforRepository.save(new Davenfor(2, "user1@gmail.com", "Soldiers", "משה בן שרה", "Moshe ben Sara", null, null,
 				true, null, null, null, null, null));
 		davenforRepository.save(new Davenfor(3, "user2@gmail.com", "Banim", "יצחק בן שרה", "Yitzchak ben Sara",
 				"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null));
-		davenforRepository.save(new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה", "Amram ben Shira", null,
+		davenforRepository.save(new Davenfor(4, "user2@gmail.com", "Soldiers", "עמרם בן שירה", "Amram ben Shira", null,
 				null, true, null, null, null, null, null));
 		davenforRepository.save(new Davenfor(5, "user2@gmail.com", "Banim", "יוסף בן שירה", "Yosef ben Shira", null,
 				null, true, null, null, null, null, null));
@@ -223,8 +221,8 @@ public class IntegrationTests {
 	public void testFindAllCategories() {
 		try {
 			mockMvc.perform(get("/admin/categories")).andDo(print()).andExpect(status().isOk())
-					.andExpect(jsonPath("$.length()").value(5)).andExpect(jsonPath("$[0]").value("refua"))
-					.andExpect(jsonPath("$[4]").value("yeshua_and_parnassa"));
+					.andExpect(jsonPath("$.length()").value(4)).andExpect(jsonPath("$[0]").value("refua"))
+					.andExpect(jsonPath("$[3]").value("soldiers"));
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -239,7 +237,7 @@ public class IntegrationTests {
 		try {
 			mockMvc.perform(delete("/user/delete/{id}/{email}", 3L, "user2@gmail.com")).andDo(print())
 					.andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2))
-					.andExpect(jsonPath("$[0].id").value("5")) //first banim and then yeshua_and_parassa
+					.andExpect(jsonPath("$[0].id").value("5")) //first banim and then  soldiers
 					.andExpect(jsonPath("$[1].id").value("4"));
 		} catch (Exception e) {
 			System.out.println(UNEXPECTED_E + e.getStackTrace());
@@ -265,7 +263,7 @@ public class IntegrationTests {
 	@Test
 	@Order(9)
 	public void testAddDavenfor() {
-		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\": \"YESHUA_AND_PARNASSA\",  \"nameEnglish\": \"Yossi ben Sara\", \"nameHebrew\": \"יוסי בן שרה\", \"submitterToReceive\": true }";
+		String requestBody = "{ \"email\": \"user3@gmail.com\", \"category\": \"SOLDIERS\",  \"nameEnglish\": \"Yossi ben Sara\", \"nameHebrew\": \"יוסי בן שרה\", \"submitterToReceive\": true }";
 
 		try {
 			mockMvc.perform(

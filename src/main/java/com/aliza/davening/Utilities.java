@@ -7,11 +7,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.Collator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import org.openqa.selenium.Dimension;
@@ -93,8 +96,11 @@ public class Utilities {
 
 		// Start with minimal window size
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars",
-				"--window-size=670,1300");
+		int calculatedHeight = calculateDocHeight(category);
+		System.out.println("calculated height is " + calculatedHeight);
+		
+		String customWindowSize = String.format("--window-size=665, %d", calculatedHeight);
+		options.addArguments("--headless", "--disable-gpu", "--no-sandbox", "--hide-scrollbars", customWindowSize);
 
 		WebDriverManager.chromedriver().setup();
 		WebDriver driver = new ChromeDriver(options);
@@ -103,26 +109,41 @@ public class Utilities {
 		driver.get("data:text/html;charset=utf-8," + weeklyHtml);
 		try {
 			Thread.sleep(2000);
-		} catch (InterruptedException e1) {
+		} catch (InterruptedException e) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
 
 		// Get [largest] EXACT content dimensions
 		JavascriptExecutor js = (JavascriptExecutor) driver;
-		long contentWidth = (long) js.executeScript("return Math.max(" + "document.body.scrollWidth, "
-				+ "document.body.offsetWidth, " + "document.documentElement.clientWidth, "
-				+ "document.documentElement.scrollWidth, " + "document.documentElement.offsetWidth" + ");");
+//		long contentWidth = (long) js.executeScript("return Math.max(" + "document.body.scrollWidth, "
+//				+ "document.body.offsetWidth, " + "document.documentElement.clientWidth, "
+//				+ "document.documentElement.scrollWidth, " + "document.documentElement.offsetWidth" + ");");
+//		System.out.println(contentWidth + " is the max of scrollWidth, offsetWidth, clientWidth, scrollWidth2 and offsetWidth2");
 
 		long contentHeight = (long) js.executeScript("return Math.max(" + "document.body.scrollHeight, "
 				+ "document.body.offsetHeight, " + "document.documentElement.clientHeight, "
 				+ "document.documentElement.scrollHeight, " + "document.documentElement.offsetHeight" + ");");
+		System.out.println(contentHeight + " is the max of scrollHeight, offsetHeight, clientHeight, sccrollHeight2 and offsetHeight2");
 
-		// Set window to EXACT content size
-		driver.manage().window().setSize(new Dimension((int) Math.max(contentWidth, 670),
-				(int) Math.max(calculateDocHeight(category), (int) contentHeight)));
+		// Set window to EXACT content size		
+		//int finalWidth = (int) Math.max(contentWidth, 665);
+		int finalWidth = 665;
+		//System.out.println("final width is 665");
+		
+		int finalHeight = (int) Math.max(calculatedHeight, (int) contentHeight);
+		System.out.println("final height is " + finalHeight);
+
+		System.out.println(driver.manage().window().getSize());
+
+		driver.manage().window().setSize(new Dimension(finalWidth, finalHeight));
+		
+		System.out.println("after set it to width: " + finalWidth + " and height: " + finalHeight + " got:");
+		System.out.println(driver.manage().window().getSize());	
+
+		
 		try {
 			Thread.sleep(1000);
-		} catch (InterruptedException e2) {
+		} catch (InterruptedException e) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
 
@@ -130,12 +151,9 @@ public class Utilities {
 		js.executeScript("window.scrollTo(0, 0);");
 		try {
 			Thread.sleep(500);
-		} catch (InterruptedException e1) {
+		} catch (InterruptedException e) {
 			System.out.println("There was an error with the thread sleeping: " + e.getMessage());
 		}
-
-		System.out.println("Content Width: " + contentWidth);
-		System.out.println("Content Height: " + contentHeight);
 
 		try {
 			ScreenshotHelper.captureScreenshot(driver, fileNameInFolder);
@@ -245,29 +263,38 @@ public class Utilities {
 		return message;
 	}
 
-	public String setExpiringNameMessage(List<Davenfor> davenfors) {
+	public String setExpiringNameMessage(List<Davenfor> davenfors, String category) {
+		String link = emailSender.getLinkCombinedConfirm(davenfors, category);
 
-		String categoryName = Category.getCategory(davenfors.get(0).getCategory()).getCname().getVisual();
-		String name;
 		StringBuilder sb = new StringBuilder(String.format(
-				" <br>This week, the list being sent out will include names under the <b>%s</b> category.  In order to keep our list relevant, please confirm:",
-				categoryName));
-		sb.append("<table cellspacing='6' cellpadding='2'> <tbody> ");
-		for (Davenfor d : davenfors) {
-			name = d.getNameEnglish().trim().length() == 0 ? d.getNameHebrew() : d.getNameEnglish();
-			sb.append(
-					"<tr><td colspan='2' style='padding-top: 20px; padding-bottom: 6px; font-size: 16px; font-family: Helvetica, Arial, sans-serif;'>");
-			sb.append(String.format("Should we continue davening for <b>%s</b>?", name));
-			sb.append("</td></tr>");
-			sb.append("<tr>");
-			sb.append(createButton(emailSender.getLinkToExtend(d), "#32a842", "Yes"));
-			sb.append(createButton(emailSender.getLinkToDelete(d), "#d10a3f", "No"));
-			sb.append("</tr>");
-		}
+				" <br>This week, the list being sent out will include names under the <b>%s</b> category.  <br>In order to keep our list relevant, please confirm the names you have submitted in this category.  <br> <br> You can do so by clicking the button below:",
+				category));
 
-		sb.append("</table>");
+		sb.append(createSingleButton(link, "#32a842", "Confirm my submitted names"));
+
 		sb.append(
-				"<b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+				"<br><b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+
+		sb.append("<br><br>Let us know if you need any help!");
+		sb.append("<br>The Emek Hafrashat Challah Davening List team");
+
+		return sb.toString();
+	}
+
+	public String setWasDeletedMessage(List<Davenfor> davenfors, String categoryName) {
+		String link = emailSender.getLinkCombinedDeleted(davenfors, categoryName);
+
+		StringBuilder sb = new StringBuilder("Hi! <br>");
+		sb.append(String.format(
+				"We tried reaching out, but since we didn’t hear back, there were some names in the <b>%s</b> category have been removed from our Davening list as part of our cleanup process. <br><br>",
+				categoryName));
+		sb.append(
+				"No worries though — if you want, you can easily repost any of the removed names (although they might not be included in this week's list).  Just click the button to view the names: <br>");
+
+		sb.append(createSingleButton(link, "#32a842", "My names might still be relevant"));
+
+		sb.append("<br>Let us know if you need any help!");
+		sb.append("<br>The Emek Hafrashat Challah Davening List team");
 
 		return sb.toString();
 	}
@@ -277,7 +304,7 @@ public class Utilities {
 		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Davenfor> categoryDavenfors = davenforRepository.findAllDavenforByCategory(category.getCname().toString());
+		List<Davenfor> categoryDavenfors = getAllDavenfors(category.getCname().toString()); 
 
 		if (categoryDavenfors.isEmpty()) {
 			throw new EmptyInformationException("There are no names to daven for in this category. ");
@@ -318,7 +345,7 @@ public class Utilities {
 					EmailScheme.banimLineHebrew));
 
 			// Inserting in one box both name and spouse name. If spouse name is null (it is
-			// not mandatory), just put an empty string.
+			// not mandatory), just put an empty string. //todo: this is not true anymore, but doesn't affect the outcome
 			for (Davenfor d : categoryDavenfors) {
 				stringBuilder.append(String.format(EmailScheme.htmlBanimRowInList, d.getNameEnglish(),
 						d.getNameEnglishSpouse() != null ? d.getNameEnglishSpouse() : "", d.getNameHebrew(),
@@ -389,19 +416,57 @@ public class Utilities {
 	public long getDaysInMs(int daysNumber) {
 		return daysNumber * 24 * 60 * 60 * 1000;
 	}
+	
+	public List<Davenfor> getAllDavenfors(String categoryName) {
+		List<Davenfor> list = davenforRepository.findAllDavenforByCategory(categoryName);
+		if ("shidduchim".equalsIgnoreCase(categoryName)) {
+            list.sort((d1, d2) -> {
+                boolean d1Contains = containsBatOrBas(d1.getName());
+                boolean d2Contains = containsBatOrBas(d2.getName());
 
+                // Put names that contain "bat"/"bas"/"בת" first
+                if (d1Contains && !d2Contains) return -1;
+                if (!d1Contains && d2Contains) return 1;
+
+                // If both are the same category, sort alphabetically
+                return d1.getName().compareToIgnoreCase(d2.getName());
+            });
+        }
+
+        return list;
+	}
+	
+	private static final Collator collator = Collator.getInstance(new Locale("he", "IL"));
+
+    public static Comparator<Davenfor> batFirstComparator() {
+        return (d1, d2) -> {
+            boolean d1Contains = containsBatOrBas(d1.getName());
+            boolean d2Contains = containsBatOrBas(d2.getName());
+
+            if (d1Contains && !d2Contains) return -1;
+            if (!d1Contains && d2Contains) return 1;
+
+            return collator.compare(d1.getName(), d2.getName());
+        };
+    }
+
+    private static boolean containsBatOrBas(String name) {
+        if (name == null) return false;
+        String lower = name.toLowerCase();
+        return lower.contains(" bat ") || lower.contains(" bas ") || lower.contains(" בת ");
+    }
+
+    //It's a delicate balance of matching the --window-size (the initial screen size holding the image),
+    //the screen.size() (the size of the camera lens) and matching it all to the outcoming html.
+    //currently I set width to be fixed (665) because that works best, and height according to the formula below.
 	private int calculateDocHeight(Category category) {
 		int davenforAmount = davenforRepository.findAllDavenforByCategory(category.getCname().toString()).size();
-		int multiply = 1; // one line per davenfor.
-
-		if (Category.isBanim(category.getCname().toString()))
-			multiply = 2;
+		int multiply = Category.isBanim(category.getCname().toString()) ? 2 : 1; // one line per davenfor unless banim.
 
 		// row height currently
-		int rowHeight = 33;
+		int rowHeight = 31; //this is the height that works.  larger makes a long gap at the bottom, and shorter (might) cut it off
 
-		// base amount is 200, plus 10px buffer, plus more - testing the window height
-		// buffer problem
-		return 210 + (davenforAmount * rowHeight * multiply);
+		//6 info lines added to every list
+		return 100 + ((davenforAmount+6) * rowHeight * multiply);
 	}
 }

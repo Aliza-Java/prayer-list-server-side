@@ -96,7 +96,7 @@ public class EmailScheme {
 	public static final String weeklyFileName = "Hafrashat Challah Davening List %s";
 
 	// putting one message first, in bold, with new line before other text.
-	public static final String boldFirstMessage = "<h4>%s</h4>%s"; //todo* in future - make not bold
+	public static final String boldFirstMessage = "<h4>%s</h4>%s"; // todo* in future - make not bold
 
 	// putting second message, in bold, on new line after other text.
 	public static final String boldSecondMessage = "%s<h4>%s</h4>";
@@ -123,12 +123,8 @@ public class EmailScheme {
 
 	public static final String deleteNameAdminMessage = "We want to let you know that the name <b>%s</b> from the <b>%s</b> category has been removed from the Hafrashat Challah Davening list by <b>%s</b>.";
 
-	public static final String nameAutoDeletedUserSubject = "Missed Our Alerts? You Can Still Repost Your Davening Name (Internal code: %s)";
-
-	public static final String nameAutoDeletedUserMessage = "Hi! <br> We tried reaching out, but since we didn’t hear back, the name for Davening <b>%s</b> has been removed from our <b>%s</b> category as part of our cleanup process. <br> "
-			+ "No worries though — if you'd like to repost this name (although it might not be included in this week's list), you can do so easily by clicking the button below: <br>"
-			+ "<div>%s </div>" + "Let us know if you need any help! <br>"
-			+ "The Emek Hafrashat Challah Davening List team";
+	public static final String nameAutoDeletedUserSubjectOne = "Missed Our Alerts? You Can Still Repost Your Davening Name";
+	public static final String nameAutoDeletedUserSubjectMultiple = "Missed Our Alerts? You Can Still Repost Your Davening Names";
 
 	public static final String unconfirmedSubject = "Names automatically deleted this week";
 
@@ -148,7 +144,7 @@ public class EmailScheme {
 		sb.append(category);
 		sb.append(" have been automatically removed this week, as they were not confirmed by users: <br>");
 		names.forEach(n -> sb
-				.append((n.getNameEnglish().trim().length() == 0 ? n.getNameHebrew() : n.getNameEnglish()) + "<br>"));
+				.append((n.getName()) + "<br>"));
 
 		return sb.toString();
 	}

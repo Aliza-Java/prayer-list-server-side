@@ -57,8 +57,8 @@ public class MaintainList { // TODO*: tests for all these
 		adminService.updateCurrentCategory();
 		Category currentCategory = adminService.findCurrentCategory();
 		davenforRepository.clearConfirmedAt(currentCategory.getCname().toString());
-		System.out.println("End updateNewWeek().  New category: " + currentCategory.getCname().getVisual() + ", new parasha: "
-				+ adminService.findCurrentParasha().getEnglishName());
+		System.out.println("End updateNewWeek().  New category: " + currentCategory.getCname().getVisual()
+				+ ", new parasha: " + adminService.findCurrentParasha().getEnglishName());
 	}
 
 	// for each category going to be sent out, Sends email to davenfor's submitter
@@ -67,31 +67,26 @@ public class MaintainList { // TODO*: tests for all these
 	@Scheduled(cron = "0 5 2 * * SUN", zone = "Asia/Jerusalem")
 	public void offerExtensionOrDelete() {
 		System.out.println("Begin offerExtensionOrDelete()");
-		// List<Davenfor> expiredDavenfors =
-		// davenforRepository.findByExpireAtLessThan(LocalDate.now());
+
 		Category currentCategory = categoryRepository.getCurrent().get();
 		CategoryName categoryName = currentCategory.getCname();
-		//At first Lynne said these not all the time, then she said yes
-		//if (categoryName.equals(SHIDDUCHIM) || categoryName.equals(BANIM))
-		//	return;
 
 		List<Davenfor> relevantDavenfors = davenforRepository.findAllDavenforByCategory(categoryName.toString());
-
 		System.out.println("Davenfors in question: " + relevantDavenfors.size());
-		
+
 		// Group the davenfors by user email
 		Map<String, List<Davenfor>> davenforsByUser = relevantDavenfors.stream()
-		    .collect(Collectors.groupingBy(Davenfor::getUserEmail));
+				.collect(Collectors.groupingBy(Davenfor::getUserEmail));
 
 		// Send one email per user with all their davenfors
 		for (Map.Entry<String, List<Davenfor>> entry : davenforsByUser.entrySet()) {
-		    String userEmail = entry.getKey();
-		    List<Davenfor> userDavenfors = entry.getValue();
+			String userEmail = entry.getKey();
+			List<Davenfor> userDavenfors = entry.getValue();
 
-		    emailSender.offerExtensionOrDelete(userDavenfors, userEmail);
-		    System.out.println(String.format("Emailed %s about %d davenfor(s)", userEmail, userDavenfors.size()));
+			emailSender.offerExtensionOrDelete(userDavenfors, userEmail, categoryName.getVisual());
+			System.out.println(String.format("Emailed %s about %d davenfor(s)", userEmail, userDavenfors.size()));
 		}
-		
+
 		System.out.println("End offerExtensionOrDelete()");
 	}
 
@@ -103,24 +98,33 @@ public class MaintainList { // TODO*: tests for all these
 		// TODO*: when add more admins, will need to add admin_id to each davenfor
 		// (unless in different DBs?)
 		System.out.println("Begin deleteUnconfirmed()");
-
 		Category category = adminService.findCurrentCategory();
-		String categoryDb = category.getCname().toString();
-		System.out.println(String.format("Starting with %d davenfors in the %s category. ", davenforRepository.findAllDavenforByCategory(categoryDb).size(), categoryDb));
-		List<Davenfor> unconfirmed = davenforRepository.findAllByCategoryAndConfirmedAtIsNull(categoryDb);
-		
-		if (unconfirmed.size() > 0)
-		{
-		unconfirmed.forEach(u -> {
-			davenforRepository.softDeleteById(u.getId());
-			emailSender.notifyUserDeletedName(u);
-		});
-		emailSender.informAdmin(EmailScheme.unconfirmedSubject, EmailScheme
-				.createUnconfirmedMessage(category.getCname().getVisual(), unconfirmed));
+		String categoryDbName = category.getCname().toString();
+		System.out.println(String.format("Starting with %d davenfors in the %s category. ",
+				davenforRepository.findAllDavenforByCategory(categoryDbName).size(), categoryDbName));
+		List<Davenfor> unconfirmed = davenforRepository.findAllByCategoryAndConfirmedAtIsNull(categoryDbName);
 
-		System.out.println(String.format("End deleteUnconfirmed() - now have %d davenfors in the %s category. ", davenforRepository.findAllDavenforByCategory(categoryDb).size(), categoryDb));
-		}
-		else
+		if (unconfirmed.size() > 0) {
+			// Group the davenfors by user email
+			Map<String, List<Davenfor>> davenforsByUser = unconfirmed.stream()
+					.collect(Collectors.groupingBy(Davenfor::getUserEmail));
+
+			// Send one email per user with all their davenfors
+			for (Map.Entry<String, List<Davenfor>> entry : davenforsByUser.entrySet()) {
+				String userEmail = entry.getKey();
+				List<Davenfor> userDavenfors = entry.getValue();
+				userDavenfors.forEach(d -> davenforRepository.softDeleteById(d.getId()));
+				emailSender.notifyUserDeletedName(userDavenfors, userEmail, category.getCname().getVisual());
+				System.out.println(
+						String.format("Emailed %s about %d deleted davenfor(s)", userEmail, userDavenfors.size()));
+			}
+
+			emailSender.informAdmin(EmailScheme.unconfirmedSubject,
+					EmailScheme.createUnconfirmedMessage(category.getCname().getVisual(), unconfirmed));
+
+			System.out.println(String.format("End deleteUnconfirmed() - now have %d davenfors in the %s category. ",
+					davenforRepository.findAllDavenforByCategory(categoryDbName).size(), categoryDbName));
+		} else
 			System.out.println("End deleteUnconfirmed().  No relevant davenfors were found to delete.");
 	}
 

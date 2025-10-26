@@ -4,7 +4,6 @@ import static com.aliza.davening.entities.CategoryName.BANIM;
 import static com.aliza.davening.entities.CategoryName.REFUA;
 import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUA_AND_PARNASSA;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -115,8 +114,7 @@ public class ServiceEmailSenderTests {
 	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-	public static Category catYeshua = new Category(YESHUA_AND_PARNASSA, false, 180, 5);
-	public static List<Category> categories = Arrays.asList(catRefua, catShidduchim, catBanim, catSoldiers, catYeshua);
+	public static List<Category> categories = Arrays.asList(catRefua, catShidduchim, catBanim, catSoldiers);
 
 	public static Admin admin1 = new Admin(1, adminEmail, adminPass, false, 7);
 	public static Admin admin2 = new Admin(2, "admin2@gmail.com", null, false, 7);
@@ -134,13 +132,13 @@ public class ServiceEmailSenderTests {
 
 	public static Davenfor dfRefua = new Davenfor(1, "user1@gmail.com", "Refua", "אברהם בן שרה", "Avraham ben Sara",
 			null, null, true, null, null, null, null, null);
-	public static Davenfor dfYeshua1 = new Davenfor(4, "user1@gmail.com", "Yeshua_and_Parnassa", "משה בן שרה",
+	public static Davenfor dfSoldiers1 = new Davenfor(4, "user1@gmail.com", "Soldiers", "משה בן שרה",
 			"Moshe ben Sara", null, null, true, null, null, null, null, null);
 	public static Davenfor dfBanim = new Davenfor(3, "user2@gmail.com", "Banim", "אברהם בן שרה", "Avraham ben Sara",
 			"יהודית בת מרים", "Yehudit bat Miriam", true, null, null, null, null, null);
-	public static Davenfor dfYeshua2 = new Davenfor(4, "user2@gmail.com", "Yeshua_and_Parnassa", "עמרם בן שירה",
+	public static Davenfor dfSoldiers2 = new Davenfor(4, "user2@gmail.com", "Soldiers", "עמרם בן שירה",
 			"Amram ben Shira", null, null, true, null, null, null, null, null);
-	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfYeshua1, dfBanim, dfYeshua2);
+	public static List<Davenfor> davenfors = Arrays.asList(dfRefua, dfSoldiers1, dfBanim, dfSoldiers2);
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @EmailSenderTest unexpected Exception: ";
 
@@ -154,7 +152,6 @@ public class ServiceEmailSenderTests {
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
 		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
 		when(categoryRep.findByCname(REFUA)).thenReturn(Optional.of(catRefua));
-		when(categoryRep.findByCname(YESHUA_AND_PARNASSA)).thenReturn(Optional.of(catYeshua));
 		when(categoryRep.findByCname(SOLDIERS)).thenReturn(Optional.of(catSoldiers));
 	}
 
@@ -249,8 +246,7 @@ public class ServiceEmailSenderTests {
 
 		// In prod, gets initialized upon first initialization of the program
 		Category.categories = Arrays.asList(new Category(REFUA, false, 180, 1), new Category(SHIDDUCHIM, true, 40, 2),
-				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 30, 4),
-				new Category(YESHUA_AND_PARNASSA, false, 180, 5));
+				new Category(BANIM, false, 50, 3), new Category(SOLDIERS, false, 30, 4));
 
 		when(categoryRep.findById(2L)).thenReturn(Optional.empty());
 
@@ -264,10 +260,10 @@ public class ServiceEmailSenderTests {
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
 
-		Weekly info = new Weekly("Vayeshev", "וישב", 5L, "YESHUA_AND_PARNASSA", "special information");
+		Weekly info = new Weekly("Vayeshev", "וישב", 5L, "SOLDIERS", "special information");
 
 		try {
-			when(davenforRep.findAllDavenforByCategory(YESHUA_AND_PARNASSA.toString()))
+			when(davenforRep.findAllDavenforByCategory(SOLDIERS.toString()))
 					.thenReturn(Collections.emptyList());
 
 			exception = assertThrows(EmptyInformationException.class, () -> {
@@ -275,7 +271,7 @@ public class ServiceEmailSenderTests {
 			});
 			assertTrue(exception.getMessage().contains("no names"));
 
-			when(davenforRep.findAllDavenforByCategory(any())).thenReturn(Arrays.asList(dfYeshua1, dfYeshua2));
+			when(davenforRep.findAllDavenforByCategory(any())).thenReturn(Arrays.asList(dfSoldiers1, dfSoldiers2));
 			emailSender.sendOutWeekly(info);
 
 			// Verify that the email was sent
@@ -336,10 +332,10 @@ public class ServiceEmailSenderTests {
 		}
 		when(userRep.getAllUsersEmails()).thenReturn(users.stream().map(User::getEmail).collect(Collectors.toList()));
 		when(categoryRep.findAll()).thenReturn(categories);
-		when(davenforRep.findAllDavenforByCategory("YESHUA_AND_PARNASSA"))
-				.thenReturn(Arrays.asList(dfYeshua1, dfYeshua2));
+		when(davenforRep.findAllDavenforByCategory("SOLDIERS"))
+				.thenReturn(Arrays.asList(dfSoldiers1, dfSoldiers2));
 
-		Weekly info = new Weekly(null, null, 5L, "YESHUA_AND_PARNASSA", "special information");
+		Weekly info = new Weekly(null, null, 5L, "SOLDIERS", "special information");
 
 		try {
 			emailSender.sendOutWeekly(info);
@@ -574,7 +570,7 @@ public class ServiceEmailSenderTests {
 	public void offerExtensionOrDelete() {
 		try {
 			when(jwtUtils.generateEmailToken(any(), any())).thenReturn("ABCdef");
-			emailSender.offerExtensionOrDelete(List.of(dfYeshua1), dfYeshua1.getUserEmail());
+			emailSender.offerExtensionOrDelete(List.of(dfSoldiers1), dfSoldiers1.getUserEmail(), "Soldiers");
 
 			greenMail.waitForIncomingEmail(5000, 1);
 			MimeMessage[] receivedMessages = greenMail.getReceivedMessages();

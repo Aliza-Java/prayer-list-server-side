@@ -87,4 +87,8 @@ public class Davenfor {
 	public boolean wasDeleted() {
 		return (this.deletedAt != null);
 	}
+	
+	public String getName() {
+		return ((this.nameEnglish == null || this.nameEnglish.trim().isEmpty()) ? this.nameHebrew : this.nameEnglish);
+	}
 }

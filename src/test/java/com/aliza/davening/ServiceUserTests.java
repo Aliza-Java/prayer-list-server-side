@@ -4,7 +4,6 @@ import static com.aliza.davening.entities.CategoryName.BANIM;
 import static com.aliza.davening.entities.CategoryName.REFUA;
 import static com.aliza.davening.entities.CategoryName.SHIDDUCHIM;
 import static com.aliza.davening.entities.CategoryName.SOLDIERS;
-import static com.aliza.davening.entities.CategoryName.YESHUA_AND_PARNASSA;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -88,7 +87,6 @@ public class ServiceUserTests {
 	public static Category catShidduchim = new Category(SHIDDUCHIM, false, 40, 2);
 	public static Category catBanim = new Category(BANIM, false, 50, 3);
 	public static Category catSoldiers = new Category(SOLDIERS, false, 180, 4);
-	public static Category catYeshua = new Category(YESHUA_AND_PARNASSA, false, 180, 5);
 
 	private final static String UNEXPECTED_E = "   ************* Attention: @Submitter service test unexpected Exception: ";
 
@@ -99,7 +97,6 @@ public class ServiceUserTests {
 		when(categoryRep.findByCname(SHIDDUCHIM)).thenReturn(Optional.of(catShidduchim));
 		when(categoryRep.findByCname(BANIM)).thenReturn(Optional.of(catBanim));
 		when(categoryRep.findByCname(REFUA)).thenReturn(Optional.of(catRefua));
-		when(categoryRep.findByCname(YESHUA_AND_PARNASSA)).thenReturn(Optional.of(catYeshua));
 		when(categoryRep.findByCname(SOLDIERS)).thenReturn(Optional.of(catSoldiers));
 	}
 
