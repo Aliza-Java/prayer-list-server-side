@@ -271,9 +271,11 @@ public class Utilities {
 				category));
 
 		sb.append(createSingleButton(link, "#32a842", "Confirm my submitted names"));
+		
+		sb.append("<br> <b>Please note: To keep the list efficient and manageable, recently submitted names are given priority. If you’ve confirmed your name but don’t see it on a weekly list, don’t worry — it hasn’t been removed. It will appear in the coming weeks as space allows. </b> ");
 
 		sb.append(
-				"<br><b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+				"<br><br>If we receive no response, unconfirmed names will automatically be removed from the list.");
 
 		sb.append("<br><br>Let us know if you need any help!");
 		sb.append("<br>The Emek Hafrashat Challah Davening List team");
@@ -304,11 +306,18 @@ public class Utilities {
 		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Davenfor> categoryDavenfors = getAllDavenfors(category.getCname().toString()); 
+		List<Davenfor> categoryDavenfors = getAllDavenforsByCategory(category.getCname().toString()); 
 
 		if (categoryDavenfors.isEmpty()) {
 			throw new EmptyInformationException("There are no names to daven for in this category. ");
 		}
+		
+		int limitSize = Category.isBanim(category.getCname().toString()) ? 20 : 40;
+		
+		List<Davenfor> dfsSizedDown = categoryDavenfors.stream().sorted(Comparator.comparing(Davenfor::getCreatedAt).reversed()) // newest first
+			    .limit(limitSize) // limit to sensible size
+			    .sorted(Comparator.comparing(Davenfor::getCreatedAt)) // re-sort them oldest→newest
+			    .collect(Collectors.toList());
 
 		// building standard html format: head and opening <body> tag
 		String allowOverflow = preview ? "auto" : "hidden";
@@ -346,7 +355,7 @@ public class Utilities {
 
 			// Inserting in one box both name and spouse name. If spouse name is null (it is
 			// not mandatory), just put an empty string. //todo: this is not true anymore, but doesn't affect the outcome
-			for (Davenfor d : categoryDavenfors) {
+			for (Davenfor d : dfsSizedDown) {
 				stringBuilder.append(String.format(EmailScheme.htmlBanimRowInList, d.getNameEnglish(),
 						d.getNameEnglishSpouse() != null ? d.getNameEnglishSpouse() : "", d.getNameHebrew(),
 						d.getNameHebrewSpouse() != null ? d.getNameHebrewSpouse() : ""));
@@ -355,7 +364,7 @@ public class Utilities {
 
 		// All other categories print every name in a single row
 		else {
-			for (Davenfor d : categoryDavenfors) {
+			for (Davenfor d : dfsSizedDown) {
 				stringBuilder
 						.append(String.format(EmailScheme.htmlNameRowInList, d.getNameEnglish(), d.getNameHebrew()));
 			}
@@ -417,7 +426,7 @@ public class Utilities {
 		return daysNumber * 24 * 60 * 60 * 1000;
 	}
 	
-	public List<Davenfor> getAllDavenfors(String categoryName) {
+	public List<Davenfor> getAllDavenforsByCategory(String categoryName) {
 		List<Davenfor> list = davenforRepository.findAllDavenforByCategory(categoryName);
 		if ("shidduchim".equalsIgnoreCase(categoryName)) {
             list.sort((d1, d2) -> {
