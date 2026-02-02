@@ -198,7 +198,7 @@ public class EmailSender {
 		Category category;
 		String pEnglish;
 		String pHebrew;
-		String emailText = getUnsubscribeLine();
+		String emailText = getVisitWebsiteLine() + "<br><br>" + getUnsubscribeLine();
 
 		if (info == null) {
 			category = adminService.inferCategory();
@@ -435,7 +435,10 @@ public class EmailSender {
 	public String getUnsubscribeLine() {
 		String linkToUnsubscribe = client + "/unsubscribe";
 		return String.format(unsubscribeLine, linkToUnsubscribe);
-
+	}
+	
+	public String getVisitWebsiteLine() {
+		return "Please visit <a href='https://emekhafrashatchallah.com'>www.emekhafrashatchallah.com</a> to add or edit names on the list.";
 	}
 
 	public final String unsubscribeLine = "To unsubscribe from the Emek Hafrashat Challah Davening list, click <a href='%s'>HERE</a>";

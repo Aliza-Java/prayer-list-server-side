@@ -30,7 +30,7 @@ public class DaveningApplication {
 		builder.headless(false);
 		@SuppressWarnings("unused")
 		ConfigurableApplicationContext context = builder.run(args);
-		System.out.println("Version update: 2025-oct-22-11-40 with noYeshua, oneClickForRepostAlso, batFirst");
+		System.out.println("Version update: 2026-02-02, removed hostages line and updated website on list and in reminder emails");
 
 //		String content="didn't go through try";
 //		try {
