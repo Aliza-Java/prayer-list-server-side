@@ -64,7 +64,7 @@ public class EmailScheme {
 
 	public static final String nextWeekHebrew = "שבוע הבא %s";
 
-	public static final String sendGoodNewsMessage = "<tr><td colspan='2' style='text-align:center; vertical-align:bottom; height:100%%;'>Please email %s with names and good news!</td></tr>";
+	public static final String howToAddNewNames = "<tr><td colspan='2' style='text-align:center; vertical-align:bottom; height:100%%;'>%s</td></tr>";
 
 	public static final String htmlBodyEnd = "</div></div></body></html>";
 

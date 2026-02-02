@@ -51,6 +51,9 @@ public class Utilities {
 
 	@Value("${page.width}")
 	public int width;
+	
+	@Value("${website}")
+	public String website;
 
 	@Autowired
 	CategoryRepository categoryRepository;
@@ -276,7 +279,10 @@ public class Utilities {
 
 		sb.append("<br><br>If we receive no response, unconfirmed names will automatically be removed from the list.");
 
+		sb.append("<br><br>").append(emailSender.getVisitWebsiteLine());
+
 		sb.append("<br><br>Let us know if you need any help!");
+		
 		sb.append("<br>The Emek Hafrashat Challah Davening List team");
 
 		return sb.toString();
@@ -332,8 +338,9 @@ public class Utilities {
 		stringBuilder.append(
 				String.format(EmailScheme.htmlNameRowInList, EmailScheme.inMemoryEnglish, EmailScheme.inMemoryHebrew));
 
-		stringBuilder.append(String.format(EmailScheme.htmlNameRowInList, EmailScheme.hostagesAndSoldiersEnglish,
-				EmailScheme.hostagesAndSoldiersHebrew));
+		//No more hostages in Gaza!
+		//stringBuilder.append(String.format(EmailScheme.htmlNameRowInList, EmailScheme.hostagesAndSoldiersEnglish,
+		//		EmailScheme.hostagesAndSoldiersHebrew));
 
 		String hafrashatChallahEng = EmailScheme.hafrashatChallahEnglish;
 		if (pEnglish != null && pEnglish.length() > 0)
@@ -381,7 +388,8 @@ public class Utilities {
 		stringBuilder.append(String.format(EmailScheme.boldHtmlRow, nextWeekEng, nextWeekHeb));
 
 		// Adding line to email with name and good news.
-		stringBuilder.append(String.format(EmailScheme.sendGoodNewsMessage, adminEmail));
+		//todo: Make website name 
+		stringBuilder.append(String.format(EmailScheme.howToAddNewNames, emailSender.getVisitWebsiteLine()));
 
 		// Closing table
 		stringBuilder.append(EmailScheme.tableClose);
