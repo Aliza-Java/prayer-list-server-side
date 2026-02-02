@@ -25,7 +25,8 @@ public class CategoryComparator implements Comparator<Davenfor> {
 
 		int result = Integer.compare(index1, index2);
 
-        // If same category and category is "shidduchim" → apply Bat/Bas/בת sorting
+        // If same category and category is "shidduchim" → apply Bat/Bas sorting 
+		//todo: for some reason searching for 'בת' doesn't work.  not so crucial if there is always english name.
         if (result == 0 && "shidduchim".equalsIgnoreCase(d1.getCategory())) {
             return Utilities.batFirstComparator().compare(d1, d2);
         }

@@ -143,7 +143,6 @@ public class Utilities {
 		System.out.println("after set it to width: " + finalWidth + " and height: " + finalHeight + " got:");
 		System.out.println(driver.manage().window().getSize());	
 
-		
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
@@ -276,7 +275,9 @@ public class Utilities {
 		sb.append(createSingleButton(link, "#32a842", "Confirm my submitted names"));
 
 		sb.append(
-				"<br><b>Important: If we receive no response, unconfirmed names will automatically be removed from the list.</b>");
+				"<br> <b>Please note: To keep the list efficient and manageable, recently submitted names are given priority. If you’ve confirmed your name but don’t see it on a weekly list, don’t worry — it hasn’t been removed. It will appear in the coming weeks as space allows. </b> ");
+
+		sb.append("<br><br>If we receive no response, unconfirmed names will automatically be removed from the list.");
 
 		sb.append("<br><br>").append(emailSender.getVisitWebsiteLine());
 
@@ -310,11 +311,22 @@ public class Utilities {
 		// todo*: make solution for too many names. Onto another page? two columns?
 		StringBuilder stringBuilder = new StringBuilder();
 
-		List<Davenfor> categoryDavenfors = getAllDavenfors(category.getCname().toString()); 
+		List<Davenfor> categoryDavenfors = getAllDavenforsByCategory(category.getCname().toString());
 
 		if (categoryDavenfors.isEmpty()) {
 			throw new EmptyInformationException("There are no names to daven for in this category. ");
 		}
+
+		int limitSize = Category.isBanim(category.getCname().toString()) ? 20 : 40;
+
+		List<Davenfor> dfsSizedDown = categoryDavenfors.stream()
+				.sorted(Comparator.comparing(Davenfor::getCreatedAt).reversed()) // newest first
+				.limit(limitSize) // limit to sensible size
+				.sorted(Comparator.comparing(Davenfor::getCreatedAt)) // re-sort them oldest→newest
+				.collect(Collectors.toList());
+
+		if ("shidduchim".equalsIgnoreCase(category.getCname().getVisual()))
+			dfsSizedDown = sortShidduchim(dfsSizedDown);
 
 		// building standard html format: head and opening <body> tag
 		String allowOverflow = preview ? "auto" : "hidden";
@@ -352,8 +364,9 @@ public class Utilities {
 					EmailScheme.banimLineHebrew));
 
 			// Inserting in one box both name and spouse name. If spouse name is null (it is
-			// not mandatory), just put an empty string. //todo: this is not true anymore, but doesn't affect the outcome
-			for (Davenfor d : categoryDavenfors) {
+			// not mandatory), just put an empty string. //todo: this is not true anymore,
+			// but doesn't affect the outcome
+			for (Davenfor d : dfsSizedDown) {
 				stringBuilder.append(String.format(EmailScheme.htmlBanimRowInList, d.getNameEnglish(),
 						d.getNameEnglishSpouse() != null ? d.getNameEnglishSpouse() : "", d.getNameHebrew(),
 						d.getNameHebrewSpouse() != null ? d.getNameHebrewSpouse() : ""));
@@ -362,7 +375,7 @@ public class Utilities {
 
 		// All other categories print every name in a single row
 		else {
-			for (Davenfor d : categoryDavenfors) {
+			for (Davenfor d : dfsSizedDown) {
 				stringBuilder
 						.append(String.format(EmailScheme.htmlNameRowInList, d.getNameEnglish(), d.getNameHebrew()));
 			}
@@ -424,57 +437,67 @@ public class Utilities {
 	public long getDaysInMs(int daysNumber) {
 		return daysNumber * 24 * 60 * 60 * 1000;
 	}
-	
-	public List<Davenfor> getAllDavenfors(String categoryName) {
+
+	public List<Davenfor> getAllDavenforsByCategory(String categoryName) {
 		List<Davenfor> list = davenforRepository.findAllDavenforByCategory(categoryName);
-		if ("shidduchim".equalsIgnoreCase(categoryName)) {
-            list.sort((d1, d2) -> {
-                boolean d1Contains = containsBatOrBas(d1.getName());
-                boolean d2Contains = containsBatOrBas(d2.getName());
 
-                // Put names that contain "bat"/"bas"/"בת" first
-                if (d1Contains && !d2Contains) return -1;
-                if (!d1Contains && d2Contains) return 1;
-
-                // If both are the same category, sort alphabetically
-                return d1.getName().compareToIgnoreCase(d2.getName());
-            });
-        }
-
-        return list;
+		return list;
 	}
-	
+
+	public List<Davenfor> sortShidduchim(List<Davenfor> list) {
+		list.sort((d1, d2) -> {
+			boolean d1Contains = containsBatOrBas(d1.getName());
+			boolean d2Contains = containsBatOrBas(d2.getName());
+
+			// Put names that contain "bat"/"bas"/"בת" first
+			if (d1Contains && !d2Contains)
+		        return -1; // d1 first
+		    else if (!d1Contains && d2Contains)
+		        return 1;  // d2 first
+		    else
+		        return 0;  // both same group — keep relative order
+		});
+		return list;
+	}
+
 	private static final Collator collator = Collator.getInstance(new Locale("he", "IL"));
 
-    public static Comparator<Davenfor> batFirstComparator() {
-        return (d1, d2) -> {
-            boolean d1Contains = containsBatOrBas(d1.getName());
-            boolean d2Contains = containsBatOrBas(d2.getName());
+	public static Comparator<Davenfor> batFirstComparator() {
+		return (d1, d2) -> {
+			boolean d1Contains = containsBatOrBas(d1.getName());
+			boolean d2Contains = containsBatOrBas(d2.getName());
 
-            if (d1Contains && !d2Contains) return -1;
-            if (!d1Contains && d2Contains) return 1;
+			if (d1Contains && !d2Contains)
+				return -1;
+			if (!d1Contains && d2Contains)
+				return 1;
 
-            return collator.compare(d1.getName(), d2.getName());
-        };
-    }
+			return collator.compare(d1.getName(), d2.getName());
+		};
+	}
 
-    private static boolean containsBatOrBas(String name) {
-        if (name == null) return false;
-        String lower = name.toLowerCase();
-        return lower.contains(" bat ") || lower.contains(" bas ") || lower.contains(" בת ");
-    }
+	private static boolean containsBatOrBas(String name) {
+		if (name == null)
+			return false;
+		String lower = name.toLowerCase();
+		return lower.contains(" bat ") || lower.contains(" bas ");
+	}
 
-    //It's a delicate balance of matching the --window-size (the initial screen size holding the image),
-    //the screen.size() (the size of the camera lens) and matching it all to the outcoming html.
-    //currently I set width to be fixed (665) because that works best, and height according to the formula below.
+	// It's a delicate balance of matching the --window-size (the initial screen
+	// size holding the image),
+	// the screen.size() (the size of the camera lens) and matching it all to the
+	// outcoming html.
+	// currently I set width to be fixed (665) because that works best, and height
+	// according to the formula below.
 	private int calculateDocHeight(Category category) {
 		int davenforAmount = davenforRepository.findAllDavenforByCategory(category.getCname().toString()).size();
 		int multiply = Category.isBanim(category.getCname().toString()) ? 2 : 1; // one line per davenfor unless banim.
 
 		// row height currently
-		int rowHeight = 31; //this is the height that works.  larger makes a long gap at the bottom, and shorter (might) cut it off
+		int rowHeight = 31; // this is the height that works. larger makes a long gap at the bottom, and
+							// shorter (might) cut it off
 
-		//6 info lines added to every list
-		return 100 + ((davenforAmount+6) * rowHeight * multiply);
+		// 6 info lines added to every list
+		return 100 + ((davenforAmount + 6) * rowHeight * multiply);
 	}
 }
